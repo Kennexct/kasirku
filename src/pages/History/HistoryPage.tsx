@@ -2,11 +2,11 @@ import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { PageHeader } from '../../components/Layout/PageHeader';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
-import { MAX_EXPORT_RANGE_DAYS } from '../../constants';
 import { useAppData } from '../../hooks/useAppData';
 import { usePeriodData } from '../../hooks/usePeriodData';
 import { getBusinessDate } from '../../lib/businessDate';
-import { formatRange, presetRange, validateRange, type DateRange, type RangePreset } from '../../lib/dateRange';
+import { formatRange } from '../../lib/dateRange';
+import { useDateRange } from '../../hooks/useDateRange';
 import { summarize } from '../../lib/reports';
 import { canRefund, canVoid, refundOrder, voidOrder, type ReasonInput, type RefundContext } from '../../services/refunds';
 import { useSessionStore } from '../../store/useSessionStore';
@@ -39,14 +39,12 @@ export function HistoryPage() {
   const cashier = useSessionStore((s) => s.cashier);
   const today = store ? getBusinessDate(new Date(), store) : new Date().toISOString().slice(0, 10);
 
-  const [preset, setPreset] = useState<RangePreset>('today');
-  const [customRange, setCustomRange] = useState<DateRange>({ from: today, to: today });
+  const dateRange = useDateRange(today);
+  const { range } = dateRange;
   const [filter, setFilter] = useState<HistoryFilter>(EMPTY_FILTER);
   const [selected, setSelected] = useState<{ id: Id; action: Action } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const rangeError = preset === 'custom' ? validateRange(customRange, MAX_EXPORT_RANGE_DAYS) : null;
-  const range: DateRange = preset === 'custom' ? (rangeError ? { from: today, to: today } : customRange) : presetRange(preset, today);
   const history = usePeriodData(storeId, range);
 
   const filtered = useMemo(() => history?.sales.filter((o) => matchesFilter(o, filter)) ?? [], [history, filter]);
@@ -86,11 +84,7 @@ export function HistoryPage() {
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader title="Riwayat penjualan" description={formatRange(range)}>
         <HistoryFilters
-          preset={preset}
-          onPresetChange={setPreset}
-          customRange={customRange}
-          onCustomRangeChange={setCustomRange}
-          rangeError={rangeError}
+          dateRange={dateRange}
           today={today}
           filter={filter}
           onFilterChange={setFilter}
