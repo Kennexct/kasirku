@@ -1,7 +1,7 @@
 # Handoff
 
-**From:** Orchestrator (Discovery) → **To:** Product Manager + Architect (Brainstorming `reports-export`)
+**From:** CTO + PM → **To:** Architect + Staff Engineer
 
-- Codebase discovered and documented in `decisions/*/_index.md` (tagged [DISCOVERED]).
-- Reuse: `lib/salesSummary.ts` (net/gross/refund definitions), `hooks/useOrderHistory.ts` (range query), `lib/dateRange.ts`, `HistoryFilters` date presets.
-- Open question to user: should refunds count on the sale date or the refund date?
+- Approved spec: `.10x/specs/2026-11-18-reports-export-design.md` (metric definitions table is binding).
+- Need ADRs for: (1) on-device, lazy-loaded export stack; (2) refund attribution by refund business date (requires `refunds.businessDate`).
+- Reuse: `lib/dateRange.ts`, history date presets, `StatTile`-like tiles in `pages/History/HistorySummary.tsx`.

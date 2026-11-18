@@ -7,4 +7,4 @@
 ## Features
 - pos-core (M1–M9, M14 partial) — shipped v0.2/v0.3
 - sales-history-refunds (M10–M11) — shipped v0.4
-- reports-export (M12–M13) — **in brainstorming**
+- reports-export (M12–M13) — strategy decided: build, on-device export, cash-basis refunds → `reports-export.md`
