@@ -8,3 +8,4 @@
 - pos-core (M1–M9, M14 partial) — shipped v0.2/v0.3
 - sales-history-refunds (M10–M11) — shipped v0.4
 - reports-export (M12–M13) — **delivered** (branch `feat/reports-export`) → `reports-export.md`
+- staff-pin (M15 part 1) — build offline, WebCrypto, client-side limit accepted → `staff-pin.md`

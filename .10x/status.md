@@ -1,8 +1,8 @@
 # Status
 
-**Phase:** Phase 0 Brainstorming — M15 decomposed into `staff-pin`, `owner-login`, `sync-pull`; user chose `staff-pin` first; design presented, awaiting approval (open question: owner-mode timeout behaviour)
+**Phase:** Strategy Complete (`staff-pin`) — spec `.10x/specs/2026-11-18-staff-pin-design.md` approved (option A)
+**Branch:** `feat/staff-pin` (from `feat/reports-export`)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
-**Branch:** `feat/reports-export` (not yet merged to `main`)
 
 | Feature | Phase | Notes |
 | --- | --- | --- |

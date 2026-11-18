@@ -6,3 +6,4 @@
 
 ## Features
 - reports-export (M12–M13) — scope + stories → `reports-export.md`
+- staff-pin (M15 part 1) — stories + acceptance → `staff-pin.md`
