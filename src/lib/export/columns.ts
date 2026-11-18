@@ -60,6 +60,8 @@ export const TRANSACTION_COLUMNS: ReadonlyArray<ExportColumn<TransactionRow>> = 
   { header: 'Status', width: 16, kind: 'text', value: (r) => ORDER_STATUS_LABEL[r.order.status] },
   { header: 'Mode', width: 12, kind: 'text', value: (r) => r.order.salesModeNameSnapshot },
   { header: 'Label', width: 16, kind: 'text', value: (r) => r.order.label },
+  // ADR-005: customer name only — phone numbers are never exported.
+  { header: 'Pelanggan', width: 18, kind: 'text', value: (r) => r.order.customerNameSnapshot ?? '' },
   { header: 'Kasir', width: 14, kind: 'text', value: (r) => r.cashier },
   { header: 'Metode', width: 14, kind: 'text', value: (r) => methodOf(r.order) },
   { header: 'Referensi', width: 14, kind: 'text', value: (r) => r.order.payments[0]?.reference ?? '' },

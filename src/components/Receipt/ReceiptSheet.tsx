@@ -1,4 +1,5 @@
 import { CircleCheck, MessageCircle, Printer } from 'lucide-react';
+import { useCustomer } from '../../hooks/useCustomers';
 import { formatRupiah } from '../../lib/money';
 import { buildReceiptText, whatsAppShareUrl } from '../../lib/receiptText';
 import type { Order, Store } from '../../types';
@@ -15,7 +16,9 @@ interface ReceiptSheetProps {
 
 /** M9: success state (change first — the cashier needs it now), then receipt with print/WhatsApp. */
 export function ReceiptSheet({ order, store, cashierName, onClose }: ReceiptSheetProps) {
-  const shareUrl = whatsAppShareUrl(buildReceiptText(order, store));
+  const customer = useCustomer(order.customerId);
+  const customerPhone = customer && !customer.deletedAt ? customer.phone : undefined;
+  const shareUrl = whatsAppShareUrl(buildReceiptText(order, store), customerPhone);
   const payment = order.payments[0];
   const change = payment?.change ?? 0;
 
@@ -31,7 +34,7 @@ export function ReceiptSheet({ order, store, cashierName, onClose }: ReceiptShee
             <Printer aria-hidden size={18} /> Cetak
           </button>
           <a href={shareUrl} target="_blank" rel="noopener noreferrer" className={btnSecondary}>
-            <MessageCircle aria-hidden size={18} /> WhatsApp
+            <MessageCircle aria-hidden size={18} /> {customerPhone ? 'Kirim WhatsApp' : 'WhatsApp'}
           </a>
           <button type="button" autoFocus onClick={onClose} className={`${btnPrimary} col-span-2`}>
             Transaksi baru

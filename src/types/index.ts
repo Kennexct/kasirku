@@ -207,6 +207,8 @@ export interface Order extends SyncMeta {
   salesModeId: Id;
   salesModeNameSnapshot: string;
   customerId: Id | null;
+  /** Customer's name when the order was saved (ADR-005); null when no customer. */
+  customerNameSnapshot?: string | null;
   /** Open-order label: table number or free text ("Mas jaket merah"). */
   label: string;
   items: OrderItem[];

@@ -86,9 +86,7 @@ def run(p, name, viewport, is_mobile):
     page.get_by_role('button', name='Setujui dengan PIN pemilik').click()
     enter_pin(page, 'PIN pemilik', '1234')
     page.get_by_role('group', name='PIN pemilik').wait_for(state='detached')
-    if is_mobile:
-        page.get_by_role('button', name='Lihat pesanan').click()
-    page.get_by_role('button', name='Bayar').click()
+    page.get_by_role('button', name='Bayar').click()  # phone: the cart sheet reopens by itself
     page.get_by_role('button', name='Uang pas').click()
     page.get_by_role('button', name='Selesaikan pembayaran').click()
     page.get_by_role('button', name='Transaksi baru').click()

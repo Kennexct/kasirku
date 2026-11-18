@@ -27,7 +27,10 @@ function matchesFilter(order: Order, filter: HistoryFilter): boolean {
     (filter.status === 'all' || order.status === filter.status) &&
     (filter.paymentMethodId === 'all' || order.payments.some((p) => p.paymentMethodId === filter.paymentMethodId)) &&
     (filter.salesModeId === 'all' || order.salesModeId === filter.salesModeId) &&
-    (query === '' || order.receiptNo.toLowerCase().includes(query) || order.label.toLowerCase().includes(query))
+    (query === '' ||
+      order.receiptNo.toLowerCase().includes(query) ||
+      order.label.toLowerCase().includes(query) ||
+      (order.customerNameSnapshot ?? '').toLowerCase().includes(query))
   );
 }
 

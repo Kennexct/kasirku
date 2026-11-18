@@ -1,4 +1,4 @@
-import { Minus, Percent, Plus, ShoppingBasket, StickyNote, Trash2 } from 'lucide-react';
+import { Minus, Percent, Plus, ShoppingBasket, StickyNote, Trash2, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { btnGhost, btnIcon, btnPrimary, btnSecondary, inputBase } from '../../../components/ui/styles';
@@ -12,12 +12,14 @@ interface CartPanelProps {
   modeName: string;
   /** False when a parent (the phone sheet) already shows the title. */
   hasTitle?: boolean;
+  customerName: string | null;
+  onOpenCustomer: () => void;
   onOpenDiscount: () => void;
   onSave: () => void;
   onPay: () => void;
 }
 
-export function CartPanel({ totals, modeName, hasTitle = true, onOpenDiscount, onSave, onPay }: CartPanelProps) {
+export function CartPanel({ totals, modeName, hasTitle = true, customerName, onOpenCustomer, onOpenDiscount, onSave, onPay }: CartPanelProps) {
   const items = useCartStore((s) => s.items);
   const label = useCartStore((s) => s.label);
   const openOrderId = useCartStore((s) => s.openOrderId);
@@ -46,6 +48,20 @@ export function CartPanel({ totals, modeName, hasTitle = true, onOpenDiscount, o
             <Trash2 aria-hidden size={16} /> Kosongkan
           </button>
         )}
+      </div>
+
+      <div className="px-5 pb-3">
+        <button
+          type="button"
+          onClick={onOpenCustomer}
+          className={`flex h-11 w-full items-center gap-2 rounded-lg border px-3 text-left text-[14px] transition-colors hover:bg-subtle ${
+            customerName ? 'border-line-strong font-semibold text-ink' : 'border-dashed border-line-strong font-medium text-muted'
+          }`}
+        >
+          <UserRound aria-hidden size={16} className="shrink-0" />
+          <span className="min-w-0 flex-1 truncate">{customerName ?? 'Tambah pelanggan'}</span>
+          {customerName && <span className="text-[13px] font-medium text-brand-700">Ganti</span>}
+        </button>
       </div>
 
       <ul className="min-h-0 flex-1 overflow-y-auto border-y border-line">

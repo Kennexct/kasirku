@@ -57,10 +57,11 @@ export function HistoryList({ orders, onSelect }: HistoryListProps) {
                     <span className="num block truncate text-[14px] font-semibold">{order.receiptNo}</span>
                     <span className="num block truncate text-[13px] text-muted lg:hidden">
                       {timeFormat.format(new Date(order.paidAt ?? order.updatedAt))} · {order.payments[0]?.methodNameSnapshot ?? '—'} · {order.salesModeNameSnapshot}
+                      {order.customerNameSnapshot ? ` · ${order.customerNameSnapshot}` : ''}
                     </span>
                   </span>
                   <span className="hidden min-w-0 truncate text-[14px] text-ink-soft lg:block">
-                    {order.label ? `${order.label} · ` : ''}
+                    {[order.customerNameSnapshot, order.label].filter(Boolean).map((part) => `${part} · `).join('')}
                     {order.items.map((i) => `${i.qty}× ${i.nameSnapshot}`).join(', ')}
                   </span>
                   <span className="hidden text-[14px] text-ink-soft lg:block">{order.payments[0]?.methodNameSnapshot ?? '—'}</span>

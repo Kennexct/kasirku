@@ -65,4 +65,8 @@ describe('whatsAppShareUrl', () => {
   it('url-encodes the text', () => {
     expect(whatsAppShareUrl('a b\n*c*')).toBe('https://wa.me/?text=a%20b%0A*c*');
   });
+
+  it('targets the customer when a phone is known', () => {
+    expect(whatsAppShareUrl('hi', '+6281234567890')).toBe('https://wa.me/6281234567890?text=hi');
+  });
 });

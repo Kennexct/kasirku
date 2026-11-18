@@ -39,7 +39,7 @@ export function HistoryFilters(props: HistoryFiltersProps) {
 
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
         <div className="lg:max-w-xs lg:flex-1">
-          <SearchInput value={filter.query} onChange={(query) => set({ query })} placeholder="No. struk atau label…" label="Cari transaksi" />
+          <SearchInput value={filter.query} onChange={(query) => set({ query })} placeholder="No. struk, label, pelanggan…" label="Cari transaksi" />
         </div>
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
           <Select

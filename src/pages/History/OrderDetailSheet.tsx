@@ -3,6 +3,7 @@ import { ReceiptView } from '../../components/Receipt/ReceiptView';
 import { Sheet } from '../../components/ui/Sheet';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { btnDanger, btnSecondary } from '../../components/ui/styles';
+import { useCustomer } from '../../hooks/useCustomers';
 import { formatRupiah } from '../../lib/money';
 import { buildReceiptText, whatsAppShareUrl } from '../../lib/receiptText';
 import { totalRefunded } from '../../lib/refunds';
@@ -26,6 +27,8 @@ const dateTime = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeSty
 /** M10 detail: status, money summary, receipt (with refund lines), and allowed actions with reasons when not allowed. */
 export function OrderDetailSheet(props: OrderDetailSheetProps) {
   const { order, refunds, store, cashierName, voidEligibility, refundEligibility, onVoid, onRefund, onClose } = props;
+  const customer = useCustomer(order.customerId);
+  const customerPhone = customer && !customer.deletedAt ? customer.phone : undefined;
   const refunded = totalRefunded(refunds.filter((r) => r.kind === 'refund'));
   const canAct = (e: Eligibility): boolean => e.ok || e.needsOwnerPin === true;
   const needsPin = (e: Eligibility): boolean => !e.ok && e.needsOwnerPin === true;
@@ -45,7 +48,7 @@ export function OrderDetailSheet(props: OrderDetailSheetProps) {
             <button type="button" onClick={() => window.print()} className={btnSecondary}>
               <Printer aria-hidden size={18} /> Cetak ulang
             </button>
-            <a href={whatsAppShareUrl(buildReceiptText(order, store))} target="_blank" rel="noopener noreferrer" className={btnSecondary}>
+            <a href={whatsAppShareUrl(buildReceiptText(order, store), customerPhone)} target="_blank" rel="noopener noreferrer" className={btnSecondary}>
               <MessageCircle aria-hidden size={18} /> WhatsApp
             </a>
           </div>

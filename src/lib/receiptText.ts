@@ -10,6 +10,7 @@ export function buildReceiptText(order: Order, store: Pick<Store, 'name' | 'addr
   if (store.phone) lines.push(store.phone);
   lines.push(DIVIDER, `No: ${order.receiptNo}`, `Mode: ${order.salesModeNameSnapshot}`);
   if (order.label) lines.push(`Pesanan: ${order.label}`);
+  if (order.customerNameSnapshot) lines.push(`Pelanggan: ${order.customerNameSnapshot}`);
   lines.push(DIVIDER);
 
   for (const item of order.items) {
@@ -35,6 +36,7 @@ export function buildReceiptText(order: Order, store: Pick<Store, 'name' | 'addr
   return lines.join('\n');
 }
 
-export function whatsAppShareUrl(text: string): string {
-  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+/** With a phone (`+628…`) the chat opens directly with that customer; without, WhatsApp asks whom to send to. */
+export function whatsAppShareUrl(text: string, phone?: string): string {
+  return `https://wa.me/${phone ? phone.replace(/\D/g, '') : ''}?text=${encodeURIComponent(text)}`;
 }

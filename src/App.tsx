@@ -5,11 +5,11 @@ import { AppShell } from './components/Layout/AppShell';
 import { OwnerGate } from './components/Layout/OwnerGate';
 import { LockScreen } from './components/Pin/LockScreen';
 import { OwnerPinHost } from './components/Pin/OwnerPinHost';
-import { PagePlaceholder } from './components/PagePlaceholder';
 import { LoadingScreen } from './components/ui/LoadingScreen';
 import { ROUTES } from './constants';
 import { useBootstrap } from './hooks/useBootstrap';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
+import { CustomersPage } from './pages/Customers/CustomersPage';
 import { HistoryPage } from './pages/History/HistoryPage';
 import { MorePage } from './pages/More/MorePage';
 import { OpenOrdersPage } from './pages/OpenOrders/OpenOrdersPage';
@@ -20,10 +20,6 @@ import { useSessionStore } from './store/useSessionStore';
 
 // ADR-001: charts + export code load only when Reports is opened.
 const ReportsPage = lazy(() => import('./pages/Reports/ReportsPage'));
-
-const PLACEHOLDER_ROUTES = [
-  { path: ROUTES.customers, title: 'Pelanggan', prdRef: 'M7', description: 'Data pelanggan.' },
-] as const;
 
 export default function App() {
   useOnlineStatus();
@@ -80,10 +76,8 @@ export default function App() {
           />
           <Route path={ROUTES.products} element={<OwnerGate><ProductsPage /></OwnerGate>} />
           <Route path={ROUTES.settings} element={<OwnerGate><SettingsPage /></OwnerGate>} />
+          <Route path={ROUTES.customers} element={<CustomersPage />} />
           <Route path={ROUTES.more} element={<MorePage />} />
-          {PLACEHOLDER_ROUTES.map(({ path, ...props }) => (
-            <Route key={path} path={path} element={<PagePlaceholder {...props} />} />
-          ))}
         </Route>
         <Route path="*" element={<Navigate to={ROUTES.pos} replace />} />
       </Routes>

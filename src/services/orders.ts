@@ -63,6 +63,9 @@ async function buildOrder(cart: CartSnapshot, ctx: OrderContext): Promise<Order>
     throw new Error(`Pesanan ${existing.receiptNo} berstatus ${ORDER_STATUS_LABEL[existing.status]}, tidak bisa diubah.`);
   }
   const businessDate = existing?.businessDate ?? getBusinessDate(new Date(), ctx.store);
+  // A customer deleted while the cart was open is dropped instead of leaving a dangling id.
+  const found = cart.customerId ? await localDb.customers.get(cart.customerId) : undefined;
+  const customer = found && !found.deletedAt ? found : undefined;
 
   return {
     id: existing?.id ?? uuidv7(),
@@ -73,7 +76,8 @@ async function buildOrder(cart: CartSnapshot, ctx: OrderContext): Promise<Order>
     status: 'open',
     salesModeId: ctx.salesMode.id,
     salesModeNameSnapshot: ctx.salesMode.name,
-    customerId: cart.customerId,
+    customerId: customer?.id ?? null,
+    customerNameSnapshot: customer?.name ?? null,
     label: cart.label,
     items: cart.items,
     orderDiscount: cart.orderDiscount,

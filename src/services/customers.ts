@@ -1,0 +1,58 @@
+import { localDb } from '../db/localDb';
+import { normalizePhone } from '../lib/customers';
+import { nowIso } from '../lib/id';
+import type { Customer, Id } from '../types';
+import { newMeta } from './catalog';
+import { saveAndQueue } from './sync';
+
+const NAME_MAX = 80;
+const NOTE_MAX = 200;
+
+export interface CustomerInput {
+  /** Present when editing. */
+  id?: Id;
+  name: string;
+  /** Raw user input; empty = no phone. */
+  phone: string;
+  note: string;
+}
+
+/** Create or update a customer (ADR-005): name required, phone optional but valid and unique per store. */
+export async function saveCustomer(storeId: Id, input: CustomerInput): Promise<Customer> {
+  const name = input.name.trim();
+  if (name.length === 0) throw new Error('Nama pelanggan wajib diisi.');
+  if (name.length > NAME_MAX) throw new Error(`Nama maksimal ${NAME_MAX} karakter.`);
+  const note = input.note.trim();
+  if (note.length > NOTE_MAX) throw new Error(`Catatan maksimal ${NOTE_MAX} karakter.`);
+
+  let phone: string | undefined;
+  if (input.phone.trim() !== '') {
+    const normalized = normalizePhone(input.phone);
+    if (!normalized) throw new Error('Nomor HP tidak valid. Contoh: 0812-3456-7890.');
+    const owner = await localDb.customers
+      .where('phone')
+      .equals(normalized)
+      .filter((c) => c.storeId === storeId && !c.deletedAt && c.id !== input.id)
+      .first();
+    if (owner) throw new Error(`Nomor ini sudah dipakai oleh ${owner.name}.`);
+    phone = normalized;
+  }
+
+  const existing = input.id ? await localDb.customers.get(input.id) : undefined;
+  if (input.id && (!existing || existing.deletedAt)) throw new Error('Pelanggan tidak ditemukan.');
+
+  const customer: Customer = { ...(existing ?? newMeta(storeId)), name, phone, note: note || undefined, updatedAt: nowIso() };
+  await saveAndQueue('customers', customer);
+  return customer;
+}
+
+/**
+ * Removes a customer from the list and erases their contact data (phone, note).
+ * Their name stays on past receipts as part of the transaction record.
+ */
+export async function deleteCustomer(customerId: Id): Promise<void> {
+  const customer = await localDb.customers.get(customerId);
+  if (!customer || customer.deletedAt) throw new Error('Pelanggan tidak ditemukan.');
+  const now = nowIso();
+  await saveAndQueue('customers', { ...customer, phone: undefined, note: undefined, deletedAt: now, updatedAt: now });
+}

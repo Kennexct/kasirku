@@ -7,6 +7,7 @@ import { SearchInput } from '../../components/ui/SearchInput';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { Tabs } from '../../components/ui/Tabs';
 import { useAppData } from '../../hooks/useAppData';
+import { useCustomer } from '../../hooks/useCustomers';
 import { formatRupiah } from '../../lib/money';
 import { calculateTotals, resolveModePrice, unitPriceWithOptions } from '../../lib/pricing';
 import { uuidv7 } from '../../lib/id';
@@ -16,13 +17,14 @@ import { requestOwnerApproval } from '../../store/usePinPromptStore';
 import { useCartStore } from '../../store/useCartStore';
 import type { AppliedDiscount, Id, Order, Product, SalesMode } from '../../types';
 import { CartPanel } from './components/CartPanel';
+import { CustomerPicker } from './components/CustomerPicker';
 import { DiscountSheet } from './components/DiscountSheet';
 import { PaymentSheet } from './components/PaymentSheet';
 import { ProductGrid } from './components/ProductGrid';
 import { SaveOrderSheet } from './components/SaveOrderSheet';
 import { VariantSheet } from './components/VariantSheet';
 
-type Panel = 'none' | 'cart' | 'discount' | 'payment' | 'save';
+type Panel = 'none' | 'cart' | 'discount' | 'customer' | 'payment' | 'save';
 const ALL_CATEGORIES = 'all';
 
 const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : 'Terjadi kesalahan.');
@@ -31,6 +33,10 @@ export function POSPage() {
   const { store, catalog, cashierId, cashierName, hasOwnerPowers } = useAppData();
   const cart = useCartStore();
   const [panel, setPanel] = useState<Panel>('none');
+  /** Phone: discount/customer sheets opened from the cart sheet return to it when they close. */
+  const [isFromCart, setIsFromCart] = useState(false);
+  const customer = useCustomer(cart.customerId);
+  const customerName = customer && !customer.deletedAt ? customer.name : null;
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
   const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
   const [categoryId, setCategoryId] = useState<Id>(ALL_CATEGORIES);
@@ -138,18 +144,26 @@ export function POSPage() {
         });
       }
       cart.setOrderDiscount(discount);
-      setPanel('none');
+      closeSub();
     } catch (error) {
       toast.error(errorMessage(error));
     }
   };
 
   const itemCount = cart.items.reduce((sum, item) => sum + item.qty, 0);
+  const openSub = (next: 'discount' | 'customer') => {
+    setIsFromCart(panel === 'cart');
+    setPanel(next);
+  };
+  const closeSub = () => setPanel(isFromCart ? 'cart' : 'none');
+
   const cartPanel = (
     <CartPanel
       totals={totals}
       modeName={mode.name}
-      onOpenDiscount={() => setPanel('discount')}
+      customerName={customerName}
+      onOpenCustomer={() => openSub('customer')}
+      onOpenDiscount={() => openSub('discount')}
       onSave={() => setPanel('save')}
       onPay={() => setPanel('payment')}
     />
@@ -206,7 +220,9 @@ export function POSPage() {
           totals={totals}
           modeName={mode.name}
           hasTitle={false}
-          onOpenDiscount={() => setPanel('discount')}
+          customerName={customerName}
+          onOpenCustomer={() => openSub('customer')}
+          onOpenDiscount={() => openSub('discount')}
           onSave={() => setPanel('save')}
           onPay={() => setPanel('payment')}
         />
@@ -232,7 +248,18 @@ export function POSPage() {
           baseAmount={totals.subtotal - totals.itemDiscountTotal}
           onRequestOverride={async () => (await requestOwnerApproval('Diskon di atas batas kasir'))?.ownerId ?? null}
           onApply={(discount) => void handleApplyDiscount(discount)}
-          onClose={() => setPanel('none')}
+          onClose={closeSub}
+        />
+      )}
+      {panel === 'customer' && (
+        <CustomerPicker
+          storeId={store.id}
+          selectedId={customerName ? cart.customerId : null}
+          onSelect={(picked) => {
+            cart.setCustomer(picked?.id ?? null);
+            closeSub();
+          }}
+          onClose={closeSub}
         />
       )}
       {panel === 'payment' && (

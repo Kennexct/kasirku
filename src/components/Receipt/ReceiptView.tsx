@@ -35,6 +35,7 @@ export function ReceiptView({ order, store, cashierName, refunds = [] }: Receipt
         <dt>Kasir</dt><dd className="text-right">{cashierName}</dd>
         <dt>Mode</dt><dd className="text-right">{order.salesModeNameSnapshot}</dd>
         {order.label && (<><dt>Pesanan</dt><dd className="text-right">{order.label}</dd></>)}
+        {order.customerNameSnapshot && (<><dt>Pelanggan</dt><dd className="text-right">{order.customerNameSnapshot}</dd></>)}
       </dl>
       <Divider />
 

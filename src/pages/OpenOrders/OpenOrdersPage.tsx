@@ -86,6 +86,7 @@ export function OpenOrdersPage() {
                     <p className="truncate text-[17px] font-bold tracking-[-0.01em]">{order.label}</p>
                     <p className="num truncate text-[13px] text-muted">
                       {order.receiptNo} · {order.salesModeNameSnapshot}
+                      {order.customerNameSnapshot ? ` · ${order.customerNameSnapshot}` : ''}
                     </p>
                   </div>
                   <span className={`num inline-flex h-6 items-center gap-1 rounded-md px-2 text-[12px] font-semibold ${isStale ? 'bg-warn-50 text-warn-700' : 'bg-subtle text-ink-soft'}`}>
