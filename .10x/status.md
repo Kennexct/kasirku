@@ -1,6 +1,7 @@
 # Status
 
-**Phase:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
+**Phase:** Phase 0 Brainstorming — M15 decomposed into `staff-pin`, `owner-login`, `sync-pull`; awaiting user's choice of first sub-project
+**Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 **Branch:** `feat/reports-export` (not yet merged to `main`)
 
 | Feature | Phase | Notes |
@@ -21,8 +22,14 @@
 ## Open before GA
 - [ ] Manual: Android Chrome share sheet → WhatsApp with .xlsx
 - [ ] Manual: iPad Safari (installed PWA) download
-- [ ] Apply DB migration to a live Supabase project (none provisioned yet)
+- [ ] Apply DB migration to a live Supabase project (checked 2026-11-18: the account has no KasirKu project; two unrelated projects exist and must not be touched)
 
-## Next candidates
-- M15 Auth, cashier PIN, sync pull (unblocks multi-device reports + PIN approvals)
+## M15 decomposition (proposed, not yet approved)
+| Sub-project | Needs backend | Closes |
+| --- | --- | --- |
+| `staff-pin` — staff list, cashier PIN switch, owner PIN approval | No | client-side-only owner guard; PIN approval for void/refund/discount |
+| `owner-login` — owner account (Supabase Auth), store linked to account | Yes (new Supabase project) | auto sign-in as owner |
+| `sync-pull` — pull to other devices, device registration, photo upload | Yes, after `owner-login` | device-only reports |
+
+## Other candidates
 - M7 Customers
