@@ -12,7 +12,7 @@ interface PinInputProps {
  * Masked numeric field for PINs inside forms. A text input with disc masking (not type=password)
  * so browsers don't offer to save a counter PIN as a site password.
  */
-export function PinInput({ id, value, onChange, placeholder = '••••' }: PinInputProps) {
+export function PinInput({ id, value, onChange, placeholder = '4–6 angka' }: PinInputProps) {
   return (
     <input
       id={id}
@@ -23,7 +23,7 @@ export function PinInput({ id, value, onChange, placeholder = '••••' }: 
       value={value}
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value.replace(/\D/g, ''))}
-      className={`${inputBase} num tracking-[0.3em] [-webkit-text-security:disc]`}
+      className={`${inputBase} num tracking-[0.3em] [-webkit-text-security:disc] placeholder:tracking-normal`}
     />
   );
 }

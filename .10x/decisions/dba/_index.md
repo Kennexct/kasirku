@@ -6,3 +6,4 @@
 
 ## Features
 - reports-export — refunds.business_date, daily_sales v2, Dexie v3 → `reports-export.md`
+- staff-pin — recovery_hash column, column-privilege note for later → `staff-pin.md`

@@ -1,5 +1,6 @@
 # Handoff
 
-**From:** EM + Senior Engineer → **To:** SDE (+ DBA for the migration)
+**From:** SDE + DBA → **To:** QA + Security
 
-Tasks T1–T8 in `decisions/engineering-manager/staff-pin.md`; approach in `decisions/senior-engineer/staff-pin.md`.
+- Built: `decisions/sde/staff-pin.md`. Test: no-PIN regression, option-A behaviour, approvals recorded, lockout, recovery.
+- Security: secrets hygiene, what client-side PINs can and cannot protect, storage tampering.

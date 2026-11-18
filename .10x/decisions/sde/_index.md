@@ -7,3 +7,4 @@
 
 ## Features
 - reports-export — built T1–T7 → `reports-export.md`
+- staff-pin — built T1–T8 → `staff-pin.md`
