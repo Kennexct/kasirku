@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Implementation Complete (`reports-export`)
+**Phase:** Verification Complete (`reports-export`) — QA PASS, Security PASS
 **Branch:** `feat/reports-export`
 **Spec:** `.10x/specs/2026-11-18-reports-export-design.md` (approved)
 
@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | pos-core | Delivered (v0.2–v0.3) | [DISCOVERED] |
 | sales-history-refunds | Delivered (v0.4) | [DISCOVERED] |
-| reports-export | Phase 4 done → Phase 5 Verification | 58 unit tests, 4 e2e |
+| reports-export | Phase 5 done → Phase 6 Delivery | QA PASS · Security PASS · 2 manual checks |
 
 ## reports-export tasks
 - [x] T1 Refund businessDate + migrations

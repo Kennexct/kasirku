@@ -1,7 +1,7 @@
 # Handoff
 
-**From:** SDE + DBA → **To:** QA + Security
+**From:** QA + Security → **To:** DevOps + SRE
 
-- Built: see `decisions/sde/reports-export.md`. Commits 6dd1ff3, 6a8fee1, 763d643 on `feat/reports-export`.
-- Test focus: refund-date attribution across days; History vs Reports agreement; export file contents; owner guard; phone layout.
-- Security focus: formula injection in CSV/XLSX, data leaving the device in exports, lazy chunk loading, dependency audit.
+- Release-ready for beta. Reports: `reviews/2026-11-18-qa-report.md`, `reviews/2026-11-18-security-review.md`.
+- Deploy notes: apply migration `20261118010000_refund_business_date.sql` after init; perf test reads `CI` env for its budget.
+- Manual pre-GA checks: Android share sheet, iOS PWA download.
