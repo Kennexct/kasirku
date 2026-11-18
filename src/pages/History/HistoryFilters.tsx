@@ -16,6 +16,9 @@ export interface HistoryFilter {
 
 export const EMPTY_FILTER: HistoryFilter = { status: 'all', paymentMethodId: 'all', salesModeId: 'all', query: '' };
 
+export const isFilterEmpty = (f: HistoryFilter): boolean =>
+  f.status === 'all' && f.paymentMethodId === 'all' && f.salesModeId === 'all' && f.query.trim() === '';
+
 const PRESET_OPTIONS: ReadonlyArray<{ value: RangePreset; label: string }> = [
   { value: 'today', label: 'Hari ini' },
   { value: 'yesterday', label: 'Kemarin' },
@@ -42,7 +45,7 @@ interface HistoryFiltersProps {
 export function HistoryFilters(props: HistoryFiltersProps) {
   const { preset, onPresetChange, customRange, onCustomRangeChange, rangeError, today, filter, onFilterChange, paymentMethods, salesModes } = props;
   const set = (patch: Partial<HistoryFilter>) => onFilterChange({ ...filter, ...patch });
-  const hasFilters = filter.status !== 'all' || filter.paymentMethodId !== 'all' || filter.salesModeId !== 'all' || filter.query !== '';
+  const hasFilters = !isFilterEmpty(filter);
 
   return (
     <div className="flex flex-col gap-3 pb-3">

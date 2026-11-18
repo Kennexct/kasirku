@@ -223,6 +223,8 @@ export interface RefundItem {
 
 export interface Refund extends SyncMeta {
   orderId: Id;
+  /** Business day the refund happened (store tz + cut-off) — refunds count on this day (ADR-002). */
+  businessDate: BusinessDate;
   kind: RefundKind;
   amount: Rupiah;
   items: RefundItem[];

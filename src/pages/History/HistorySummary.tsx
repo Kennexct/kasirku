@@ -1,6 +1,6 @@
 import { card } from '../../components/ui/styles';
 import { formatRupiah } from '../../lib/money';
-import type { SalesSummary } from '../../lib/salesSummary';
+import type { ReportSummary } from '../../lib/reports';
 
 interface StatProps {
   label: string;
@@ -19,8 +19,8 @@ function Stat({ label, value, hint, isPrimary = false }: StatProps) {
   );
 }
 
-/** Period totals (definitions shared with M12 reports via lib/salesSummary). */
-export function HistorySummary({ summary }: { summary: SalesSummary }) {
+/** Period totals — definitions from lib/reports.ts (shared with Reports, ADR-002 cash basis). */
+export function HistorySummary({ summary }: { summary: ReportSummary }) {
   return (
     <div className="grid grid-cols-3 gap-2 md:grid-cols-4 md:gap-3">
       <Stat label="Penjualan bersih" value={formatRupiah(summary.netSales)} hint={`Kotor ${formatRupiah(summary.grossSales)}`} isPrimary />

@@ -73,6 +73,7 @@ async function commit(order: Order, kind: RefundKind, built: ReturnType<typeof b
     createdAt: now,
     updatedAt: now,
     orderId: order.id,
+    businessDate: getBusinessDate(ctx.now ?? new Date(), ctx.store),
     kind,
     amount: built.amount,
     items: built.items,

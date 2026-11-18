@@ -19,7 +19,7 @@ function makeOrder(items: OrderItem[], discountPct = 0, servicePct = 0): Order {
 }
 
 const asRefund = (order: Order, built: ReturnType<typeof buildRefundItems>): Refund => ({
-  id: 'r', storeId: 's', createdAt: '', updatedAt: '', orderId: order.id, kind: 'refund', amount: built.amount,
+  id: 'r', storeId: 's', createdAt: '', updatedAt: '', orderId: order.id, businessDate: '2026-11-18', kind: 'refund', amount: built.amount,
   items: built.items, reasonCode: 'other', reasonNote: '', actorId: 'c', approvedById: null,
 });
 

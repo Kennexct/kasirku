@@ -55,6 +55,17 @@ export class LocalDb extends Dexie {
     this.version(2).stores({
       stores: 'id',
     });
+    // ADR-002: refunds are queried by the day they happened.
+    this.version(3)
+      .stores({ refunds: 'id, storeId, orderId, [storeId+businessDate]' })
+      .upgrade((tx) =>
+        tx
+          .table('refunds')
+          .toCollection()
+          .modify((refund: { businessDate?: string; createdAt: string }) => {
+            refund.businessDate ??= refund.createdAt.slice(0, 10);
+          }),
+      );
   }
 }
 

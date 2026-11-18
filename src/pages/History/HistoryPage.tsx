@@ -4,14 +4,14 @@ import { PageHeader } from '../../components/Layout/PageHeader';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { MAX_EXPORT_RANGE_DAYS } from '../../constants';
 import { useAppData } from '../../hooks/useAppData';
-import { useOrderHistory } from '../../hooks/useOrderHistory';
+import { usePeriodData } from '../../hooks/usePeriodData';
 import { getBusinessDate } from '../../lib/businessDate';
 import { formatRange, presetRange, validateRange, type DateRange, type RangePreset } from '../../lib/dateRange';
-import { summarizeSales } from '../../lib/salesSummary';
+import { summarize } from '../../lib/reports';
 import { canRefund, canVoid, refundOrder, voidOrder, type ReasonInput, type RefundContext } from '../../services/refunds';
 import { useSessionStore } from '../../store/useSessionStore';
 import type { Id, Order } from '../../types';
-import { EMPTY_FILTER, HistoryFilters, type HistoryFilter } from './HistoryFilters';
+import { EMPTY_FILTER, HistoryFilters, isFilterEmpty, type HistoryFilter } from './HistoryFilters';
 import { HistoryList } from './HistoryList';
 import { HistorySummary } from './HistorySummary';
 import { OrderDetailSheet } from './OrderDetailSheet';
@@ -47,15 +47,22 @@ export function HistoryPage() {
 
   const rangeError = preset === 'custom' ? validateRange(customRange, MAX_EXPORT_RANGE_DAYS) : null;
   const range: DateRange = preset === 'custom' ? (rangeError ? { from: today, to: today } : customRange) : presetRange(preset, today);
-  const history = useOrderHistory(storeId, range);
+  const history = usePeriodData(storeId, range);
 
-  const filtered = useMemo(() => history?.orders.filter((o) => matchesFilter(o, filter)) ?? [], [history, filter]);
-  const summary = useMemo(() => summarizeSales(filtered, history?.refundsByOrder ?? new Map()), [filtered, history]);
+  const filtered = useMemo(() => history?.sales.filter((o) => matchesFilter(o, filter)) ?? [], [history, filter]);
+  // ADR-002: refunds count on their own day; a filter applies to a refund through its original order.
+  const summary = useMemo(() => {
+    const refunds = (history?.refundsInRange ?? []).filter((r) => {
+      const original = history?.ordersById.get(r.orderId);
+      return original ? matchesFilter(original, filter) : isFilterEmpty(filter);
+    });
+    return summarize(filtered, refunds);
+  }, [filtered, history, filter]);
 
   if (!store || !catalog || !cashier) return <LoadingScreen />;
 
   const ctx: RefundContext = { store, actorId: cashier.memberId, actorRole: cashier.role };
-  const order = selected ? history?.orders.find((o) => o.id === selected.id) : undefined;
+  const order = selected ? history?.ordersById.get(selected.id) : undefined;
   const refunds = (order && history?.refundsByOrder.get(order.id)) || [];
 
   const run = async (task: () => Promise<unknown>, success: string) => {

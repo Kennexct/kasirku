@@ -66,6 +66,13 @@ describe('refundOrder', () => {
     await expect(refundOrder(order.id, [{ orderItemId: 'bakso', qty: 1 }], reason, ctx)).rejects.toThrow(/tidak bisa direfund/);
   });
 
+  it('dates a refund on the day it happens, not the sale day (ADR-002)', async () => {
+    const { order, ctx } = await sell();
+    const refund = await refundOrder(order.id, [{ orderItemId: 'esteh', qty: 1 }], reason, { ...ctx, now: nextDay(order) });
+    expect(refund.businessDate).not.toBe(order.businessDate);
+    expect(await localDb.refunds.where('[storeId+businessDate]').equals([order.storeId, refund.businessDate]).count()).toBe(1);
+  });
+
   it('enforces refund window and reason note for "Lainnya"', async () => {
     const { order, ctx, store } = await sell();
     const late = new Date(new Date(order.paidAt ?? '').getTime() + 9 * 86_400_000);
