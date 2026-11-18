@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Strategy Complete (`staff-pin`) — spec `.10x/specs/2026-11-18-staff-pin-design.md` approved (option A)
+**Phase:** Design Complete (`staff-pin`) — ADR-003, ADR-004
 **Branch:** `feat/staff-pin` (from `feat/reports-export`)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 

@@ -8,3 +8,4 @@
 
 ## Features
 - reports-export — ADR-001, ADR-002 → `reports-export.md`
+- staff-pin — ADR-003, ADR-004 → `staff-pin.md`
