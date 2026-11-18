@@ -1,7 +1,7 @@
 # Handoff
 
-**From:** QA + Security → **To:** DevOps + SRE
+**From:** DevOps + SRE → **To:** next feature (PM/CTO)
 
-- Release-ready for beta. Reports: `reviews/2026-11-18-qa-report.md`, `reviews/2026-11-18-security-review.md`.
-- Deploy notes: apply migration `20261118010000_refund_business_date.sql` after init; perf test reads `CI` env for its budget.
-- Manual pre-GA checks: Android share sheet, iOS PWA download.
+- reports-export delivered on `feat/reports-export`; runbook `docs/runbooks/reports-export.md`; reviews in `.10x/reviews/`.
+- No dashboards yet (Sentry not integrated). Escalation: owner reports numbers mismatch → runbook table → P1 bug.
+- Recommended next: M15 (auth + PIN + sync pull) — it closes the two known limitations (client-side owner guard, device-only reports).
