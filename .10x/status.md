@@ -1,7 +1,7 @@
 # Status
 
-**Phase:** Delivery Complete (`staff-pin`) — QA PASS, Security PASS with documented limits
-**Branch:** `feat/staff-pin` (from `feat/reports-export`)
+**Phase:** Implementation (`customers`, medium task) — spec + ADR-005 written
+**Branch:** `feat/customers` (stacked: reports-export → staff-pin → customers)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
 | Feature | Phase | Notes |
