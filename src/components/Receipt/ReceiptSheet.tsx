@@ -33,8 +33,8 @@ export function ReceiptSheet({ order, store, cashierName, onClose }: ReceiptShee
           <button type="button" onClick={() => window.print()} className={btnSecondary}>
             <Printer aria-hidden size={18} /> Cetak
           </button>
-          <a href={shareUrl} target="_blank" rel="noopener noreferrer" className={btnSecondary}>
-            <MessageCircle aria-hidden size={18} /> {customerPhone ? 'Kirim WhatsApp' : 'WhatsApp'}
+          <a href={shareUrl} target="_blank" rel="noopener noreferrer" title={customerPhone ? 'Kirim struk ke WhatsApp pelanggan' : 'Bagikan struk lewat WhatsApp'} className={btnSecondary}>
+            <MessageCircle aria-hidden size={18} /> WhatsApp
           </a>
           <button type="button" autoFocus onClick={onClose} className={`${btnPrimary} col-span-2`}>
             Transaksi baru
