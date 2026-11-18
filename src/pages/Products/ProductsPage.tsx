@@ -5,7 +5,7 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { ProductThumb } from '../../components/ui/ProductThumb';
 import { SearchInput } from '../../components/ui/SearchInput';
-import { badgeBrand, badgeNeutral, btnPrimary, card } from '../../components/ui/styles';
+import { badgeBrand, badgeNeutral, badgeWarn, btnPrimary, card } from '../../components/ui/styles';
 import { Tabs } from '../../components/ui/Tabs';
 import { useAppData } from '../../hooks/useAppData';
 import { formatRupiah } from '../../lib/money';
@@ -87,7 +87,10 @@ export function ProductsPage() {
                           <span className={`block truncate text-[15px] font-semibold ${p.isActive ? '' : 'text-muted'}`}>{p.name}</span>
                           <span className="block truncate text-[13px] text-muted">
                             {(p.categoryId && categoryName.get(p.categoryId)) || 'Tanpa kategori'}
-                            <span className="lg:hidden">{p.variantGroupIds.length > 0 && ` · ${p.variantGroupIds.length} varian`}</span>
+                            <span className="lg:hidden">
+                              {p.variantGroupIds.length > 0 && ` · ${p.variantGroupIds.length} varian`}
+                              {p.isActive && p.isSoldOut && ' · Habis'}
+                            </span>
                           </span>
                         </span>
                       </span>
@@ -99,7 +102,7 @@ export function ProductsPage() {
                         {takeawayMode && p.modePrices[takeawayMode.id] !== undefined ? formatRupiah(p.modePrices[takeawayMode.id] ?? 0) : '—'}
                       </span>
                       <span className="hidden lg:block">
-                        <span className={p.isActive ? badgeBrand : badgeNeutral}>{p.isActive ? 'Aktif' : 'Nonaktif'}</span>
+                        <span className={!p.isActive ? badgeNeutral : p.isSoldOut ? badgeWarn : badgeBrand}>{!p.isActive ? 'Nonaktif' : p.isSoldOut ? 'Habis' : 'Aktif'}</span>
                       </span>
                       <ChevronRight aria-hidden size={18} className="text-faint" />
                     </button>

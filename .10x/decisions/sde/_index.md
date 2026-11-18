@@ -9,3 +9,4 @@
 - reports-export — built T1–T7 → `reports-export.md`
 - staff-pin — built T1–T8 → `staff-pin.md`
 - customers (M7) → `customers.md`
+- v0.8 feedback round (custom methods/modes, sold-out, debt) → `v08-feedback.md`

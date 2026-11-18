@@ -34,6 +34,16 @@ function matchesFilter(order: Order, filter: HistoryFilter): boolean {
   );
 }
 
+type NamedOption = { id: Id; name: string };
+
+/** Filter choices: what exists now, plus removed methods/modes that still appear in this period's sales. */
+function withRemoved(current: readonly NamedOption[], seen: readonly NamedOption[]): NamedOption[] {
+  const known = new Set(current.map((c) => c.id));
+  const removed = new Map<Id, NamedOption>();
+  for (const item of seen) if (!known.has(item.id)) removed.set(item.id, { id: item.id, name: `${item.name} (dihapus)` });
+  return [...current, ...removed.values()];
+}
+
 const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Terjadi kesalahan.');
 
 /** M10 sales history + M11 void/refund entry point. */
@@ -54,6 +64,14 @@ export function HistoryPage() {
   const history = usePeriodData(storeId, range);
 
   const filtered = useMemo(() => history?.sales.filter((o) => matchesFilter(o, filter)) ?? [], [history, filter]);
+  const methodOptions = useMemo(
+    () => withRemoved(catalog?.paymentMethods ?? [], (history?.sales ?? []).flatMap((o) => o.payments.map((p) => ({ id: p.paymentMethodId, name: p.methodNameSnapshot })))),
+    [catalog, history],
+  );
+  const modeOptions = useMemo(
+    () => withRemoved(catalog?.salesModes ?? [], (history?.sales ?? []).map((o) => ({ id: o.salesModeId, name: o.salesModeNameSnapshot }))),
+    [catalog, history],
+  );
   // ADR-002: refunds count on their own day; a filter applies to a refund through its original order.
   const summary = useMemo(() => {
     const refunds = (history?.refundsInRange ?? []).filter((r) => {
@@ -114,8 +132,8 @@ export function HistoryPage() {
           today={today}
           filter={filter}
           onFilterChange={setFilter}
-          paymentMethods={catalog.paymentMethods}
-          salesModes={catalog.salesModes}
+          paymentMethods={methodOptions}
+          salesModes={modeOptions}
         />
       </PageHeader>
 

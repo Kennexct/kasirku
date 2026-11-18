@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Implementation — v0.8 (`custom-methods-modes`, `sold-out`, `customer-debt`); roadmap approved, ADR-006 written
+**Phase:** Implementation — v0.9 next (cost price & profit, expenses, close of day, backup file). v0.8 delivered.
 **Branch:** `feat/v0.8-feedback` (stacked: reports-export → staff-pin → customers → v0.8-feedback)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
@@ -11,6 +11,10 @@
 | reports-export | **Delivered (v0.5)** | QA PASS · Security PASS · ADR-001, ADR-002 |
 | staff-pin (M15 part 1) | **Delivered (v0.6)** on `feat/staff-pin` | 71 unit · 5 e2e · ADR-003, ADR-004 |
 | customers (M7) | **Delivered (v0.7)** on `feat/customers` | 80 unit · 6 e2e · ADR-005 |
+| v0.8 custom methods/modes · sold-out · unpaid customers | **Delivered (v0.8)** on `feat/v0.8-feedback` | 85 unit · 7 e2e · ADR-006 · review PASS |
+| v0.9 cost & profit · expenses · close of day · backup | Next | roadmap spec |
+| v0.10 first-time journey · help centre | Planned | roadmap spec |
+| v0.11 English | Planned | roadmap spec |
 
 ## reports-export tasks
 - [x] T1 Refund businessDate + migrations

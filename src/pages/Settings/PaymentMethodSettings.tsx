@@ -1,21 +1,16 @@
-import { Banknote, CircleDollarSign, Landmark, QrCode, Upload, Wallet } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { useRef } from 'react';
+import { MoreHorizontal, Plus, QrCode, Upload } from 'lucide-react';
+import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
-import { btnSecondary, card, helperText, inputBase, labelBase } from '../../components/ui/styles';
+import { btnIcon, btnSecondary, card, helperText, inputBase, labelBase } from '../../components/ui/styles';
 import { Switch } from '../../components/ui/Switch';
 import { compressQrisImage } from '../../lib/image';
 import { savePaymentMethod } from '../../services/catalog';
-import type { PaymentMethod, PaymentType, ReferenceMode } from '../../types';
-
-const METHOD_ICON: Record<PaymentType, LucideIcon> = {
-  cash: Banknote,
-  qris: QrCode,
-  transfer: Landmark,
-  ewallet: Wallet,
-  other: CircleDollarSign,
-};
+import { MAX_PAYMENT_METHODS, PAYMENT_TYPE_LABEL } from '../../constants';
+import type { Id, PaymentMethod, ReferenceMode } from '../../types';
+import { AddMethodSheet } from './AddMethodSheet';
+import { ConfigItemSheet } from './ConfigItemSheet';
+import { METHOD_ICON } from '../../components/ui/paymentIcon';
 
 const REFERENCE_OPTIONS: ReadonlyArray<{ value: ReferenceMode; label: string }> = [
   { value: 'off', label: 'Tidak ada' },
@@ -31,19 +26,47 @@ async function persist(method: PaymentMethod): Promise<void> {
   }
 }
 
-/** M5: activate methods, configure the reference field, upload the static QRIS image. Changes save instantly. */
-export function PaymentMethodSettings({ methods }: { methods: PaymentMethod[] }) {
+/** M5: add, rename, reorder and delete methods; configure the reference field and the static QRIS image. */
+export function PaymentMethodSettings({ storeId, methods }: { storeId: Id; methods: PaymentMethod[] }) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [managingId, setManagingId] = useState<Id | null>(null);
+  const managingIndex = methods.findIndex((m) => m.id === managingId);
+  const managing = methods[managingIndex];
+  const isFull = methods.length >= MAX_PAYMENT_METHODS;
+  const activeCount = methods.filter((m) => m.isActive).length;
+
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-[14px] text-muted">Perubahan tersimpan otomatis.</p>
+      <div className="flex items-center gap-3">
+        <p className="min-w-0 flex-1 text-[14px] text-muted">
+          {isFull ? `Sudah ${MAX_PAYMENT_METHODS} metode (batas maksimal).` : 'Urutan di sini sama dengan urutan di layar pembayaran.'}
+        </p>
+        <button type="button" disabled={isFull} onClick={() => setIsAdding(true)} className={`${btnSecondary} h-11 shrink-0 text-[14px]`}>
+          <Plus aria-hidden size={17} /> Tambah metode
+        </button>
+      </div>
       {methods.map((method) => (
-        <PaymentMethodCard key={method.id} method={method} />
+        <PaymentMethodCard key={method.id} method={method} isLastActive={method.isActive && activeCount === 1} onManage={() => setManagingId(method.id)} />
       ))}
+
+      {isAdding && <AddMethodSheet storeId={storeId} onClose={() => setIsAdding(false)} />}
+      {managing && (
+        <ConfigItemSheet
+          key={managing.id}
+          table="paymentMethods"
+          noun="metode"
+          item={managing}
+          index={managingIndex}
+          count={methods.length}
+          deleteBlockedReason={managing.isActive && activeCount === 1 ? 'Ini satu-satunya metode aktif, jadi tidak bisa dihapus. Aktifkan metode lain dulu.' : null}
+          onClose={() => setManagingId(null)}
+        />
+      )}
     </div>
   );
 }
 
-function PaymentMethodCard({ method }: { method: PaymentMethod }) {
+function PaymentMethodCard({ method, isLastActive, onManage }: { method: PaymentMethod; isLastActive: boolean; onManage: () => void }) {
   const fileInput = useRef<HTMLInputElement>(null);
   const Icon = METHOD_ICON[method.type];
   const isCash = method.type === 'cash';
@@ -68,11 +91,15 @@ function PaymentMethodCard({ method }: { method: PaymentMethod }) {
         <div className="flex-1">
           <Switch
             checked={method.isActive}
+            disabled={isLastActive}
             onChange={(isActive) => void persist({ ...method, isActive })}
             label={method.name}
-            description={method.isActive ? 'Tampil di layar pembayaran' : 'Disembunyikan dari kasir'}
+            description={`${PAYMENT_TYPE_LABEL[method.type]} · ${isLastActive ? 'Satu-satunya metode aktif' : method.isActive ? 'Tampil di pembayaran' : 'Disembunyikan'}`}
           />
         </div>
+        <button type="button" aria-label={`Kelola ${method.name}`} onClick={onManage} className={`${btnIcon} border-transparent! bg-transparent!`}>
+          <MoreHorizontal aria-hidden size={20} />
+        </button>
       </div>
 
       {method.isActive && !isCash && (

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Order } from '../types';
-import { customerStats, formatPhone, normalizePhone, searchCustomers, toWhatsAppNumber } from './customers';
+import { buildDebtReminder, customerStats, formatPhone, normalizePhone, searchCustomers, toWhatsAppNumber } from './customers';
 
 describe('phone', () => {
   it('normalises every common way of typing an Indonesian mobile number', () => {
@@ -47,7 +47,7 @@ describe('searchCustomers', () => {
 
 describe('customerStats', () => {
   const order = (customerId: string | null, status: Order['status'], total: number, paidAt: string): Order =>
-    ({ customerId, status, totals: { grandTotal: total }, paidAt, updatedAt: paidAt } as unknown as Order);
+    ({ customerId, status, totals: { grandTotal: total }, paidAt, updatedAt: paidAt, createdAt: paidAt, label: '' } as unknown as Order);
 
   it('counts completed sales, ignores voids, and tracks open orders and the last visit', () => {
     const stats = customerStats([
@@ -55,9 +55,41 @@ describe('customerStats', () => {
       order('a', 'partial_refund', 10_000, '2026-11-18T05:00:00Z'),
       order('a', 'void', 99_000, '2026-11-18T06:00:00Z'),
       order('a', 'open', 5_000, '2026-11-18T07:00:00Z'),
+      order('a', 'open', 12_000, '2026-11-16T07:00:00Z'),
       order(null, 'paid', 7_000, '2026-11-18T08:00:00Z'),
     ]);
-    expect(stats.get('a')).toEqual({ visits: 2, totalSpend: 30_000, lastVisitAt: '2026-11-18T05:00:00Z', openOrders: 1 });
+    expect(stats.get('a')).toEqual({ visits: 2, totalSpend: 30_000, lastVisitAt: '2026-11-18T05:00:00Z', openOrders: 2, openAmount: 17_000, oldestOpenAt: '2026-11-16T07:00:00Z' });
     expect(stats.size).toBe(1);
+  });
+});
+
+describe('buildDebtReminder', () => {
+  const open = (total: number, createdAt: string, label: string): Order =>
+    ({ status: 'open', totals: { grandTotal: total }, createdAt, label } as unknown as Order);
+
+  it('lists unpaid orders oldest first with the total, in the store timezone', () => {
+    const text = buildDebtReminder({
+      storeName: 'Warung Bakso Pak Kumis',
+      customerName: 'Bu Sari',
+      timeZone: 'Asia/Jakarta',
+      orders: [
+        open(20_000, '2026-11-18T03:00:00Z', ''),
+        open(45_000, '2026-11-16T18:30:00Z', 'Meja 3'), // 17 Nov 01:30 WIB
+        { ...open(99_000, '2026-11-18T04:00:00Z', ''), status: 'paid' } as Order,
+      ],
+    });
+    expect(text).toBe(
+      [
+        'Halo Bu Sari, ini dari Warung Bakso Pak Kumis.',
+        '',
+        'Kami ingin mengingatkan 2 pesanan yang belum dibayar:',
+        '- 17 Nov 2026 · Meja 3 · Rp45.000',
+        '- 18 Nov 2026 · Rp20.000',
+        '',
+        'Total: Rp65.000',
+        '',
+        'Terima kasih.',
+      ].join('\n'),
+    );
   });
 });

@@ -1,0 +1,63 @@
+import { SearchX } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { SearchInput } from '../../../components/ui/SearchInput';
+import { Sheet } from '../../../components/ui/Sheet';
+import { Switch } from '../../../components/ui/Switch';
+import { setProductSoldOut } from '../../../services/catalog';
+import type { Product } from '../../../types';
+
+interface SoldOutSheetProps {
+  /** Products shown at the cashier (active ones). */
+  products: readonly Product[];
+  onClose: () => void;
+}
+
+/** Any seller marks what has run out; the tile stays visible but cannot be sold until switched back. */
+export function SoldOutSheet({ products, onClose }: SoldOutSheetProps) {
+  const [query, setQuery] = useState('');
+  const soldOutCount = products.filter((p) => p.isSoldOut).length;
+
+  /** Items that were sold out when the sheet opened go first; the order then stays put so rows do not jump under the finger. */
+  const [pinnedIds] = useState(() => new Set(products.filter((p) => p.isSoldOut).map((p) => p.id)));
+  const rows = useMemo(() => {
+    const text = query.trim().toLowerCase();
+    const matches = products.filter((p) => text === '' || p.name.toLowerCase().includes(text));
+    return [...matches.filter((p) => pinnedIds.has(p.id)), ...matches.filter((p) => !pinnedIds.has(p.id))];
+  }, [products, query, pinnedIds]);
+
+  const toggle = async (product: Product, isSoldOut: boolean) => {
+    try {
+      await setProductSoldOut(product.id, isSoldOut);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan.');
+    }
+  };
+
+  return (
+    <Sheet title="Stok habis" subtitle={soldOutCount > 0 ? `${soldOutCount} menu ditandai habis` : 'Semua menu tersedia'} isOpen onClose={onClose} isFlush>
+      <div className="border-b border-line px-5 py-3">
+        <SearchInput value={query} onChange={setQuery} placeholder="Cari menu…" label="Cari menu untuk ditandai habis" />
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-1">
+        {rows.length === 0 ? (
+          <EmptyState icon={SearchX} title="Menu tidak ditemukan" description="Coba kata kunci lain." />
+        ) : (
+          <ul className="divide-y divide-line">
+            {rows.map((product) => (
+              <li key={product.id} className="py-1">
+                <Switch
+                  checked={product.isSoldOut === true}
+                  onChange={(isSoldOut) => void toggle(product, isSoldOut)}
+                  label={product.name}
+                  description={product.isSoldOut ? 'Habis, tidak bisa dijual' : undefined}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </Sheet>
+  );
+}

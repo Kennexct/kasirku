@@ -33,8 +33,8 @@ export function SettingsPage() {
       <div className="min-h-0 flex-1 overflow-y-auto p-4 md:px-8 md:py-6">
         <div className="max-w-2xl">
           {tab === 'store' && <StoreSettings store={store} />}
-          {tab === 'payments' && <PaymentMethodSettings methods={catalog.paymentMethods} />}
-          {tab === 'modes' && <SalesModeSettings modes={catalog.salesModes} />}
+          {tab === 'payments' && <PaymentMethodSettings storeId={store.id} methods={catalog.paymentMethods} />}
+          {tab === 'modes' && <SalesModeSettings storeId={store.id} modes={catalog.salesModes} />}
           {tab === 'staff' && <StaffSettings store={store} />}
         </div>
       </div>

@@ -98,6 +98,8 @@ export interface Product extends SyncMeta {
   photoUrl?: string;
   sku?: string;
   isActive: boolean;
+  /** "Habis": shown but not sellable at the cashier until switched back (ADR-006). */
+  isSoldOut?: boolean;
   sortOrder: number;
   variantGroupIds: Id[];
   /** salesModeId -> price override (e.g. Takeaway cup cost). */

@@ -1,22 +1,15 @@
-import { Star } from 'lucide-react';
+import { MoreHorizontal, Plus, Star } from 'lucide-react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
-import { badgeBrand, btnGhost, card, helperText, inputBase, labelBase } from '../../components/ui/styles';
+import { badgeBrand, btnGhost, btnIcon, btnSecondary, card, helperText, inputBase, labelBase } from '../../components/ui/styles';
 import { Switch } from '../../components/ui/Switch';
 import { saveSalesMode } from '../../services/catalog';
-import type { PriceRule, SalesMode } from '../../types';
-
-const PRICE_RULE_OPTIONS: ReadonlyArray<{ value: PriceRule; label: string }> = [
-  { value: 'none', label: 'Harga dasar' },
-  { value: 'mode_price', label: 'Per produk' },
-  { value: 'markup', label: 'Markup %' },
-];
-
-const PRICE_RULE_HELP: Record<PriceRule, string> = {
-  none: 'Semua produk memakai harga dasar.',
-  mode_price: 'Atur harga khusus di setiap produk (mis. biaya cup takeaway). Kosong = harga dasar.',
-  markup: 'Harga dasar dinaikkan otomatis, cocok untuk menutup komisi ojol.',
-};
+import { MAX_SALES_MODES } from '../../constants';
+import type { Id, SalesMode } from '../../types';
+import { AddModeSheet } from './AddModeSheet';
+import { ConfigItemSheet } from './ConfigItemSheet';
+import { PRICE_RULE_HELP, PRICE_RULE_OPTIONS } from './priceRules';
 
 async function persist(mode: SalesMode): Promise<void> {
   try {
@@ -26,8 +19,14 @@ async function persist(mode: SalesMode): Promise<void> {
   }
 }
 
-/** M4: enable modes, pick the default, and decide how each mode is priced. Changes save instantly. */
-export function SalesModeSettings({ modes }: { modes: SalesMode[] }) {
+/** M4: add, rename, reorder and delete modes; pick the default and decide how each mode is priced. */
+export function SalesModeSettings({ storeId, modes }: { storeId: Id; modes: SalesMode[] }) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [managingId, setManagingId] = useState<Id | null>(null);
+  const managingIndex = modes.findIndex((m) => m.id === managingId);
+  const managing = modes[managingIndex];
+  const isFull = modes.length >= MAX_SALES_MODES;
+
   const setDefault = async (target: SalesMode) => {
     for (const mode of modes) {
       const isDefault = mode.id === target.id;
@@ -37,7 +36,14 @@ export function SalesModeSettings({ modes }: { modes: SalesMode[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-[14px] text-muted">Perubahan tersimpan otomatis.</p>
+      <div className="flex items-center gap-3">
+        <p className="min-w-0 flex-1 text-[14px] text-muted">
+          {isFull ? `Sudah ${MAX_SALES_MODES} mode (batas maksimal).` : 'Urutan di sini sama dengan urutan di kasir.'}
+        </p>
+        <button type="button" disabled={isFull} onClick={() => setIsAdding(true)} className={`${btnSecondary} h-11 shrink-0 text-[14px]`}>
+          <Plus aria-hidden size={17} /> Tambah mode
+        </button>
+      </div>
       {modes.map((mode) => (
         <section key={mode.id} className={`${card} overflow-hidden ${mode.isActive ? '' : 'bg-subtle'}`}>
           <div className="flex items-center gap-3 px-5 py-2">
@@ -53,10 +59,13 @@ export function SalesModeSettings({ modes }: { modes: SalesMode[] }) {
             {mode.isDefault ? (
               <span className={badgeBrand}>Default</span>
             ) : (
-              <button type="button" onClick={() => void setDefault(mode)} className={`${btnGhost} text-[13px]`}>
-                <Star aria-hidden size={15} /> Jadikan default
+              <button type="button" aria-label={`Jadikan ${mode.name} default`} onClick={() => void setDefault(mode)} className={`${btnGhost} text-[13px]`}>
+                <Star aria-hidden size={15} /> <span className="hidden sm:inline">Jadikan default</span>
               </button>
             )}
+            <button type="button" aria-label={`Kelola ${mode.name}`} onClick={() => setManagingId(mode.id)} className={`${btnIcon} border-transparent! bg-transparent!`}>
+              <MoreHorizontal aria-hidden size={20} />
+            </button>
           </div>
           {mode.isActive && (
             <div className="border-t border-line px-5 py-4">
@@ -82,6 +91,20 @@ export function SalesModeSettings({ modes }: { modes: SalesMode[] }) {
           )}
         </section>
       ))}
+
+      {isAdding && <AddModeSheet storeId={storeId} onClose={() => setIsAdding(false)} />}
+      {managing && (
+        <ConfigItemSheet
+          key={managing.id}
+          table="salesModes"
+          noun="mode"
+          item={managing}
+          index={managingIndex}
+          count={modes.length}
+          deleteBlockedReason={managing.isDefault ? 'Mode default tidak bisa dihapus. Jadikan mode lain sebagai default dulu.' : null}
+          onClose={() => setManagingId(null)}
+        />
+      )}
     </div>
   );
 }

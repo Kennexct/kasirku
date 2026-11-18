@@ -188,6 +188,14 @@ export function ProductForm({ product, catalog, storeId, onClose }: ProductFormP
               label="Tampilkan di kasir"
               description="Produk nonaktif disembunyikan dari kasir, tetapi tetap ada di riwayat."
             />
+            {draft.isActive && (
+              <Switch
+                checked={draft.isSoldOut === true}
+                onChange={(isSoldOut) => update({ isSoldOut })}
+                label="Sedang habis"
+                description="Tetap terlihat di kasir dengan tanda Habis, tetapi tidak bisa dijual. Kasir juga bisa mengubahnya."
+              />
+            )}
           </div>
         </div>
       </div>

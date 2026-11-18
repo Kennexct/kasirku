@@ -1,4 +1,5 @@
 import type { Customer, Id, Order } from '../types';
+import { formatRupiah } from './money';
 import { isCountedSale } from './reports';
 
 /** Customer helpers (ADR-005). Phones are stored canonically as `+628…`. */
@@ -45,9 +46,12 @@ export interface CustomerStats {
   totalSpend: number;
   lastVisitAt: string | null;
   openOrders: number;
+  /** What the customer still owes: the sum of their saved, unpaid orders (ADR-006 — derived, no ledger). */
+  openAmount: number;
+  oldestOpenAt: string | null;
 }
 
-export const NO_STATS: CustomerStats = { visits: 0, totalSpend: 0, lastVisitAt: null, openOrders: 0 };
+export const NO_STATS: CustomerStats = { visits: 0, totalSpend: 0, lastVisitAt: null, openOrders: 0, openAmount: 0, oldestOpenAt: null };
 
 export function customerStats(orders: readonly Order[]): Map<Id, CustomerStats> {
   const stats = new Map<Id, CustomerStats>();
@@ -55,7 +59,12 @@ export function customerStats(orders: readonly Order[]): Map<Id, CustomerStats> 
     if (!order.customerId) continue;
     const current = stats.get(order.customerId) ?? NO_STATS;
     if (order.status === 'open') {
-      stats.set(order.customerId, { ...current, openOrders: current.openOrders + 1 });
+      stats.set(order.customerId, {
+        ...current,
+        openOrders: current.openOrders + 1,
+        openAmount: current.openAmount + order.totals.grandTotal,
+        oldestOpenAt: current.oldestOpenAt && current.oldestOpenAt < order.createdAt ? current.oldestOpenAt : order.createdAt,
+      });
     } else if (isCountedSale(order)) {
       const paidAt = order.paidAt ?? order.updatedAt;
       stats.set(order.customerId, {
@@ -67,4 +76,22 @@ export function customerStats(orders: readonly Order[]): Map<Id, CustomerStats> 
     }
   }
   return stats;
+}
+
+/** WhatsApp text reminding a customer of their unpaid orders. Pure, so the wording is tested. */
+export function buildDebtReminder(input: { storeName: string; customerName: string; orders: readonly Order[]; timeZone: string }): string {
+  const open = input.orders.filter((o) => o.status === 'open').sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const format = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: input.timeZone });
+  const lines = open.map((o) => `- ${format.format(new Date(o.createdAt))}${o.label ? ` · ${o.label}` : ''} · ${formatRupiah(o.totals.grandTotal)}`);
+  const total = open.reduce((sum, o) => sum + o.totals.grandTotal, 0);
+  return [
+    `Halo ${input.customerName}, ini dari ${input.storeName}.`,
+    '',
+    open.length === 1 ? 'Kami ingin mengingatkan pesanan yang belum dibayar:' : `Kami ingin mengingatkan ${open.length} pesanan yang belum dibayar:`,
+    ...lines,
+    '',
+    `Total: ${formatRupiah(total)}`,
+    '',
+    'Terima kasih.',
+  ].join('\n');
 }

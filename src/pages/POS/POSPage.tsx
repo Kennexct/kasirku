@@ -1,3 +1,4 @@
+import { PackageX } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { ReceiptSheet } from '../../components/Receipt/ReceiptSheet';
@@ -5,6 +6,7 @@ import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { Sheet } from '../../components/ui/Sheet';
 import { SearchInput } from '../../components/ui/SearchInput';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
+import { btnIcon } from '../../components/ui/styles';
 import { Tabs } from '../../components/ui/Tabs';
 import { useAppData } from '../../hooks/useAppData';
 import { useCustomer } from '../../hooks/useCustomers';
@@ -22,9 +24,10 @@ import { DiscountSheet } from './components/DiscountSheet';
 import { PaymentSheet } from './components/PaymentSheet';
 import { ProductGrid } from './components/ProductGrid';
 import { SaveOrderSheet } from './components/SaveOrderSheet';
+import { SoldOutSheet } from './components/SoldOutSheet';
 import { VariantSheet } from './components/VariantSheet';
 
-type Panel = 'none' | 'cart' | 'discount' | 'customer' | 'payment' | 'save';
+type Panel = 'none' | 'cart' | 'discount' | 'customer' | 'payment' | 'save' | 'soldOut';
 const ALL_CATEGORIES = 'all';
 
 const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : 'Terjadi kesalahan.');
@@ -47,13 +50,23 @@ export function POSPage() {
   const mode: SalesMode | undefined =
     activeModes.find((m) => m.id === cart.salesModeId) ?? activeModes.find((m) => m.isDefault) ?? activeModes[0];
 
-  const modeId = mode?.id;
-  const { salesModeId, setSalesMode } = cart;
-  useEffect(() => {
-    if (modeId && salesModeId !== modeId) setSalesMode(modeId);
-  }, [modeId, salesModeId, setSalesMode]);
-
   const productsById = useMemo(() => new Map(catalog?.products.map((p) => [p.id, p]) ?? []), [catalog]);
+
+  /**
+   * The cart's mode can vanish (hidden or deleted in Settings). Fall back to the default and, for a cart that is
+   * not a saved order, re-price it — a saved order keeps the prices the customer was told.
+   */
+  const { salesModeId, setSalesMode, repriceItems, openOrderId } = cart;
+  useEffect(() => {
+    if (!mode || salesModeId === mode.id) return;
+    setSalesMode(mode.id);
+    if (salesModeId === null || openOrderId) return;
+    repriceItems((item) => {
+      const product = productsById.get(item.productId);
+      return product ? unitPriceWithOptions(resolveModePrice(product, mode), item.options) : item.unitPrice;
+    });
+  }, [mode, salesModeId, setSalesMode, repriceItems, openOrderId, productsById]);
+
   const visibleProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
     return (catalog?.products ?? []).filter(
@@ -63,6 +76,8 @@ export function POSPage() {
         (query === '' || p.name.toLowerCase().includes(query)),
     );
   }, [catalog, categoryId, search]);
+  const sellableProducts = useMemo(() => catalog?.products.filter((p) => p.isActive) ?? [], [catalog]);
+  const soldOutCount = sellableProducts.filter((p) => p.isSoldOut).length;
   const qtyByProduct = useMemo(() => {
     const map = new Map<Id, number>();
     cart.items.forEach((item) => map.set(item.productId, (map.get(item.productId) ?? 0) + item.qty));
@@ -80,6 +95,10 @@ export function POSPage() {
     product.variantGroupIds.flatMap((id) => catalog.variantGroups.filter((g) => g.id === id));
 
   const handleSelectProduct = (product: Product) => {
+    if (product.isSoldOut) {
+      setPanel('soldOut');
+      return;
+    }
     if (groupsFor(product).length > 0) {
       setVariantProduct(product);
       return;
@@ -174,16 +193,28 @@ export function POSPage() {
       <section aria-label="Produk" className="flex min-w-0 flex-1 flex-col">
         <div className="flex flex-col gap-3 border-b border-line bg-surface px-3 pt-3 md:px-5 md:pt-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-            <SearchInput value={search} onChange={setSearch} placeholder="Cari menu…" label="Cari produk" />
-            <SegmentedControl
-              label="Mode penjualan"
-              options={activeModes.map((m) => ({ value: m.id, label: m.name }))}
-              value={mode.id}
-              onChange={(id) => {
-                const next = activeModes.find((m) => m.id === id);
-                if (next) handleModeChange(next);
-              }}
-            />
+            <div className="flex min-w-0 flex-1 gap-2">
+              <SearchInput value={search} onChange={setSearch} placeholder="Cari menu…" label="Cari produk" />
+              <button type="button" aria-label="Tandai stok habis" title="Tandai stok habis" onClick={() => setPanel('soldOut')} className={`${btnIcon} relative`}>
+                <PackageX aria-hidden size={20} />
+                {soldOutCount > 0 && (
+                  <span className="num absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-md bg-ink px-1 text-[11px] font-bold text-white">
+                    {soldOutCount}
+                  </span>
+                )}
+              </button>
+            </div>
+            <div className="-mx-3 min-w-0 overflow-x-auto px-3 [scrollbar-width:none] md:mx-0 md:max-w-[55%] md:px-0">
+              <SegmentedControl
+                label="Mode penjualan"
+                options={activeModes.map((m) => ({ value: m.id, label: m.name }))}
+                value={mode.id}
+                onChange={(id) => {
+                  const next = activeModes.find((m) => m.id === id);
+                  if (next) handleModeChange(next);
+                }}
+              />
+            </div>
           </div>
           <Tabs
             label="Kategori"
@@ -272,6 +303,7 @@ export function POSPage() {
           onClose={() => setPanel('none')}
         />
       )}
+      {panel === 'soldOut' && <SoldOutSheet products={sellableProducts} onClose={() => setPanel('none')} />}
       {panel === 'save' && (
         <SaveOrderSheet initialLabel={cart.label} isSubmitting={isSubmitting} onSave={(label) => void handleSave(label)} onClose={() => setPanel('none')} />
       )}

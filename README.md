@@ -114,7 +114,7 @@ npx supabase db push           # applies supabase/migrations
 
 CI (`.github/workflows/ci.yml`): `npm ci` → `typecheck` → `test` → `build`. Migrations are applied to staging on merge, to prod by manual approval.
 
-## 7. Current status (v0.7 — + customers)
+## 7. Current status (v0.8 — + custom methods & modes, sold-out, unpaid customers)
 
 Design rules, tokens and component inventory: [`design-system/MASTER.md`](design-system/MASTER.md). Browser flow checks: [`e2e/`](e2e/README.md).
 
@@ -124,8 +124,8 @@ Design rules, tokens and component inventory: [`design-system/MASTER.md`](design
 | M1 POS checkout | Done: grid, search, categories, cart, qty, line notes, change calculator | `pages/POS/` |
 | M2 Products & variants | Done: CRUD, categories, variant groups (single/multi, required, +Rp), per-mode price | `pages/Products/` |
 | M3 Product photo | Done on device: compressed to WebP ≤ 200 KB. Upload to Supabase Storage pending | `lib/image.ts` |
-| M4 Sales mode | Done: switch re-prices the cart; base / per-product / markup % rules; default mode | `pages/Settings/SalesModeSettings.tsx` |
-| M5 Payment + QRIS | Done: methods on/off, reference off/optional/required, static QRIS upload + full-screen display. Single method per order (split = v1.1) | `PaymentSheet.tsx`, `QrisDisplay.tsx` |
+| M4 Sales mode | Done: add / rename / reorder / delete own modes (max 8); switch re-prices the cart; base / per-product / markup % rules; default mode | `pages/Settings/SalesModeSettings.tsx` |
+| M5 Payment + QRIS | Done: add / rename / reorder / delete own methods (max 12, ADR-006); methods on/off, reference off/optional/required, static QRIS upload + full-screen display. Single method per order (split = v1.1) | `PaymentSheet.tsx`, `QrisDisplay.tsx` |
 | M6 Discount | Order-level done (presets + ad-hoc % / Rp, cashier limit). Item-level pending | `DiscountSheet.tsx` |
 | M8 Open orders | Done: save with label, nav badge, resume (same receipt no.), cancel with reason + audit | `pages/OpenOrders/` |
 | M9 Receipt | Done: preview, browser print (58/80 mm), WhatsApp text share. Share-as-image pending | `components/Receipt/` |
@@ -136,11 +136,13 @@ Design rules, tokens and component inventory: [`design-system/MASTER.md`](design
 | M13 Export | Done: Excel (5 sheets, numeric Rupiah), PDF summary, CSV (Transaksi/Item/Refund); on-device (ADR-001), share or download, formula-injection guard | `lib/export/` |
 | M15 part 1 — Staff & PINs | Done: owner PIN + recovery code, cashiers (add / reset PIN / deactivate), switch seller, owner gate on Reports/Products/Settings with 5-minute auto-lock, one-time owner-PIN approval for void / refund / over-limit discount (approver recorded + audit), lockout, rules UI. On-device only (ADR-003, ADR-004) | `services/staff.ts`, `components/Pin/`, `pages/Settings/staff/` |
 | M7 Customers | Done: list + search (name / phone), add / edit / delete (delete erases phone + note), pick or quick-add from the cart, name on receipt / history / exports, WhatsApp receipt straight to the customer, visits / spend / last visit (ADR-005) | `pages/Customers/`, `services/customers.ts` |
+| Sold-out switch (v0.8) | Done: any seller marks a menu item "Habis" from the cashier; tile stays visible but cannot be sold | `pages/POS/components/SoldOutSheet.tsx` |
+| Unpaid customers (v0.8) | Done: "Belum bayar" tab — who owes, how much, since when; WhatsApp reminder; derived from saved orders, no ledger (ADR-006) | `pages/Customers/DebtList.tsx`, `lib/customers.ts` |
 | M15 parts 2–3 (owner login, sync) | Not started — needs a Supabase project | — |
 
 First run seeds a "Warung Bakso" starter menu (`services/seedTemplate.ts`) so the seller can sell immediately and edit from there.
 
-Tests: 80 unit/integration tests (incl. a 20k-order performance guard) (`npm test`) cover pricing, variants, receipt numbering, business date, WhatsApp receipt text, and the order service against an in-memory IndexedDB (paid, open → resume → paid, cancel + audit, validation, StrictMode double-seed guard) and void/refund rules (same-day void, refund window, partial → full, permission, reason).
+Tests: 85 unit/integration tests (incl. a 20k-order performance guard) (`npm test`) cover pricing, variants, receipt numbering, business date, WhatsApp receipt text, and the order service against an in-memory IndexedDB (paid, open → resume → paid, cancel + audit, validation, StrictMode double-seed guard) and void/refund rules (same-day void, refund window, partial → full, permission, reason).
 
 ## 8. Build order (maps to PRD release plan)
 

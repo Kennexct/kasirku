@@ -1,10 +1,13 @@
 import { MessageCircle, Pencil, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Sheet } from '../../components/ui/Sheet';
 import { StatusBadge } from '../../components/ui/StatusBadge';
-import { btnDanger, btnSecondary, sectionTitle } from '../../components/ui/styles';
+import { btnDanger, btnGhost, btnSecondary, sectionTitle } from '../../components/ui/styles';
+import { ROUTES } from '../../constants';
 import { useCustomerOrders } from '../../hooks/useCustomers';
-import { formatPhone, toWhatsAppNumber, type CustomerStats } from '../../lib/customers';
+import { buildDebtReminder, formatPhone, toWhatsAppNumber, type CustomerStats } from '../../lib/customers';
 import { formatRupiah } from '../../lib/money';
+import { whatsAppShareUrl } from '../../lib/receiptText';
 import type { Customer } from '../../types';
 
 const RECENT_ORDERS = 5;
@@ -16,6 +19,9 @@ const shortDate = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'sho
 interface CustomerDetailSheetProps {
   customer: Customer;
   stats: CustomerStats;
+  /** Used in the payment reminder text. */
+  storeName: string;
+  timeZone: string;
   onEdit: () => void;
   onDelete: () => void;
   onClose: () => void;
@@ -30,8 +36,11 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function CustomerDetailSheet({ customer, stats, onEdit, onDelete, onClose }: CustomerDetailSheetProps) {
+export function CustomerDetailSheet({ customer, stats, storeName, timeZone, onEdit, onDelete, onClose }: CustomerDetailSheetProps) {
   const orders = useCustomerOrders(customer.id);
+  const unpaid = (orders ?? []).filter((o) => o.status === 'open').sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const settled = (orders ?? []).filter((o) => o.status !== 'open');
+  const reminder = unpaid.length > 0 ? buildDebtReminder({ storeName, customerName: customer.name, orders: unpaid, timeZone }) : '';
 
   return (
     <Sheet
@@ -56,22 +65,53 @@ export function CustomerDetailSheet({ customer, stats, onEdit, onDelete, onClose
         <Stat label="Terakhir" value={stats.lastVisitAt ? shortDate.format(new Date(stats.lastVisitAt)) : '—'} />
       </dl>
 
-      {customer.phone && (
+      {customer.phone && unpaid.length === 0 && (
         <a href={`https://wa.me/${toWhatsAppNumber(customer.phone)}`} target="_blank" rel="noopener noreferrer" className={`${btnSecondary} mb-4 w-full`}>
           <MessageCircle aria-hidden size={18} /> Chat WhatsApp
         </a>
       )}
       {customer.note && <p className="mb-4 rounded-lg bg-subtle px-3.5 py-2.5 text-[14px] text-ink-soft">{customer.note}</p>}
-      {stats.openOrders > 0 && (
-        <p className="mb-4 rounded-lg bg-warn-50 px-3.5 py-2.5 text-[14px] text-warn-700">{stats.openOrders} pesanan belum dibayar.</p>
+      {unpaid.length > 0 && (
+        <section aria-label="Belum dibayar" className="mb-4 overflow-hidden rounded-lg border border-warn-200">
+          <header className="flex items-end justify-between gap-3 bg-warn-50 px-3.5 py-2.5">
+            <div>
+              <h3 className="text-[13px] font-semibold text-warn-700">Belum dibayar</h3>
+              <p className="num text-[13px] text-warn-700">{unpaid.length} pesanan</p>
+            </div>
+            <p className="num text-[20px] font-extrabold leading-none tracking-[-0.02em] text-ink">{formatRupiah(stats.openAmount)}</p>
+          </header>
+          <ul className="divide-y divide-line">
+            {unpaid.map((order) => (
+              <li key={order.id} className="flex items-center gap-3 px-3.5 py-2.5">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[14px] font-semibold">{order.label || 'Pesanan tersimpan'}</span>
+                  <span className="block truncate text-[13px] text-muted">
+                    {formatVisit(order.createdAt)} · {order.items.map((i) => `${i.qty}× ${i.nameSnapshot}`).join(', ')}
+                  </span>
+                </span>
+                <span className="num text-[14px] font-semibold">{formatRupiah(order.totals.grandTotal)}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-col gap-1 border-t border-line px-3.5 py-2.5 sm:flex-row sm:items-center sm:gap-2">
+            {customer.phone ? (
+              <a href={whatsAppShareUrl(reminder, customer.phone)} target="_blank" rel="noopener noreferrer" className={`${btnSecondary} h-11 text-[14px] sm:flex-1`}>
+                <MessageCircle aria-hidden size={17} /> Ingatkan via WhatsApp
+              </a>
+            ) : (
+              <p className="flex-1 text-[13px] text-muted">Tambahkan nomor HP untuk mengirim pengingat.</p>
+            )}
+            <Link to={ROUTES.openOrders} className={`${btnGhost} text-[14px]`}>Terima bayaran</Link>
+          </div>
+        </section>
       )}
 
       <h3 className={`${sectionTitle} mb-2`}>Transaksi terakhir</h3>
-      {orders && orders.length === 0 ? (
+      {orders && settled.length === 0 ? (
         <p className="text-[14px] text-muted">Belum ada transaksi.</p>
       ) : (
         <ul className="divide-y divide-line rounded-lg border border-line">
-          {orders?.slice(0, RECENT_ORDERS).map((order) => (
+          {settled.slice(0, RECENT_ORDERS).map((order) => (
             <li key={order.id} className="flex items-center gap-3 px-3.5 py-2.5">
               <span className="min-w-0 flex-1">
                 <span className="num block truncate text-[14px] font-semibold">{order.receiptNo}</span>

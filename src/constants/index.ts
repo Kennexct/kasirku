@@ -1,4 +1,12 @@
-import type { OrderStatus, RefundReason, StoreRules } from '../types';
+import type { OrderStatus, PaymentType, RefundReason, StoreRules } from '../types';
+
+export const PAYMENT_TYPE_LABEL: Record<PaymentType, string> = {
+  cash: 'Tunai',
+  qris: 'QRIS',
+  transfer: 'Transfer',
+  ewallet: 'E-wallet',
+  other: 'Lainnya',
+};
 
 export const REFUND_REASON_LABEL: Record<RefundReason, string> = {
   wrong_input: 'Salah input',
@@ -40,6 +48,9 @@ export const PIN_LOCK_STEPS_MS = [30_000, 60_000, 300_000, 900_000] as const;
 export const OWNER_UNLOCK_MS = 5 * 60_000;
 export const ACTIVE_MEMBER_STORAGE_KEY = 'kasirku-active-member';
 export const MEMBER_NAME_MAX = 40;
+export const CONFIG_NAME_MAX = 40;
+export const MAX_PAYMENT_METHODS = 12;
+export const MAX_SALES_MODES = 8;
 
 export const SYNC_INTERVAL_MS = 15_000;
 export const SYNC_BATCH_SIZE = 100;

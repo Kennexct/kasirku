@@ -24,8 +24,9 @@ interface HistoryFiltersProps {
   today: string;
   filter: HistoryFilter;
   onFilterChange: (filter: HistoryFilter) => void;
-  paymentMethods: PaymentMethod[];
-  salesModes: SalesMode[];
+  /** Current ones plus any removed ones that still appear in the period's sales. */
+  paymentMethods: ReadonlyArray<Pick<PaymentMethod, 'id' | 'name'>>;
+  salesModes: ReadonlyArray<Pick<SalesMode, 'id' | 'name'>>;
 }
 
 export function HistoryFilters(props: HistoryFiltersProps) {

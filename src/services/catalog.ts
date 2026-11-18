@@ -1,3 +1,4 @@
+import { localDb } from '../db/localDb';
 import { nowIso, uuidv7 } from '../lib/id';
 import type { Category, Id, PaymentMethod, Product, SalesMode, SyncMeta, VariantGroup } from '../types';
 import { saveAndQueue } from './sync';
@@ -25,6 +26,13 @@ export async function saveProduct(product: Product): Promise<void> {
   requirePrice(product.basePrice, 'Harga dasar');
   Object.values(product.modePrices).forEach((price) => requirePrice(price, 'Harga mode'));
   await saveAndQueue('products', { ...product, name: product.name.trim(), updatedAt: nowIso() });
+}
+
+/** "Habis" switch (ADR-006): any seller can flip it from the cashier; it changes nothing else about the product. */
+export async function setProductSoldOut(productId: Id, isSoldOut: boolean): Promise<void> {
+  const product = await localDb.products.get(productId);
+  if (!product || product.deletedAt) throw new Error('Produk tidak ditemukan.');
+  await saveAndQueue('products', { ...product, isSoldOut, updatedAt: nowIso() });
 }
 
 export async function saveVariantGroup(group: VariantGroup): Promise<void> {

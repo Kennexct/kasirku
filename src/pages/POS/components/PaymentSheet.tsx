@@ -1,6 +1,5 @@
-import { Banknote, CircleDollarSign, Landmark, QrCode, Wallet } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
+import { METHOD_ICON } from '../../../components/ui/paymentIcon';
 import { RupiahInput } from '../../../components/ui/RupiahInput';
 import { Sheet } from '../../../components/ui/Sheet';
 import { btnPrimary, inputBase, labelBase, option, sectionTitle } from '../../../components/ui/styles';
@@ -8,16 +7,8 @@ import { QUICK_CASH_AMOUNTS } from '../../../constants';
 import { formatRupiah } from '../../../lib/money';
 import { calculateChange } from '../../../lib/pricing';
 import { validatePayment, type PaymentInput } from '../../../services/orders';
-import type { PaymentMethod, PaymentType } from '../../../types';
+import type { PaymentMethod } from '../../../types';
 import { QrisDisplay } from './QrisDisplay';
-
-const METHOD_ICON: Record<PaymentType, LucideIcon> = {
-  cash: Banknote,
-  qris: QrCode,
-  transfer: Landmark,
-  ewallet: Wallet,
-  other: CircleDollarSign,
-};
 
 interface PaymentSheetProps {
   total: number;

@@ -1,5 +1,7 @@
 # Handoff
 
-**To:** SDE
+**To:** Architect → SDE
 
-Build v0.8 per `specs/2026-11-19-feedback-round-roadmap.md` (v0.8 design section), ADR-006, `decisions/architect/v08-feedback.md`. Then v0.9 → v0.11 in roadmap order.
+v0.8 is delivered (`reviews/2026-11-19-v08-review.md`, `decisions/sde/v08-feedback.md`).
+
+Next: v0.9 per `specs/2026-11-19-feedback-round-roadmap.md` — cost price → profit in reports, expenses, close of day (opening cash, expected vs counted, resets sold-out flags), backup/restore file. Write the ADR (data shapes for expenses and day closings, backup file format and restore rules) before code. Then v0.10 → v0.11.

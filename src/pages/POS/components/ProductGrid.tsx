@@ -9,6 +9,7 @@ interface ProductGridProps {
   products: Product[];
   salesMode: SalesMode;
   qtyByProduct: ReadonlyMap<Id, number>;
+  /** Called for sold-out products too; the page decides what a tap on one does. */
   onSelect: (product: Product) => void;
 }
 
@@ -23,20 +24,22 @@ export function ProductGrid({ products, salesMode, qtyByProduct, onSelect }: Pro
         const qty = qtyByProduct.get(product.id) ?? 0;
         const isSelected = qty > 0;
         const hasVariants = product.variantGroupIds.length > 0;
+        const isSoldOut = product.isSoldOut === true;
         return (
           <li key={product.id}>
             <button
               type="button"
               onClick={() => onSelect(product)}
+              aria-label={isSoldOut ? `${product.name}, habis` : undefined}
               className={`relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-surface text-left shadow-xs transition-[border-color,box-shadow,transform] duration-150 active:scale-[0.985] ${
                 isSelected ? 'border-brand-600 ring-1 ring-brand-600' : 'border-line hover:border-line-strong'
-              }`}
+              } ${isSoldOut ? 'bg-subtle! shadow-none!' : ''}`}
             >
-              <ProductThumb name={product.name} photoUrl={product.photoUrl} className="aspect-[3/2] w-full border-b border-line md:aspect-[4/3]" />
+              <ProductThumb name={product.name} photoUrl={product.photoUrl} className={`aspect-[3/2] w-full border-b border-line md:aspect-[4/3] ${isSoldOut ? 'opacity-40 grayscale' : ''}`} />
               <span className="flex flex-1 flex-col gap-1 p-2.5 md:p-3">
-                <span className="line-clamp-2 text-[13px] font-semibold leading-snug text-ink md:text-[14px]">{product.name}</span>
+                <span className={`line-clamp-2 text-[13px] font-semibold leading-snug md:text-[14px] ${isSoldOut ? 'text-muted' : 'text-ink'}`}>{product.name}</span>
                 <span className="mt-auto flex items-center gap-1.5">
-                  <span className="num text-[13px] font-semibold text-ink-soft md:text-[14px]">
+                  <span className={`num text-[13px] font-semibold md:text-[14px] ${isSoldOut ? 'text-faint' : 'text-ink-soft'}`}>
                     {formatRupiah(resolveModePrice(product, salesMode))}
                   </span>
                   {hasVariants && <Layers aria-label="Ada varian" size={14} className="text-faint" />}
@@ -47,6 +50,9 @@ export function ProductGrid({ products, salesMode, qtyByProduct, onSelect }: Pro
                   )}
                 </span>
               </span>
+              {isSoldOut && (
+                <span className="absolute left-1.5 top-1.5 flex h-6 items-center rounded-md bg-ink px-2 text-[12px] font-semibold text-white">Habis</span>
+              )}
               {isSelected && (
                 <span className="num absolute right-1.5 top-1.5 flex h-6 min-w-6 items-center justify-center rounded-md bg-brand-600 px-1.5 text-[13px] font-bold text-white shadow-xs">
                   {qty}
