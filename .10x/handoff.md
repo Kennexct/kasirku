@@ -1,7 +1,5 @@
 # Handoff
 
-**From:** Orchestrator → **To:** PM + Architect (Brainstorming)
+**To:** SDE
 
-- User feedback: English language; custom payment methods + sales modes; asked what else completes the product.
-- Presented: design for `custom-methods-modes`, three approaches for `i18n-english` (recommended: typed in-house dictionary), six ranked additions tied to the PRD's stated problem (profit, cash matching, who owes me).
-- Waiting for: approval of the two designs and which additions to build. No code written.
+Build v0.8 per `specs/2026-11-19-feedback-round-roadmap.md` (v0.8 design section), ADR-006, `decisions/architect/v08-feedback.md`. Then v0.9 → v0.11 in roadmap order.

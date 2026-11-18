@@ -1,7 +1,7 @@
 # Status
 
-**Phase:** Phase 0 Brainstorming — feedback round 2: user added onboarding journey + help button. Designs presented; still awaiting approval and choice among recommended additions 1, 2, 3, 5, 6
-**Branch:** `feat/customers` (stacked: reports-export → staff-pin → customers)
+**Phase:** Implementation — v0.8 (`custom-methods-modes`, `sold-out`, `customer-debt`); roadmap approved, ADR-006 written
+**Branch:** `feat/v0.8-feedback` (stacked: reports-export → staff-pin → customers → v0.8-feedback)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
 | Feature | Phase | Notes |
@@ -38,7 +38,7 @@
 - M15 part 2 `owner-login`, part 3 `sync-pull` (need a Supabase project — user decision)
 - Smaller gaps: item-level discount (M6), share receipt as image (M9), split payment (open question in PRD)
 
-## Feedback round (2026-11-18) — proposed sub-projects, not yet approved
+## Feedback round — APPROVED 2026-11-19 (see specs/2026-11-19-feedback-round-roadmap.md)
 | Slug | What | Size |
 | --- | --- | --- |
 | `custom-methods-modes` | Add / rename / reorder / delete payment methods and sales modes in Settings | small–medium |

@@ -10,3 +10,4 @@
 - reports-export — ADR-001, ADR-002 → `reports-export.md`
 - staff-pin — ADR-003, ADR-004 → `staff-pin.md`
 - customers (M7) — ADR-005 → `customers.md`
+- v0.8 feedback batch — ADR-006 → `v08-feedback.md`
