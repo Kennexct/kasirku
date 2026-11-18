@@ -1,0 +1,82 @@
+# KasirKu Design System — MASTER
+
+Source of truth for every screen. Tokens live in `src/index.css` (`@theme`); shared classes in `src/components/ui/styles.ts`.
+Components must use semantic tokens only — no raw `slate-*`, `orange-*` or hex in JSX.
+
+## Principles
+
+1. **Speed over decoration.** A seller with one free hand and a queue. Big targets (44px min, 48px primary), fewest taps, money always readable.
+2. **Borders carry structure, shadows mean "floating".** Cards = 1px `line` border + `shadow-xs`. Only sheets, toasts and the phone cart bar use `shadow-pop`.
+3. **One accent.** Pandan green is the only brand color. Status colors (danger, warn) appear only when there is a status to communicate.
+4. **The photo is the only color on a product tile.** No random pastel placeholders — monogram on neutral.
+5. **Numbers are first-class.** Every amount uses the `num` utility (tabular figures) so columns of Rupiah align.
+
+## Typography
+
+| Role | Spec |
+| --- | --- |
+| Family | Plus Jakarta Sans Variable (Tokotype, Jakarta), self-hosted via `@fontsource-variable` — works offline |
+| Page title | 22px / 700 / -0.02em |
+| Sheet title | 17px / 700 / -0.01em |
+| Body / inputs | 15px / 400–500 |
+| Secondary | 13–14px, `muted` |
+| Section label | 13px / 600 / uppercase / 0.06em, `muted` |
+| Big money | 20–36px / 700–800 / -0.02 to -0.03em, `num` |
+| Receipt | system monospace 12.5px (thermal-printer feel) |
+
+## Color tokens
+
+| Token | Hex | Use | Contrast on white |
+| --- | --- | --- | --- |
+| `brand-600` | #0B7A5A | Primary buttons, active states | 5.3:1 (white text on it) |
+| `brand-700` | #08654A | Active nav/tab text, links | 7.1:1 |
+| `brand-50` | #EBF7F2 | Selected backgrounds, success panel | — |
+| `ink` | #14201B | Primary text | 16.8:1 |
+| `ink-soft` | #36423D | Secondary emphasis | 10.5:1 |
+| `muted` | #5E6A65 | Helper text, labels — smallest allowed text color | 5.6:1 |
+| `faint` | #8A9590 | Icons/placeholders only, never body text | 3.1:1 |
+| `line` / `line-strong` | #E2E7E4 / #C9D1CD | Dividers, card borders / secondary button borders | — |
+| `line-input` | #8A9590 | Form control borders (WCAG 1.4.11 ≥ 3:1) | 3.1:1 |
+| `canvas` / `surface` / `subtle` | #F7F9F8 / #FFF / #F2F5F3 | App bg / cards / wells, table headers | — |
+| `danger-600/700/50` | #C2281D / #A31F16 / #FEF3F2 | Destructive actions, errors, "Kurang" | 5.8:1 / 7.0:1 |
+| `warn-700/50` | #9A5B05 / #FFF8EB | Stale open orders, fallback price | 5.1:1 |
+
+## Shape & spacing
+
+- Radius: 6 (`sm`, badges), 8 (`md`, segments), 10 (`lg`, buttons/inputs/cards), 14 (`xl`, sheets). No pill buttons — `rounded-full` only for avatars, count badges, switches.
+- Spacing: 4px grid. Page padding 16px phone / 32px tablet. Card padding 16–20px.
+
+## Components (use these, don't re-invent)
+
+| Need | Component |
+| --- | --- |
+| Mutually exclusive mode (sales mode, discount type, paper size, reference mode) | `SegmentedControl` |
+| Sections / categories | `Tabs` (underline, scrolls horizontally) |
+| Pick one or many from a set (variants, quick cash, presets) | `option()` class — bordered square, check icon when selected |
+| On/off setting | `Switch` (row with label + description) |
+| Modal / bottom sheet | `Sheet` (grabber on phone, centered on tablet, title + subtitle) |
+| Nothing to show | `EmptyState` (icon in bordered square + title + one line) |
+| Search | `SearchInput` |
+| Page chrome | `PageHeader` (title, description, actions, tabs slot) |
+| Settings group | `SettingsSection` |
+
+## Icons
+
+- lucide-react only, one stroke weight (1.75, set globally on `.lucide`).
+- Sizes: 22 nav, 18–20 buttons, 15–16 inline with text.
+- Decorative icons get `aria-hidden`; icon-only buttons need `aria-label`.
+- No emoji anywhere in the UI.
+
+## Motion
+
+- Sheets: 220ms slide-up with ease-out-quart; backdrop: 160ms fade. Press feedback: 1px translate.
+- `prefers-reduced-motion` disables all animation.
+
+## Layout
+
+- **Phone (< 768px):** bottom tab bar (4 primary + Lainnya), floating dark "Lihat pesanan" bar above it, 3-column product grid.
+- **Tablet (≥ 768px):** 84px side rail (logomark, nav with 3px active indicator, sync status, cashier avatar); POS = product grid + 340–420px cart column.
+
+## Anti-patterns (reject in review)
+
+Pastel random tile colors · gradient buttons · pill-shaped everything · emoji icons · gray text below `muted` · raw palette classes in JSX · shadows on every card · centered-everything layouts · more than one accent color.

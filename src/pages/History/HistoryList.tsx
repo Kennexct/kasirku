@@ -1,0 +1,83 @@
+import { ChevronRight, ReceiptText } from 'lucide-react';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { StatusBadge } from '../../components/ui/StatusBadge';
+import { card } from '../../components/ui/styles';
+import { formatBusinessDate } from '../../lib/dateRange';
+import { formatRupiah } from '../../lib/money';
+import type { BusinessDate, Id, Order } from '../../types';
+
+const timeFormat = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' });
+const COLUMNS = 'lg:grid-cols-[64px_minmax(150px,190px)_1fr_120px_130px_120px_20px]';
+
+interface HistoryListProps {
+  orders: Order[];
+  onSelect: (orderId: Id) => void;
+}
+
+function groupByDate(orders: Order[]): Array<[BusinessDate, Order[]]> {
+  const groups = new Map<BusinessDate, Order[]>();
+  for (const order of orders) groups.set(order.businessDate, [...(groups.get(order.businessDate) ?? []), order]);
+  return Array.from(groups.entries()).sort(([a], [b]) => b.localeCompare(a));
+}
+
+const isStruckThrough = (order: Order) => order.status === 'void' || order.status === 'cancelled';
+
+export function HistoryList({ orders, onSelect }: HistoryListProps) {
+  if (orders.length === 0) {
+    return <EmptyState icon={ReceiptText} title="Belum ada transaksi" description="Tidak ada transaksi pada periode dan filter ini." />;
+  }
+
+  return (
+    <div className={`${card} overflow-hidden`}>
+      <div className={`hidden items-center gap-4 border-b border-line bg-subtle px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.05em] text-muted lg:grid ${COLUMNS}`}>
+        <span>Jam</span>
+        <span>No. struk</span>
+        <span>Pesanan</span>
+        <span>Pembayaran</span>
+        <span>Status</span>
+        <span className="text-right">Total</span>
+        <span />
+      </div>
+      {groupByDate(orders).map(([date, group]) => (
+        <section key={date}>
+          <h3 className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-surface/95 px-4 py-2 text-[13px] font-semibold text-ink-soft backdrop-blur">
+            <span>{formatBusinessDate(date)}</span>
+            <span className="num text-muted">{group.length} transaksi</span>
+          </h3>
+          <ul className="divide-y divide-line">
+            {group.map((order) => (
+              <li key={order.id}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(order.id)}
+                  className={`grid w-full grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 px-4 py-3 text-left hover:bg-subtle lg:gap-4 ${COLUMNS}`}
+                >
+                  <span className="num hidden text-[14px] text-ink-soft lg:block">{timeFormat.format(new Date(order.paidAt ?? order.updatedAt))}</span>
+                  <span className="min-w-0">
+                    <span className="num block truncate text-[14px] font-semibold">{order.receiptNo}</span>
+                    <span className="num block truncate text-[13px] text-muted lg:hidden">
+                      {timeFormat.format(new Date(order.paidAt ?? order.updatedAt))} · {order.payments[0]?.methodNameSnapshot ?? '—'} · {order.salesModeNameSnapshot}
+                    </span>
+                  </span>
+                  <span className="hidden min-w-0 truncate text-[14px] text-ink-soft lg:block">
+                    {order.label ? `${order.label} · ` : ''}
+                    {order.items.map((i) => `${i.qty}× ${i.nameSnapshot}`).join(', ')}
+                  </span>
+                  <span className="hidden text-[14px] text-ink-soft lg:block">{order.payments[0]?.methodNameSnapshot ?? '—'}</span>
+                  <span className="hidden lg:block"><StatusBadge status={order.status} /></span>
+                  <span className="flex flex-col items-end gap-1 lg:block lg:text-right">
+                    <span className={`num text-[15px] font-semibold ${isStruckThrough(order) ? 'text-muted line-through' : ''}`}>
+                      {formatRupiah(order.totals.grandTotal)}
+                    </span>
+                    {order.status !== 'paid' && <span className="lg:hidden"><StatusBadge status={order.status} /></span>}
+                  </span>
+                  <ChevronRight aria-hidden size={18} className="hidden text-faint lg:block" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  );
+}

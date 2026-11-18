@@ -1,0 +1,95 @@
+import { Ban, MessageCircle, Printer, Undo2 } from 'lucide-react';
+import { ReceiptView } from '../../components/Receipt/ReceiptView';
+import { Sheet } from '../../components/ui/Sheet';
+import { StatusBadge } from '../../components/ui/StatusBadge';
+import { btnDanger, btnSecondary } from '../../components/ui/styles';
+import { formatRupiah } from '../../lib/money';
+import { buildReceiptText, whatsAppShareUrl } from '../../lib/receiptText';
+import { totalRefunded } from '../../lib/refunds';
+import type { Eligibility } from '../../services/refunds';
+import type { Order, Refund, Store } from '../../types';
+
+interface OrderDetailSheetProps {
+  order: Order;
+  refunds: Refund[];
+  store: Store;
+  cashierName: string;
+  voidEligibility: Eligibility;
+  refundEligibility: Eligibility;
+  onVoid: () => void;
+  onRefund: () => void;
+  onClose: () => void;
+}
+
+const dateTime = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+/** M10 detail: status, money summary, receipt (with refund lines), and allowed actions with reasons when not allowed. */
+export function OrderDetailSheet(props: OrderDetailSheetProps) {
+  const { order, refunds, store, cashierName, voidEligibility, refundEligibility, onVoid, onRefund, onClose } = props;
+  const refunded = totalRefunded(refunds.filter((r) => r.kind === 'refund'));
+  const blockedReason = !refundEligibility.ok && !voidEligibility.ok ? refundEligibility.reason : null;
+
+  return (
+    <Sheet
+      title={order.receiptNo}
+      subtitle={dateTime.format(new Date(order.paidAt ?? order.updatedAt))}
+      isOpen
+      onClose={onClose}
+      footer={
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => window.print()} className={btnSecondary}>
+              <Printer aria-hidden size={18} /> Cetak ulang
+            </button>
+            <a href={whatsAppShareUrl(buildReceiptText(order, store))} target="_blank" rel="noopener noreferrer" className={btnSecondary}>
+              <MessageCircle aria-hidden size={18} /> WhatsApp
+            </a>
+          </div>
+          {(voidEligibility.ok || refundEligibility.ok) && (
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" disabled={!refundEligibility.ok} onClick={onRefund} className={btnSecondary}>
+                <Undo2 aria-hidden size={18} /> Refund
+              </button>
+              <button type="button" disabled={!voidEligibility.ok} onClick={onVoid} className={btnDanger}>
+                <Ban aria-hidden size={18} /> Void
+              </button>
+            </div>
+          )}
+          {blockedReason && order.status !== 'cancelled' && <p className="text-center text-[13px] text-muted">{blockedReason}</p>}
+          {voidEligibility.ok === false && refundEligibility.ok && order.status === 'paid' && (
+            <p className="text-center text-[13px] text-muted">{voidEligibility.reason}</p>
+          )}
+        </div>
+      }
+    >
+      <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-3 rounded-lg border border-line p-4 text-[14px]">
+        <div>
+          <dt className="text-[13px] text-muted">Status</dt>
+          <dd className="mt-0.5"><StatusBadge status={order.status} /></dd>
+        </div>
+        <div className="text-right">
+          <dt className="text-[13px] text-muted">Total</dt>
+          <dd className={`num text-[20px] font-bold tracking-[-0.02em] ${order.status === 'void' ? 'text-muted line-through' : ''}`}>
+            {formatRupiah(order.totals.grandTotal)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-[13px] text-muted">Pembayaran</dt>
+          <dd className="font-medium">
+            {order.payments[0]?.methodNameSnapshot ?? '—'}
+            {order.payments[0]?.reference && <span className="num block text-[13px] text-muted">Ref {order.payments[0].reference}</span>}
+          </dd>
+        </div>
+        <div className="text-right">
+          <dt className="text-[13px] text-muted">{refunded > 0 ? 'Sudah direfund' : 'Mode'}</dt>
+          <dd className={`num font-medium ${refunded > 0 ? 'text-warn-700' : ''}`}>
+            {refunded > 0 ? `−${formatRupiah(refunded)}` : order.salesModeNameSnapshot}
+          </dd>
+        </div>
+      </dl>
+      <div className="rounded-lg bg-subtle px-3 py-4">
+        <ReceiptView order={order} store={store} cashierName={cashierName} refunds={refunds} />
+      </div>
+    </Sheet>
+  );
+}
