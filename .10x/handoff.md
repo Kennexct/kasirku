@@ -1,7 +1,7 @@
 # Handoff
 
-**From:** CTO + PM → **To:** Architect + Staff Engineer
+**From:** Architect + Staff Engineer → **To:** Engineering Manager + Senior Engineer
 
-- Approved spec: `.10x/specs/2026-11-18-reports-export-design.md` (metric definitions table is binding).
-- Need ADRs for: (1) on-device, lazy-loaded export stack; (2) refund attribution by refund business date (requires `refunds.businessDate`).
-- Reuse: `lib/dateRange.ts`, history date presets, `StatTile`-like tiles in `pages/History/HistorySummary.tsx`.
+- ADR-001 (on-device export) and ADR-002 (refund business date) accepted — see `.10x/adrs/`.
+- Component table in `decisions/architect/reports-export.md`; rules in `decisions/staff-engineer/reports-export.md`.
+- Sequencing hint: data change (refund businessDate + migrations) first, then `buildReport`, then History alignment, then exporters, then UI.

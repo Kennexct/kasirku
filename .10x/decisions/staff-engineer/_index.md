@@ -4,3 +4,6 @@
 [DISCOVERED] Design system: `design-system/MASTER.md` — semantic tokens only, shared components (Sheet, SegmentedControl, Tabs, Switch, Select, EmptyState, PageHeader).
 [DISCOVERED] Money = integer Rupiah everywhere; `num` utility for tabular figures.
 [DISCOVERED] Errors: services throw `Error` with Indonesian user-facing messages; UI shows via react-hot-toast.
+
+## Features
+- reports-export — one-definition rule, DRY extractions, bundle discipline → `reports-export.md`
