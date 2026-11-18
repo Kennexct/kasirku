@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Delivery Complete (`customers`, medium task) — QA + security PASS
+**Phase:** Phase 0 Brainstorming — user feedback 2026-11-18: (1) English language, (2) add custom payment methods / sales modes, (3) asked for recommended additions. Designs + recommendations presented; awaiting approval and choice of additions
 **Branch:** `feat/customers` (stacked: reports-export → staff-pin → customers)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
@@ -37,3 +37,10 @@
 ## Remaining PRD modules
 - M15 part 2 `owner-login`, part 3 `sync-pull` (need a Supabase project — user decision)
 - Smaller gaps: item-level discount (M6), share receipt as image (M9), split payment (open question in PRD)
+
+## Feedback round (2026-11-18) — proposed sub-projects, not yet approved
+| Slug | What | Size |
+| --- | --- | --- |
+| `custom-methods-modes` | Add / rename / reorder / delete payment methods and sales modes in Settings | small–medium |
+| `i18n-english` | Indonesian + English UI, typed dictionary, per-device language | large (≈ 500 strings, 70 screens/components) |
+| recommended additions | close-of-day + expenses, cost price → profit, backup file, setup wizard, sold-out toggle, customer debt view | each small–medium; user to choose |
