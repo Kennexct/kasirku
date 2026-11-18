@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Phase 0 Brainstorming — user feedback 2026-11-18: (1) English language, (2) add custom payment methods / sales modes, (3) asked for recommended additions. Designs + recommendations presented; awaiting approval and choice of additions
+**Phase:** Phase 0 Brainstorming — feedback round 2: user added onboarding journey + help button. Designs presented; still awaiting approval and choice among recommended additions 1, 2, 3, 5, 6
 **Branch:** `feat/customers` (stacked: reports-export → staff-pin → customers)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
@@ -43,4 +43,6 @@
 | --- | --- | --- |
 | `custom-methods-modes` | Add / rename / reorder / delete payment methods and sales modes in Settings | small–medium |
 | `i18n-english` | Indonesian + English UI, typed dictionary, per-device language | large (≈ 500 strings, 70 screens/components) |
-| recommended additions | close-of-day + expenses, cost price → profit, backup file, setup wizard, sold-out toggle, customer debt view | each small–medium; user to choose |
+| `onboarding` (user request) | First-launch journey: language, store name + business template, payment/QRIS setup, short explanation, "Langkah awal" checklist. Absorbs recommended "setup wizard" | medium |
+| `help-center` (user request) | Help button → in-app, offline help topics + contextual "?" on complex screens + replay intro | medium (≈ 12–15 short articles × 2 languages) |
+| recommended additions | 1 close-of-day + expenses, 2 cost price → profit, 3 backup file, 5 sold-out toggle, 6 customer debt view | each small–medium; user to choose |
