@@ -114,7 +114,7 @@ npx supabase db push           # applies supabase/migrations
 
 CI (`.github/workflows/ci.yml`): `npm ci` → `typecheck` → `test` → `build`. Migrations are applied to staging on merge, to prod by manual approval.
 
-## 7. Current status (v0.6 — + staff, PINs and owner approvals)
+## 7. Current status (v0.7 — + customers)
 
 Design rules, tokens and component inventory: [`design-system/MASTER.md`](design-system/MASTER.md). Browser flow checks: [`e2e/`](e2e/README.md).
 
@@ -135,11 +135,12 @@ Design rules, tokens and component inventory: [`design-system/MASTER.md`](design
 | M12 Reports | Done: KPIs, sales by hour/day, payment method / sales mode / cashier breakdowns, top products; refunds counted on refund day (ADR-002); owner only; lazy route | `pages/Reports/`, `lib/reports.ts` |
 | M13 Export | Done: Excel (5 sheets, numeric Rupiah), PDF summary, CSV (Transaksi/Item/Refund); on-device (ADR-001), share or download, formula-injection guard | `lib/export/` |
 | M15 part 1 — Staff & PINs | Done: owner PIN + recovery code, cashiers (add / reset PIN / deactivate), switch seller, owner gate on Reports/Products/Settings with 5-minute auto-lock, one-time owner-PIN approval for void / refund / over-limit discount (approver recorded + audit), lockout, rules UI. On-device only (ADR-003, ADR-004) | `services/staff.ts`, `components/Pin/`, `pages/Settings/staff/` |
-| M7, M15 parts 2–3 (owner login, sync) | Not started | — |
+| M7 Customers | Done: list + search (name / phone), add / edit / delete (delete erases phone + note), pick or quick-add from the cart, name on receipt / history / exports, WhatsApp receipt straight to the customer, visits / spend / last visit (ADR-005) | `pages/Customers/`, `services/customers.ts` |
+| M15 parts 2–3 (owner login, sync) | Not started — needs a Supabase project | — |
 
 First run seeds a "Warung Bakso" starter menu (`services/seedTemplate.ts`) so the seller can sell immediately and edit from there.
 
-Tests: 71 unit/integration tests (incl. a 20k-order performance guard) (`npm test`) cover pricing, variants, receipt numbering, business date, WhatsApp receipt text, and the order service against an in-memory IndexedDB (paid, open → resume → paid, cancel + audit, validation, StrictMode double-seed guard) and void/refund rules (same-day void, refund window, partial → full, permission, reason).
+Tests: 80 unit/integration tests (incl. a 20k-order performance guard) (`npm test`) cover pricing, variants, receipt numbering, business date, WhatsApp receipt text, and the order service against an in-memory IndexedDB (paid, open → resume → paid, cancel + audit, validation, StrictMode double-seed guard) and void/refund rules (same-day void, refund window, partial → full, permission, reason).
 
 ## 8. Build order (maps to PRD release plan)
 

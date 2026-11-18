@@ -6,3 +6,4 @@
 ## Features
 - reports-export — PASS, formula-injection guard → `reports-export.md`
 - staff-pin — PASS with documented limits → `staff-pin.md`
+- customers — PASS; first PII, ADR-005 → `reviews/2026-11-18-customers-review.md`
