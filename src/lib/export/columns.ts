@@ -34,9 +34,17 @@ export interface ExportContext {
   timeZone: string;
 }
 
+const timeFormatters = new Map<string, Intl.DateTimeFormat>();
+
+/** Intl formatters are expensive to construct — cache one per timezone (20k-row exports). */
 function timeOf(iso: string | null, timeZone: string): string {
   if (!iso) return '';
-  return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone }).format(new Date(iso));
+  let format = timeFormatters.get(timeZone);
+  if (!format) {
+    format = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone });
+    timeFormatters.set(timeZone, format);
+  }
+  return format.format(new Date(iso));
 }
 
 const methodOf = (order: Order | undefined) => order?.payments[0]?.methodNameSnapshot ?? '';

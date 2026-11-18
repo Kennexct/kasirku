@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/Layout/AppShell';
@@ -13,8 +14,10 @@ import { POSPage } from './pages/POS/POSPage';
 import { ProductsPage } from './pages/Products/ProductsPage';
 import { SettingsPage } from './pages/Settings/SettingsPage';
 
+// ADR-001: charts + export code load only when Reports is opened.
+const ReportsPage = lazy(() => import('./pages/Reports/ReportsPage'));
+
 const PLACEHOLDER_ROUTES = [
-  { path: ROUTES.reports, title: 'Laporan', prdRef: 'M12, M13', description: 'Ringkasan dan ekspor laporan.' },
   { path: ROUTES.customers, title: 'Pelanggan', prdRef: 'M7', description: 'Data pelanggan.' },
 ] as const;
 
@@ -38,6 +41,14 @@ export default function App() {
           <Route path={ROUTES.pos} element={<POSPage />} />
           <Route path={ROUTES.openOrders} element={<OpenOrdersPage />} />
           <Route path={ROUTES.history} element={<HistoryPage />} />
+          <Route
+            path={ROUTES.reports}
+            element={
+              <Suspense fallback={<LoadingScreen message="Memuat laporan…" />}>
+                <ReportsPage />
+              </Suspense>
+            }
+          />
           <Route path={ROUTES.products} element={<ProductsPage />} />
           <Route path={ROUTES.settings} element={<SettingsPage />} />
           <Route path={ROUTES.more} element={<MorePage />} />

@@ -17,7 +17,7 @@ export function StatTile({ label, value, hint, isPrimary = false, className = ''
       <p className={`num truncate font-bold tracking-[-0.02em] ${isPrimary ? 'text-[24px] text-brand-900 md:text-[22px]' : 'text-[16px] text-ink md:text-[22px]'}`}>
         {value}
       </p>
-      {hint && <p className={`num truncate text-[12px] text-muted ${isPrimary ? '' : 'hidden md:block'}`}>{hint}</p>}
+      {hint && <p className={`num text-[12px] text-muted ${isPrimary ? '' : 'hidden truncate md:block'}`}>{hint}</p>}
     </div>
   );
 }

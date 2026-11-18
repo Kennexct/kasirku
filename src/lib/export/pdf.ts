@@ -28,6 +28,9 @@ function section(doc: DocWithTable, title: string, y: number, head: string[], bo
     styles: { font: 'helvetica', fontSize: 9, cellPadding: { top: 1.6, bottom: 1.6, left: 2, right: 2 }, textColor: INK, lineColor: [226, 231, 228], lineWidth: { bottom: 0.2 } },
     headStyles: { fontStyle: 'bold', textColor: MUTED, fillColor: [242, 245, 243] },
     columnStyles: Object.fromEntries(moneyCols.map((i) => [i, { halign: 'right' as const }])),
+    didParseCell: (data) => {
+      if (data.section === 'head' && moneyCols.includes(data.column.index)) data.cell.styles.halign = 'right';
+    },
   });
   return nextY(doc, y);
 }
