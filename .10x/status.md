@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Design Complete (`staff-pin`) — ADR-003, ADR-004
+**Phase:** Planning Complete (`staff-pin`) — implementing T1–T8
 **Branch:** `feat/staff-pin` (from `feat/reports-export`)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
