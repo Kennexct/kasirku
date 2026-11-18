@@ -1,6 +1,8 @@
 # Handoff
 
-**From:** SDE + DBA → **To:** QA + Security
+**From:** DevOps + SRE → **To:** next sub-project (`owner-login`)
 
-- Built: `decisions/sde/staff-pin.md`. Test: no-PIN regression, option-A behaviour, approvals recorded, lockout, recovery.
-- Security: secrets hygiene, what client-side PINs can and cannot protect, storage tampering.
+- `staff-pin` delivered on `feat/staff-pin` (stacked on `feat/reports-export`; neither merged to `main`).
+- Next needs a user decision: create a Supabase project for KasirKu (none exists; two unrelated projects must not be touched).
+- Carry-overs for `owner-login`: server-side PIN/account check for void/refund, restrict `pin_hash`/`recovery_hash` columns, account-based owner PIN reset, queue store settings for sync.
+- Runbooks: `docs/runbooks/`. Reviews: `.10x/reviews/2026-11-18-staff-pin-*.md`.

@@ -4,3 +4,4 @@
 
 ## Features
 - reports-export — SLIs, alerts, runbook → `reports-export.md`
+- staff-pin — signals + runbook → `staff-pin.md`

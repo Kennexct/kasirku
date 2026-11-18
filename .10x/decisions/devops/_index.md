@@ -5,3 +5,4 @@
 
 ## Features
 - reports-export — deploy order, rollback → `reports-export.md`
+- staff-pin — stacked branch, additive migration → `staff-pin.md`

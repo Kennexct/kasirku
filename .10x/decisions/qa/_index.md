@@ -5,3 +5,4 @@
 
 ## Features
 - reports-export — PASS, 2 manual checks pending → `reports-export.md`
+- staff-pin — PASS → `staff-pin.md`

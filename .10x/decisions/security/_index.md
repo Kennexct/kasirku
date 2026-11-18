@@ -5,3 +5,4 @@
 
 ## Features
 - reports-export — PASS, formula-injection guard → `reports-export.md`
+- staff-pin — PASS with documented limits → `staff-pin.md`
