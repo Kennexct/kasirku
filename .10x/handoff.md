@@ -1,7 +1,5 @@
 # Handoff
 
-**From:** Architect + Staff Engineer → **To:** Engineering Manager + Senior Engineer
+**From:** EM + Senior Engineer → **To:** SDE (+ DBA for T1)
 
-- ADR-001 (on-device export) and ADR-002 (refund business date) accepted — see `.10x/adrs/`.
-- Component table in `decisions/architect/reports-export.md`; rules in `decisions/staff-engineer/reports-export.md`.
-- Sequencing hint: data change (refund businessDate + migrations) first, then `buildReport`, then History alignment, then exporters, then UI.
+Start with T1 (data), then T2. Spike library bundling at the start of T5. Approach per task: `decisions/senior-engineer/reports-export.md`.
