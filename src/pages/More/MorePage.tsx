@@ -1,38 +1,59 @@
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Lock, LockOpen, Repeat } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from '../../components/Brand/Logo';
-import { navItemsForRole } from '../../components/Layout/navItems';
+import { NAV_ITEMS } from '../../components/Layout/navItems';
 import { PageHeader } from '../../components/Layout/PageHeader';
 import { SyncBadge } from '../../components/Layout/SyncBadge';
-import { card } from '../../components/ui/styles';
+import { AccountSheet } from '../../components/Pin/AccountSheet';
+import { initialsOf } from '../../components/Pin/SellerSwitcher';
+import { btnSecondary, card } from '../../components/ui/styles';
+import { useOwnerAccess } from '../../hooks/useOwnerAccess';
 import { useSessionStore } from '../../store/useSessionStore';
 
-/** Phone-only overflow menu for nav items not in the bottom bar. */
+/** Phone-only overflow menu: account, owner-mode lock, and nav items not in the bottom bar. */
 export function MorePage() {
   const cashier = useSessionStore((s) => s.cashier);
-  const items = navItemsForRole(cashier?.role).filter((item) => !item.isPrimary);
+  const hasOwnerPin = useSessionStore((s) => s.hasOwnerPin);
+  const lockOwner = useSessionStore((s) => s.lockOwner);
+  const access = useOwnerAccess();
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const items = NAV_ITEMS.filter((item) => !item.isPrimary);
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-y-auto">
       <PageHeader title="Lainnya" />
       <div className="flex flex-col gap-4 p-4">
-        <div className={`${card} flex items-center gap-3 p-4`}>
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-[13px] font-bold text-white">
-            {(cashier?.displayName ?? '?').slice(0, 2).toUpperCase()}
-          </span>
-          <div className="flex-1">
-            <p className="text-[15px] font-semibold">{cashier?.displayName}</p>
-            <p className="text-[13px] text-muted">{cashier?.role === 'owner' ? 'Pemilik' : 'Kasir'}</p>
+        <div className={`${card} p-4`}>
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-[13px] font-bold text-white">
+              {initialsOf(cashier?.displayName ?? '')}
+            </span>
+            <div className="flex-1">
+              <p className="text-[15px] font-semibold">{cashier?.displayName}</p>
+              <p className="text-[13px] text-muted">{cashier?.role === 'owner' ? 'Pemilik' : 'Kasir'}</p>
+            </div>
+            <SyncBadge variant="inline" />
           </div>
-          <SyncBadge variant="inline" />
+          <div className="mt-3 flex gap-2">
+            <button type="button" onClick={() => setIsAccountOpen(true)} className={`${btnSecondary} h-11 flex-1 text-[14px]`}>
+              <Repeat aria-hidden size={16} /> {hasOwnerPin ? 'Ganti kasir' : 'Akun'}
+            </button>
+            {access.kind === 'unlocked' && (
+              <button type="button" onClick={lockOwner} className={`${btnSecondary} h-11 text-[14px]`}>
+                <LockOpen aria-hidden size={16} /> Kunci
+              </button>
+            )}
+          </div>
         </div>
 
         <ul className={`${card} divide-y divide-line`}>
-          {items.map(({ to, label, icon: Icon }) => (
+          {items.map(({ to, label, icon: Icon, isOwnerOnly }) => (
             <li key={to}>
               <Link to={to} className="flex min-h-14 items-center gap-3 px-4 text-[15px] font-medium hover:bg-subtle">
                 <Icon aria-hidden size={20} className="text-muted" />
                 <span className="flex-1">{label}</span>
+                {access.kind === 'locked' && isOwnerOnly && <Lock aria-label="terkunci, butuh PIN pemilik" size={15} className="text-faint" />}
                 <ChevronRight aria-hidden size={18} className="text-faint" />
               </Link>
             </li>
@@ -43,6 +64,8 @@ export function MorePage() {
           <Logo size={24} />
         </div>
       </div>
+
+      {isAccountOpen && <AccountSheet onClose={() => setIsAccountOpen(false)} />}
     </section>
   );
 }

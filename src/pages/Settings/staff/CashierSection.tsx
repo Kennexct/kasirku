@@ -1,0 +1,150 @@
+import { KeyRound, UserMinus, UserPlus, Users } from 'lucide-react';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { PinInput } from '../../../components/Pin/PinInput';
+import { initialsOf } from '../../../components/Pin/SellerSwitcher';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { Sheet } from '../../../components/ui/Sheet';
+import { btnDangerSolid, btnGhost, btnPrimary, btnSecondary, inputBase, labelBase } from '../../../components/ui/styles';
+import { MEMBER_NAME_MAX } from '../../../constants';
+import { useStaff } from '../../../hooks/useStaff';
+import { isValidPin } from '../../../lib/pin';
+import { addCashier, deactivateCashier, getOwner, resetCashierPin } from '../../../services/staff';
+import { useSessionStore } from '../../../store/useSessionStore';
+import type { Id, StoreMember } from '../../../types';
+import { SettingsSection } from '../SettingsSection';
+
+type Dialog = { kind: 'reset' | 'deactivate'; member: StoreMember } | null;
+const message = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback);
+
+/** Add cashiers, reset their PIN, or deactivate them (name stays in history). */
+export function CashierSection({ storeId }: { storeId: Id }) {
+  const hasOwnerPin = useSessionStore((s) => s.hasOwnerPin);
+  const activeSellerId = useSessionStore((s) => s.cashier?.memberId);
+  const signInCashier = useSessionStore((s) => s.signInCashier);
+  const unlockOwner = useSessionStore((s) => s.unlockOwner);
+  const cashiers = useStaff(storeId)?.filter((m) => m.role === 'cashier') ?? [];
+  const [name, setName] = useState('');
+  const [pin, setPin] = useState('');
+  const [resetPin, setResetPin] = useState('');
+  const [dialog, setDialog] = useState<Dialog>(null);
+  const [isBusy, setIsBusy] = useState(false);
+
+  const run = async (task: () => Promise<void>, success: string, fallback: string) => {
+    setIsBusy(true);
+    try {
+      await task();
+      toast.success(success);
+      setDialog(null);
+      setResetPin('');
+    } catch (error) {
+      toast.error(message(error, fallback));
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handleAdd = () =>
+    run(
+      async () => {
+        await addCashier(storeId, name, pin);
+        setName('');
+        setPin('');
+      },
+      `${name.trim()} ditambahkan`,
+      'Gagal menambah kasir.',
+    );
+
+  const handleDeactivate = (member: StoreMember) =>
+    run(
+      async () => {
+        await deactivateCashier(member.id);
+        if (member.id !== activeSellerId) return;
+        // The seller who was signed in no longer exists: hand the device back to the owner, still in owner mode.
+        const owner = await getOwner(storeId);
+        signInCashier({ memberId: owner.id, displayName: owner.displayName, role: owner.role });
+        unlockOwner();
+      },
+      `${member.displayName} dinonaktifkan`,
+      'Gagal menonaktifkan kasir.',
+    );
+
+  return (
+    <SettingsSection title="Kasir" description="Setiap kasir punya PIN sendiri, sehingga penjualan tercatat atas namanya.">
+      {!hasOwnerPin ? (
+        <p className="text-[14px] text-muted">Atur PIN pemilik dulu untuk menambah kasir.</p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {cashiers.length === 0 ? (
+            <EmptyState icon={Users} title="Belum ada kasir" description="Tambahkan kasir pertama di bawah ini." />
+          ) : (
+            <ul className="divide-y divide-line rounded-lg border border-line">
+              {cashiers.map((member) => (
+                <li key={member.id} className="flex flex-wrap items-center gap-3 px-3.5 py-2.5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-bold text-white">{initialsOf(member.displayName)}</span>
+                  <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{member.displayName}</span>
+                  <button type="button" onClick={() => setDialog({ kind: 'reset', member })} className={`${btnGhost} text-[14px]`}>
+                    <KeyRound aria-hidden size={16} /> Reset PIN
+                  </button>
+                  <button type="button" aria-label={`Nonaktifkan ${member.displayName}`} onClick={() => setDialog({ kind: 'deactivate', member })} className={`${btnGhost} text-[14px] text-danger-700!`}>
+                    <UserMinus aria-hidden size={16} /> Nonaktifkan
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <fieldset className="grid items-end gap-3 rounded-lg border border-dashed border-line-strong p-4 sm:grid-cols-[1fr_150px_auto]">
+            <legend className="px-1 text-[13px] font-semibold text-ink-soft">Tambah kasir</legend>
+            <div>
+              <label htmlFor="cashier-name" className={labelBase}>Nama</label>
+              <input id="cashier-name" value={name} maxLength={MEMBER_NAME_MAX} placeholder="Contoh: Dika" onChange={(e) => setName(e.target.value)} className={inputBase} />
+            </div>
+            <div>
+              <label htmlFor="cashier-pin" className={labelBase}>PIN kasir</label>
+              <PinInput id="cashier-pin" value={pin} onChange={setPin} />
+            </div>
+            <button type="button" disabled={isBusy || name.trim() === '' || !isValidPin(pin)} onClick={() => void handleAdd()} className={btnPrimary}>
+              <UserPlus aria-hidden size={18} /> Tambah
+            </button>
+          </fieldset>
+        </div>
+      )}
+
+      {dialog?.kind === 'reset' && (
+        <Sheet
+          title="Reset PIN kasir"
+          subtitle={dialog.member.displayName}
+          isOpen
+          onClose={() => setDialog(null)}
+          footer={
+            <button type="button" disabled={isBusy || !isValidPin(resetPin)} onClick={() => void run(() => resetCashierPin(dialog.member.id, resetPin), 'PIN kasir diganti', 'Gagal mengganti PIN.')} className={`${btnPrimary} w-full`}>
+              Simpan PIN baru
+            </button>
+          }
+        >
+          <label htmlFor="cashier-reset-pin" className={labelBase}>PIN baru (4–6 angka)</label>
+          <PinInput id="cashier-reset-pin" value={resetPin} onChange={setResetPin} />
+        </Sheet>
+      )}
+
+      {dialog?.kind === 'deactivate' && (
+        <Sheet
+          title={`Nonaktifkan ${dialog.member.displayName}?`}
+          isOpen
+          onClose={() => setDialog(null)}
+          footer={
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setDialog(null)} className={btnSecondary}>Batal</button>
+              <button type="button" disabled={isBusy} onClick={() => void handleDeactivate(dialog.member)} className={`${btnDangerSolid} flex-1`}>
+                Nonaktifkan
+              </button>
+            </div>
+          }
+        >
+          <p className="text-[14px] text-ink-soft">Kasir ini tidak bisa masuk lagi. Namanya tetap tampil di riwayat dan laporan penjualan yang sudah ada.</p>
+        </Sheet>
+      )}
+    </SettingsSection>
+  );
+}

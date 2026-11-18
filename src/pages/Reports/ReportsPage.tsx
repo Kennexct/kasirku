@@ -1,4 +1,4 @@
-import { BarChart3, Download, Lock } from 'lucide-react';
+import { BarChart3, Download } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { PageHeader } from '../../components/Layout/PageHeader';
 import { DateRangeControl } from '../../components/ui/DateRangeControl';
@@ -55,9 +55,9 @@ function dayData(rows: DayRow[]): BarDatum[] {
   });
 }
 
-/** M12 reports + M13 export entry point. Owner only. Route is lazy-loaded (ADR-001). */
+/** M12 reports + M13 export entry point. Owner only via <OwnerGate> on the route. Lazy-loaded (ADR-001). */
 export default function ReportsPage() {
-  const { store, isOwner } = useAppData();
+  const { store } = useAppData();
   const storeId = useSessionStore((s) => s.storeId);
   const today = store ? getBusinessDate(new Date(), store) : new Date().toISOString().slice(0, 10);
   const dateRange = useDateRange(today);
@@ -74,10 +74,6 @@ export default function ReportsPage() {
   const report = useMemo(() => (input ? buildReport(input) : null), [input]);
 
   if (!store) return <LoadingScreen />;
-  if (!isOwner) {
-    return <EmptyState icon={Lock} title="Khusus pemilik" description="Laporan hanya bisa dibuka oleh pemilik toko." />;
-  }
-
   const ctx: ExportContext | null = input ? { input, timeZone: store.timezone } : null;
   const hours = report ? hourData(report.byHour) : [];
   const isMultiDay = dateRange.range.from !== dateRange.range.to;

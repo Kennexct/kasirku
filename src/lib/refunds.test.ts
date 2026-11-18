@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import type { Order, OrderItem, Refund } from '../types';
-import { checkPermission } from './permissions';
 import { calculateTotals } from './pricing';
 import { buildRefundItems, isFullyRefunded, remainingQtyByItem, totalRefunded } from './refunds';
 
@@ -51,14 +50,5 @@ describe('buildRefundItems', () => {
     expect(() => buildRefundItems(order, [{ orderItemId: 'bakso', qty: 2 }], [r1])).toThrow(/maksimal 1/);
     expect(() => buildRefundItems(order, [{ orderItemId: 'bakso', qty: 0 }], [])).toThrow(/minimal satu/);
     expect(totalRefunded([r1])).toBe(15_000);
-  });
-});
-
-describe('checkPermission', () => {
-  it('lets the owner do anything and applies store rules to cashiers', () => {
-    expect(checkPermission('owner_only', 'owner')).toBe('allowed');
-    expect(checkPermission('owner_only', 'cashier')).toBe('denied');
-    expect(checkPermission('cashier_with_pin', 'cashier')).toBe('needs_owner_pin');
-    expect(checkPermission('cashier', 'cashier')).toBe('allowed');
   });
 });

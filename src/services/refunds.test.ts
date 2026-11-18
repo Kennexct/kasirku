@@ -22,7 +22,7 @@ async function sell(): Promise<{ order: Order; ctx: RefundContext; store: Store 
     { store, salesMode, cashierId: owner.id },
     { method: cash, amount: 35_000, cashReceived: 50_000 },
   );
-  return { order, store, ctx: { store, actorId: owner.id, actorRole: 'owner' } };
+  return { order, store, ctx: { store, actorId: owner.id, access: { kind: 'open' } } };
 }
 
 const nextDay = (order: Order) => new Date(new Date(order.paidAt ?? '').getTime() + 86_400_000);
@@ -45,11 +45,29 @@ describe('voidOrder', () => {
     await expect(voidOrder(order.id, reason, ctx)).rejects.toThrow(/lunas/);
   });
 
-  it('blocks void on a later business day and for cashiers when owner-only', async () => {
+  it('blocks void on a later business day before asking for any PIN', async () => {
+    const { order, ctx } = await sell();
+    const result = canVoid(order, [], { ...ctx, access: { kind: 'locked' }, now: nextDay(order) });
+    expect(result).toEqual({ ok: false, reason: expect.stringMatching(/hari ini/) });
+  });
+
+  it('needs the owner PIN when locked, records the approver, and rejects an expired approval (ADR-004)', async () => {
+    const { order, ctx } = await sell();
+    expect(canVoid(order, [], { ...ctx, access: { kind: 'locked' } })).toMatchObject({ ok: false, needsOwnerPin: true });
+    await expect(voidOrder(order.id, reason, { ...ctx, actorId: 'cashier-1', access: { kind: 'locked' } })).rejects.toThrow(/PIN pemilik/);
+
+    const expired = { kind: 'approved' as const, ownerId: ctx.actorId, grantedAt: Date.now() - 6 * 60_000 };
+    await expect(voidOrder(order.id, reason, { ...ctx, actorId: 'cashier-1', access: expired })).rejects.toThrow(/kedaluwarsa/);
+
+    const approved = { kind: 'approved' as const, ownerId: ctx.actorId, grantedAt: Date.now() };
+    const refund = await voidOrder(order.id, reason, { ...ctx, actorId: 'cashier-1', access: approved });
+    expect(refund).toMatchObject({ actorId: 'cashier-1', approvedById: ctx.actorId });
+  });
+
+  it('lets a cashier act freely when the rule says so', async () => {
     const { order, ctx, store } = await sell();
-    expect(canVoid(order, [], { ...ctx, now: nextDay(order) })).toEqual({ ok: false, reason: expect.stringMatching(/hari ini/) });
-    const strict = { ...store, settings: { ...store.settings, voidPermission: 'owner_only' as const } };
-    expect(canVoid(order, [], { ...ctx, store: strict, actorRole: 'cashier' }).ok).toBe(false);
+    const relaxed = { ...store, settings: { ...store.settings, voidPermission: 'cashier' as const } };
+    expect(canVoid(order, [], { ...ctx, store: relaxed, access: { kind: 'locked' } })).toEqual({ ok: true });
   });
 });
 

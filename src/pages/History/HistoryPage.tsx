@@ -8,7 +8,8 @@ import { getBusinessDate } from '../../lib/businessDate';
 import { formatRange } from '../../lib/dateRange';
 import { useDateRange } from '../../hooks/useDateRange';
 import { summarize } from '../../lib/reports';
-import { canRefund, canVoid, refundOrder, voidOrder, type ReasonInput, type RefundContext } from '../../services/refunds';
+import { canRefund, canVoid, refundOrder, voidOrder, type Eligibility, type ReasonInput, type RefundContext } from '../../services/refunds';
+import { requestOwnerApproval, type OwnerApproval } from '../../store/usePinPromptStore';
 import { useSessionStore } from '../../store/useSessionStore';
 import type { Id, Order } from '../../types';
 import { EMPTY_FILTER, HistoryFilters, isFilterEmpty, type HistoryFilter } from './HistoryFilters';
@@ -34,7 +35,7 @@ const errorMessage = (error: unknown) => (error instanceof Error ? error.message
 
 /** M10 sales history + M11 void/refund entry point. */
 export function HistoryPage() {
-  const { store, catalog } = useAppData();
+  const { store, catalog, access } = useAppData();
   const storeId = useSessionStore((s) => s.storeId);
   const cashier = useSessionStore((s) => s.cashier);
   const today = store ? getBusinessDate(new Date(), store) : new Date().toISOString().slice(0, 10);
@@ -44,6 +45,8 @@ export function HistoryPage() {
   const [filter, setFilter] = useState<HistoryFilter>(EMPTY_FILTER);
   const [selected, setSelected] = useState<{ id: Id; action: Action } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  /** One-time owner approval for the action sheet that is open (ADR-004); cleared when it closes. */
+  const [approval, setApproval] = useState<OwnerApproval | null>(null);
 
   const history = usePeriodData(storeId, range);
 
@@ -59,16 +62,36 @@ export function HistoryPage() {
 
   if (!store || !catalog || !cashier) return <LoadingScreen />;
 
-  const ctx: RefundContext = { store, actorId: cashier.memberId, actorRole: cashier.role };
+  const ctx: RefundContext = { store, actorId: cashier.memberId, access };
+  const actionCtx: RefundContext = { ...ctx, access: approval ?? access };
   const order = selected ? history?.ordersById.get(selected.id) : undefined;
   const refunds = (order && history?.refundsByOrder.get(order.id)) || [];
+  const voidEligibility: Eligibility = order ? canVoid(order, refunds, ctx) : { ok: false, reason: '' };
+  const refundEligibility: Eligibility = order ? canRefund(order, ctx) : { ok: false, reason: '' };
+
+  const backToDetail = () => {
+    setApproval(null);
+    setSelected((prev) => (prev ? { ...prev, action: 'detail' } : prev));
+  };
+
+  /** Opens the void/refund sheet; asks for the owner PIN first when that is the only thing missing. */
+  const begin = async (action: 'void' | 'refund', eligibility: Eligibility, reason: string) => {
+    if (!order) return;
+    if (!eligibility.ok) {
+      if (!eligibility.needsOwnerPin) return;
+      const granted = await requestOwnerApproval(reason);
+      if (!granted) return;
+      setApproval(granted);
+    }
+    setSelected({ id: order.id, action });
+  };
 
   const run = async (task: () => Promise<unknown>, success: string) => {
     setIsSubmitting(true);
     try {
       await task();
       toast.success(success);
-      setSelected((prev) => (prev ? { ...prev, action: 'detail' } : prev));
+      backToDetail();
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
@@ -76,9 +99,9 @@ export function HistoryPage() {
     }
   };
 
-  const handleVoid = (reason: ReasonInput) => order && void run(() => voidOrder(order.id, reason, ctx), `${order.receiptNo} di-void`);
+  const handleVoid = (reason: ReasonInput) => order && void run(() => voidOrder(order.id, reason, actionCtx), `${order.receiptNo} di-void`);
   const handleRefund = (selections: Array<{ orderItemId: Id; qty: number }>, reason: ReasonInput) =>
-    order && void run(() => refundOrder(order.id, selections, reason, ctx), 'Refund berhasil dicatat');
+    order && void run(() => refundOrder(order.id, selections, reason, actionCtx), 'Refund berhasil dicatat');
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
@@ -110,18 +133,18 @@ export function HistoryPage() {
           refunds={refunds}
           store={store}
           cashierName={history?.memberName.get(order.cashierId) ?? '—'}
-          voidEligibility={canVoid(order, refunds, ctx)}
-          refundEligibility={canRefund(order, ctx)}
-          onVoid={() => setSelected({ id: order.id, action: 'void' })}
-          onRefund={() => setSelected({ id: order.id, action: 'refund' })}
+          voidEligibility={voidEligibility}
+          refundEligibility={refundEligibility}
+          onVoid={() => void begin('void', voidEligibility, `Void ${order.receiptNo}`)}
+          onRefund={() => void begin('refund', refundEligibility, `Refund ${order.receiptNo}`)}
           onClose={() => setSelected(null)}
         />
       )}
       {order && selected?.action === 'void' && (
-        <VoidSheet order={order} isSubmitting={isSubmitting} onConfirm={handleVoid} onClose={() => setSelected({ id: order.id, action: 'detail' })} />
+        <VoidSheet order={order} isSubmitting={isSubmitting} onConfirm={handleVoid} onClose={backToDetail} />
       )}
       {order && selected?.action === 'refund' && (
-        <RefundSheet order={order} refunds={refunds} isSubmitting={isSubmitting} onConfirm={handleRefund} onClose={() => setSelected({ id: order.id, action: 'detail' })} />
+        <RefundSheet order={order} refunds={refunds} isSubmitting={isSubmitting} onConfirm={handleRefund} onClose={backToDetail} />
       )}
     </section>
   );

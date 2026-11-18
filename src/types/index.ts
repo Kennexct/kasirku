@@ -80,8 +80,10 @@ export interface StoreMember extends SyncMeta {
   userId: Id | null;
   role: Role;
   displayName: string;
-  /** bcrypt hash — never stored in plain text, never sent to other devices in clear. */
+  /** `pbkdf2-sha256$<iterations>$<salt>$<hash>` (ADR-003); empty string = no PIN set. Never the PIN itself. */
   pinHash: string;
+  /** Owner only: hash of the one-time recovery code shown when the PIN was set. */
+  recoveryHash?: string;
 }
 
 export interface Category extends SyncMeta {
@@ -157,6 +159,8 @@ export interface AppliedDiscount {
   name: string;
   type: DiscountType;
   value: number;
+  /** Owner who approved a discount above the cashier limit (ADR-004). */
+  approvedById?: Id | null;
 }
 
 export interface SelectedOption {

@@ -31,6 +31,15 @@ export const PHOTO_MAX_DIMENSION_PX = 600;
 
 export const PIN_MIN_LENGTH = 4;
 export const PIN_MAX_LENGTH = 6;
+/** ADR-003: PBKDF2-HMAC-SHA-256 work factor for PIN and recovery-code hashes. */
+export const PIN_PBKDF2_ITERATIONS = 150_000;
+export const PIN_FREE_ATTEMPTS = 5;
+/** Wait after the 5th, 6th, 7th, 8th+ consecutive wrong PIN. */
+export const PIN_LOCK_STEPS_MS = [30_000, 60_000, 300_000, 900_000] as const;
+/** ADR-004: owner powers re-lock this long after last use; one-time approvals expire after the same time. */
+export const OWNER_UNLOCK_MS = 5 * 60_000;
+export const ACTIVE_MEMBER_STORAGE_KEY = 'kasirku-active-member';
+export const MEMBER_NAME_MAX = 40;
 
 export const SYNC_INTERVAL_MS = 15_000;
 export const SYNC_BATCH_SIZE = 100;

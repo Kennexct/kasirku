@@ -9,9 +9,12 @@ import { Tabs } from '../../components/ui/Tabs';
 import { useAppData } from '../../hooks/useAppData';
 import { formatRupiah } from '../../lib/money';
 import { calculateTotals, resolveModePrice, unitPriceWithOptions } from '../../lib/pricing';
+import { uuidv7 } from '../../lib/id';
+import { writeAudit } from '../../services/audit';
 import { completeOrder, saveOpenOrder, type PaymentInput } from '../../services/orders';
+import { requestOwnerApproval } from '../../store/usePinPromptStore';
 import { useCartStore } from '../../store/useCartStore';
-import type { Id, Order, Product, SalesMode } from '../../types';
+import type { AppliedDiscount, Id, Order, Product, SalesMode } from '../../types';
 import { CartPanel } from './components/CartPanel';
 import { DiscountSheet } from './components/DiscountSheet';
 import { PaymentSheet } from './components/PaymentSheet';
@@ -25,7 +28,7 @@ const ALL_CATEGORIES = 'all';
 const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : 'Terjadi kesalahan.');
 
 export function POSPage() {
-  const { store, catalog, cashierId, cashierName, isOwner } = useAppData();
+  const { store, catalog, cashierId, cashierName, hasOwnerPowers } = useAppData();
   const cart = useCartStore();
   const [panel, setPanel] = useState<Panel>('none');
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
@@ -121,6 +124,26 @@ export function POSPage() {
     }
   };
 
+  /** An owner-approved over-limit discount is written to the audit log before it is applied. */
+  const handleApplyDiscount = async (discount: AppliedDiscount | null) => {
+    try {
+      if (discount?.approvedById) {
+        await writeAudit({
+          storeId: store.id,
+          actorId: cashierId,
+          entity: 'discount',
+          entityId: cart.openOrderId ?? uuidv7(),
+          action: 'discount_override',
+          payload: { approvedById: discount.approvedById, name: discount.name, type: discount.type, value: discount.value, baseAmount: totals.subtotal - totals.itemDiscountTotal },
+        });
+      }
+      cart.setOrderDiscount(discount);
+      setPanel('none');
+    } catch (error) {
+      toast.error(errorMessage(error));
+    }
+  };
+
   const itemCount = cart.items.reduce((sum, item) => sum + item.qty, 0);
   const cartPanel = (
     <CartPanel
@@ -205,12 +228,10 @@ export function POSPage() {
         <DiscountSheet
           presets={catalog.discounts.filter((d) => d.isActive && d.scope === 'order')}
           current={cart.orderDiscount}
-          maxPercent={isOwner ? null : store.settings.cashierMaxDiscountPct}
+          maxPercent={hasOwnerPowers ? null : store.settings.cashierMaxDiscountPct}
           baseAmount={totals.subtotal - totals.itemDiscountTotal}
-          onApply={(discount) => {
-            cart.setOrderDiscount(discount);
-            setPanel('none');
-          }}
+          onRequestOverride={async () => (await requestOwnerApproval('Diskon di atas batas kasir'))?.ownerId ?? null}
+          onApply={(discount) => void handleApplyDiscount(discount)}
           onClose={() => setPanel('none')}
         />
       )}

@@ -1,10 +1,14 @@
-import { MoreHorizontal } from 'lucide-react';
+import { Lock, LockOpen, MoreHorizontal } from 'lucide-react';
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { ROUTES } from '../../constants';
 import { useOpenOrderCount } from '../../hooks/useOpenOrderCount';
+import { useOwnerAccess, useOwnerAutoLock } from '../../hooks/useOwnerAccess';
 import { useSessionStore } from '../../store/useSessionStore';
 import { LogoMark } from '../Brand/Logo';
-import { navItemsForRole, type NavItem } from './navItems';
+import { AccountSheet } from '../Pin/AccountSheet';
+import { initialsOf } from '../Pin/SellerSwitcher';
+import { NAV_ITEMS, type NavItem } from './navItems';
 import { SyncBadge } from './SyncBadge';
 
 function CountBadge({ count }: { count: number }) {
@@ -19,8 +23,17 @@ function CountBadge({ count }: { count: number }) {
   );
 }
 
+function LockMark({ isShown }: { isShown: boolean }) {
+  if (!isShown) return null;
+  return (
+    <span aria-label="terkunci, butuh PIN pemilik" className="absolute right-2 top-1.5 text-faint">
+      <Lock aria-hidden size={12} strokeWidth={2.5} />
+    </span>
+  );
+}
+
 /** Tablet rail item: icon over label, 3px indicator bar on the active item. */
-function RailLink({ item, badge }: { item: NavItem; badge: number }) {
+function RailLink({ item, badge, isLocked }: { item: NavItem; badge: number; isLocked: boolean }) {
   const { to, label, icon: Icon } = item;
   return (
     <NavLink
@@ -38,6 +51,7 @@ function RailLink({ item, badge }: { item: NavItem; badge: number }) {
           <Icon aria-hidden size={22} />
           {label}
           <CountBadge count={badge} />
+          <LockMark isShown={isLocked} />
         </>
       )}
     </NavLink>
@@ -45,7 +59,7 @@ function RailLink({ item, badge }: { item: NavItem; badge: number }) {
 }
 
 /** Phone tab item: no pill background — color + weight carry the active state. */
-function TabLink({ to, label, icon: Icon, badge }: { to: string; label: string; icon: NavItem['icon']; badge: number }) {
+function TabLink({ to, label, icon: Icon, badge, isLocked }: { to: string; label: string; icon: NavItem['icon']; badge: number; isLocked: boolean }) {
   return (
     <NavLink
       to={to}
@@ -57,20 +71,25 @@ function TabLink({ to, label, icon: Icon, badge }: { to: string; label: string; 
       <Icon aria-hidden size={22} />
       {label}
       <CountBadge count={badge} />
+      <LockMark isShown={isLocked} />
     </NavLink>
   );
 }
 
 /**
  * Phone (< md): content + bottom tab bar (primary items + "Lainnya").
- * Tablet/desktop (>= md): 84px side rail with logomark, nav, sync status and cashier.
+ * Tablet/desktop (>= md): 84px side rail with logomark, nav, sync status, owner-mode lock and the seller.
  */
 export function AppShell() {
   const cashier = useSessionStore((s) => s.cashier);
+  const lockOwner = useSessionStore((s) => s.lockOwner);
+  const access = useOwnerAccess();
   const openOrders = useOpenOrderCount();
-  const items = navItemsForRole(cashier?.role);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  useOwnerAutoLock();
+
   const badgeFor = (item: NavItem) => (item.to === ROUTES.openOrders ? openOrders : 0);
-  const initials = (cashier?.displayName ?? '?').slice(0, 2).toUpperCase();
+  const isLocked = (item: NavItem) => access.kind === 'locked' && item.isOwnerOnly === true;
 
   return (
     <div className="flex h-dvh bg-canvas text-ink">
@@ -79,18 +98,27 @@ export function AppShell() {
           <LogoMark size={36} />
         </div>
         <div className="flex flex-col gap-1">
-          {items.map((item) => (
-            <RailLink key={item.to} item={item} badge={badgeFor(item)} />
+          {NAV_ITEMS.map((item) => (
+            <RailLink key={item.to} item={item} badge={badgeFor(item)} isLocked={isLocked(item)} />
           ))}
         </div>
-        <div className="mt-auto flex flex-col items-center gap-4 border-t border-line pt-4">
+        <div className="mt-auto flex flex-col items-center gap-3 border-t border-line pt-3">
           <SyncBadge />
-          <span
+          {access.kind === 'unlocked' && (
+            <button type="button" onClick={lockOwner} title="Kunci mode pemilik" className="flex h-11 w-full flex-col items-center justify-center rounded-lg text-[11px] font-semibold text-brand-700 hover:bg-brand-50">
+              <LockOpen aria-hidden size={18} />
+              Kunci
+            </button>
+          )}
+          <button
+            type="button"
+            aria-label={`Akun: ${cashier?.displayName ?? ''}. Ganti kasir`}
             title={`${cashier?.displayName ?? ''} · ${cashier?.role === 'owner' ? 'Pemilik' : 'Kasir'}`}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-[12px] font-bold text-white"
+            onClick={() => setIsAccountOpen(true)}
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-[12px] font-bold text-white hover:bg-ink-soft"
           >
-            {initials}
-          </span>
+            {initialsOf(cashier?.displayName ?? '')}
+          </button>
         </div>
       </nav>
 
@@ -102,13 +130,13 @@ export function AppShell() {
         aria-label="Navigasi bawah"
         className="fixed inset-x-0 bottom-0 z-30 grid h-[calc(64px+env(safe-area-inset-bottom))] auto-cols-fr grid-flow-col border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
       >
-        {items
-          .filter((item) => item.isPrimary)
-          .map((item) => (
-            <TabLink key={item.to} to={item.to} label={item.label} icon={item.icon} badge={badgeFor(item)} />
-          ))}
-        <TabLink to={ROUTES.more} label="Lainnya" icon={MoreHorizontal} badge={0} />
+        {NAV_ITEMS.filter((item) => item.isPrimary).map((item) => (
+          <TabLink key={item.to} to={item.to} label={item.label} icon={item.icon} badge={badgeFor(item)} isLocked={isLocked(item)} />
+        ))}
+        <TabLink to={ROUTES.more} label="Lainnya" icon={MoreHorizontal} badge={0} isLocked={false} />
       </nav>
+
+      {isAccountOpen && <AccountSheet onClose={() => setIsAccountOpen(false)} />}
     </div>
   );
 }

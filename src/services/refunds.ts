@@ -3,9 +3,9 @@ import { localDb } from '../db/localDb';
 import { getBusinessDate } from '../lib/businessDate';
 import { daysBetween } from '../lib/dateRange';
 import { nowIso, uuidv7 } from '../lib/id';
-import { checkPermission, PERMISSION_MESSAGE } from '../lib/permissions';
+import { APPROVAL_EXPIRED, approverOf, OWNER_PIN_REQUIRED, requiresOwnerPin, type OwnerAccess } from '../lib/permissions';
 import { buildRefundItems, isFullyRefunded, type RefundSelection } from '../lib/refunds';
-import type { Id, Order, Refund, RefundKind, RefundReason, Role, Store } from '../types';
+import type { Id, Order, PermissionLevel, Refund, RefundKind, RefundReason, Store } from '../types';
 import { saveAndQueue } from './sync';
 
 export interface ReasonInput {
@@ -16,36 +16,42 @@ export interface ReasonInput {
 export interface RefundContext {
   store: Store;
   actorId: Id;
-  actorRole: Role;
+  /** Owner powers at the moment of the action (ADR-004). */
+  access: OwnerAccess;
   now?: Date;
 }
 
-export type Eligibility = { ok: true } | { ok: false; reason: string };
+/** `needsOwnerPin`: every business rule passes and only the owner PIN is missing — the UI may prompt for it. */
+export type Eligibility = { ok: true } | { ok: false; reason: string; needsOwnerPin?: true };
+
+/** Checked last, so we never ask for a PIN for an action that is impossible anyway. */
+function permissionGate(level: PermissionLevel, ctx: RefundContext): Eligibility {
+  const now = (ctx.now ?? new Date()).getTime();
+  if (!requiresOwnerPin(level, ctx.access, now)) return { ok: true };
+  const reason = ctx.access.kind === 'approved' ? APPROVAL_EXPIRED : OWNER_PIN_REQUIRED;
+  return { ok: false, reason, needsOwnerPin: true };
+}
 
 const REFUNDABLE_STATUSES: ReadonlySet<Order['status']> = new Set(['paid', 'partial_refund']);
 
 /** M11: void = cancel a whole paid sale on the same business day, before any refund. */
 export function canVoid(order: Order, refunds: readonly Refund[], ctx: RefundContext): Eligibility {
-  const permission = checkPermission(ctx.store.settings.voidPermission, ctx.actorRole);
-  if (permission !== 'allowed') return { ok: false, reason: PERMISSION_MESSAGE[permission] };
   if (order.status !== 'paid') return { ok: false, reason: 'Hanya transaksi lunas yang bisa di-void.' };
   if (refunds.length > 0) return { ok: false, reason: 'Transaksi sudah direfund sebagian. Gunakan refund.' };
   const today = getBusinessDate(ctx.now ?? new Date(), ctx.store);
   if (order.businessDate !== today) return { ok: false, reason: 'Void hanya untuk transaksi hari ini. Gunakan refund.' };
-  return { ok: true };
+  return permissionGate(ctx.store.settings.voidPermission, ctx);
 }
 
 /** M11: refund = return some or all items within the store's refund window. */
 export function canRefund(order: Order, ctx: RefundContext): Eligibility {
-  const permission = checkPermission(ctx.store.settings.refundPermission, ctx.actorRole);
-  if (permission !== 'allowed') return { ok: false, reason: PERMISSION_MESSAGE[permission] };
   if (!REFUNDABLE_STATUSES.has(order.status)) return { ok: false, reason: 'Transaksi ini tidak bisa direfund.' };
   const today = getBusinessDate(ctx.now ?? new Date(), ctx.store);
   const age = daysBetween(order.businessDate, today);
   if (age > ctx.store.settings.refundWindowDays) {
     return { ok: false, reason: `Batas refund ${ctx.store.settings.refundWindowDays} hari sudah lewat.` };
   }
-  return { ok: true };
+  return permissionGate(ctx.store.settings.refundPermission, ctx);
 }
 
 function validateReason(reason: ReasonInput, store: Store): void {
@@ -80,7 +86,7 @@ async function commit(order: Order, kind: RefundKind, built: ReturnType<typeof b
     reasonCode: reason.code,
     reasonNote: reason.note.trim(),
     actorId: ctx.actorId,
-    approvedById: null,
+    approvedById: approverOf(ctx.access),
   };
 
   await localDb.transaction('rw', [localDb.orders, localDb.refunds, localDb.auditEvents, localDb.outbox], async () => {
@@ -100,6 +106,7 @@ async function commit(order: Order, kind: RefundKind, built: ReturnType<typeof b
         amount: refund.amount,
         reason: REFUND_REASON_LABEL[reason.code],
         note: refund.reasonNote,
+        approvedById: refund.approvedById,
         items: refund.items,
       },
     });

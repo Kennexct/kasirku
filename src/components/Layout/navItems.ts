@@ -1,12 +1,12 @@
 import { BarChart3, ClipboardList, Package, ReceiptText, Settings, Store, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ROUTES } from '../../constants';
-import type { Role } from '../../types';
 
 export interface NavItem {
   to: string;
   label: string;
   icon: LucideIcon;
+  /** Route is wrapped in <OwnerGate>; nav shows a lock while owner mode is locked. */
   isOwnerOnly?: boolean;
   /** Shown in the phone bottom bar; the rest go under "Lainnya". */
   isPrimary?: boolean;
@@ -21,7 +21,3 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { to: ROUTES.customers, label: 'Pelanggan', icon: Users },
   { to: ROUTES.settings, label: 'Pengaturan', icon: Settings, isOwnerOnly: true },
 ];
-
-export function navItemsForRole(role: Role | undefined): NavItem[] {
-  return NAV_ITEMS.filter((item) => !item.isOwnerOnly || role === 'owner');
-}

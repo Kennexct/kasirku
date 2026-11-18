@@ -1,3 +1,4 @@
+import { Lock } from 'lucide-react';
 import { useState } from 'react';
 import { RupiahInput } from '../../../components/ui/RupiahInput';
 import { SegmentedControl } from '../../../components/ui/SegmentedControl';
@@ -5,7 +6,7 @@ import { Sheet } from '../../../components/ui/Sheet';
 import { btnPrimary, btnSecondary, inputBase, labelBase, option, sectionTitle } from '../../../components/ui/styles';
 import { PERCENT_MAX } from '../../../constants';
 import { formatRupiah } from '../../../lib/money';
-import type { AppliedDiscount, Discount, DiscountType } from '../../../types';
+import type { AppliedDiscount, Discount, DiscountType, Id } from '../../../types';
 
 interface DiscountSheetProps {
   presets: Discount[];
@@ -13,6 +14,8 @@ interface DiscountSheetProps {
   /** Ad-hoc percent limit for this user; null = no limit (owner). */
   maxPercent: number | null;
   baseAmount: number;
+  /** Asks for the owner PIN; resolves to the approving owner's id, or null when cancelled (ADR-004). */
+  onRequestOverride: () => Promise<Id | null>;
   onApply: (discount: AppliedDiscount | null) => void;
   onClose: () => void;
 }
@@ -23,22 +26,28 @@ const TYPE_OPTIONS = [
 ] as const;
 
 /** M6 order-level discount: pick a preset or enter an ad-hoc % / Rp amount. */
-export function DiscountSheet({ presets, current, maxPercent, baseAmount, onApply, onClose }: DiscountSheetProps) {
+export function DiscountSheet({ presets, current, maxPercent, baseAmount, onRequestOverride, onApply, onClose }: DiscountSheetProps) {
   const isCustom = current !== null && current.discountId === null;
   const [type, setType] = useState<DiscountType>(isCustom ? current.type : 'percent');
   const [value, setValue] = useState<number | null>(isCustom ? current.value : null);
 
   const effectivePercent = type === 'percent' ? (value ?? 0) : baseAmount > 0 ? ((value ?? 0) / baseAmount) * PERCENT_MAX : 0;
   const isOverLimit = maxPercent !== null && effectivePercent > maxPercent;
-  const isInvalid = value === null || value <= 0 || (type === 'percent' && value > PERCENT_MAX) || isOverLimit;
+  const isBadValue = value === null || value <= 0 || (type === 'percent' && value > PERCENT_MAX);
+  const isInvalid = isBadValue || isOverLimit;
 
   const applyPreset = (preset: Discount) =>
     onApply({ discountId: preset.id, name: preset.name, type: preset.type, value: preset.value });
 
-  const applyCustom = () => {
-    if (isInvalid || value === null) return;
+  const applyCustom = (approvedById: Id | null = null) => {
+    if (isBadValue || value === null) return;
     const name = type === 'percent' ? `Diskon ${value}%` : `Diskon ${formatRupiah(value)}`;
-    onApply({ discountId: null, name, type, value });
+    onApply({ discountId: null, name, type, value, approvedById });
+  };
+
+  const applyWithOwnerPin = async () => {
+    const ownerId = await onRequestOverride();
+    if (ownerId) applyCustom(ownerId);
   };
 
   return (
@@ -54,7 +63,7 @@ export function DiscountSheet({ presets, current, maxPercent, baseAmount, onAppl
               Hapus diskon
             </button>
           )}
-          <button type="button" disabled={isInvalid} onClick={applyCustom} className={`${btnPrimary} flex-1`}>
+          <button type="button" disabled={isInvalid} onClick={() => applyCustom()} className={`${btnPrimary} flex-1`}>
             Terapkan
           </button>
         </div>
@@ -100,10 +109,13 @@ export function DiscountSheet({ presets, current, maxPercent, baseAmount, onAppl
             <RupiahInput id="discount-value" value={value} onChange={setValue} />
           )}
         </div>
-        {isOverLimit && (
-          <p role="alert" className="mt-2 rounded-md bg-danger-50 px-3 py-2 text-[13px] text-danger-700">
-            Melebihi batas diskon kasir ({maxPercent}%). Minta pemilik untuk menerapkan.
-          </p>
+        {isOverLimit && !isBadValue && (
+          <div role="alert" className="mt-3 rounded-lg border border-warn-200 bg-warn-50 p-3">
+            <p className="text-[13px] text-warn-700">Melebihi batas diskon kasir ({maxPercent}%).</p>
+            <button type="button" onClick={() => void applyWithOwnerPin()} className={`${btnSecondary} mt-2 h-11 w-full text-[14px]`}>
+              <Lock aria-hidden size={16} /> Setujui dengan PIN pemilik
+            </button>
+          </div>
         )}
       </section>
     </Sheet>

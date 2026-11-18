@@ -1,4 +1,4 @@
-import { Ban, MessageCircle, Printer, Undo2 } from 'lucide-react';
+import { Ban, Lock, MessageCircle, Printer, Undo2 } from 'lucide-react';
 import { ReceiptView } from '../../components/Receipt/ReceiptView';
 import { Sheet } from '../../components/ui/Sheet';
 import { StatusBadge } from '../../components/ui/StatusBadge';
@@ -27,7 +27,11 @@ const dateTime = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeSty
 export function OrderDetailSheet(props: OrderDetailSheetProps) {
   const { order, refunds, store, cashierName, voidEligibility, refundEligibility, onVoid, onRefund, onClose } = props;
   const refunded = totalRefunded(refunds.filter((r) => r.kind === 'refund'));
-  const blockedReason = !refundEligibility.ok && !voidEligibility.ok ? refundEligibility.reason : null;
+  const canAct = (e: Eligibility): boolean => e.ok || e.needsOwnerPin === true;
+  const needsPin = (e: Eligibility): boolean => !e.ok && e.needsOwnerPin === true;
+  const isAnyActionable = canAct(voidEligibility) || canAct(refundEligibility);
+  const blockedReason = isAnyActionable ? null : refundEligibility.ok ? null : refundEligibility.reason;
+  const voidHint = !canAct(voidEligibility) && canAct(refundEligibility) && order.status === 'paid' && !voidEligibility.ok ? voidEligibility.reason : null;
 
   return (
     <Sheet
@@ -45,20 +49,20 @@ export function OrderDetailSheet(props: OrderDetailSheetProps) {
               <MessageCircle aria-hidden size={18} /> WhatsApp
             </a>
           </div>
-          {(voidEligibility.ok || refundEligibility.ok) && (
+          {isAnyActionable && (
             <div className="grid grid-cols-2 gap-2">
-              <button type="button" disabled={!refundEligibility.ok} onClick={onRefund} className={btnSecondary}>
+              <button type="button" disabled={!canAct(refundEligibility)} onClick={onRefund} className={btnSecondary}>
                 <Undo2 aria-hidden size={18} /> Refund
+                {needsPin(refundEligibility) && <Lock aria-label="butuh PIN pemilik" size={14} className="text-faint" />}
               </button>
-              <button type="button" disabled={!voidEligibility.ok} onClick={onVoid} className={btnDanger}>
+              <button type="button" disabled={!canAct(voidEligibility)} onClick={onVoid} className={btnDanger}>
                 <Ban aria-hidden size={18} /> Void
+                {needsPin(voidEligibility) && <Lock aria-label="butuh PIN pemilik" size={14} />}
               </button>
             </div>
           )}
           {blockedReason && order.status !== 'cancelled' && <p className="text-center text-[13px] text-muted">{blockedReason}</p>}
-          {voidEligibility.ok === false && refundEligibility.ok && order.status === 'paid' && (
-            <p className="text-center text-[13px] text-muted">{voidEligibility.reason}</p>
-          )}
+          {voidHint && <p className="text-center text-[13px] text-muted">{voidHint}</p>}
         </div>
       }
     >

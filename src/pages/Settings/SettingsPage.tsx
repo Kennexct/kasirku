@@ -1,28 +1,33 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../components/Layout/PageHeader';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { Tabs } from '../../components/ui/Tabs';
 import { useAppData } from '../../hooks/useAppData';
 import { PaymentMethodSettings } from './PaymentMethodSettings';
 import { SalesModeSettings } from './SalesModeSettings';
+import { StaffSettings } from './StaffSettings';
 import { StoreSettings } from './StoreSettings';
 
 const TABS = [
   { value: 'store', label: 'Toko & Struk' },
   { value: 'payments', label: 'Pembayaran' },
   { value: 'modes', label: 'Mode Penjualan' },
+  { value: 'staff', label: 'Staf & PIN' },
 ] as const;
 type TabId = (typeof TABS)[number]['value'];
 
 export function SettingsPage() {
   const { store, catalog } = useAppData();
-  const [tab, setTab] = useState<TabId>('store');
+  const [params] = useSearchParams();
+  const requested = TABS.find((t) => t.value === params.get('tab'))?.value;
+  const [tab, setTab] = useState<TabId>(requested ?? 'store');
 
   if (!store || !catalog) return <LoadingScreen />;
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      <PageHeader title="Pengaturan" description="Profil toko, struk, pembayaran, dan mode penjualan.">
+      <PageHeader title="Pengaturan" description="Profil toko, struk, pembayaran, mode penjualan, staf dan PIN.">
         <Tabs label="Bagian pengaturan" items={TABS} value={tab} onChange={setTab} />
       </PageHeader>
       <div className="min-h-0 flex-1 overflow-y-auto p-4 md:px-8 md:py-6">
@@ -30,6 +35,7 @@ export function SettingsPage() {
           {tab === 'store' && <StoreSettings store={store} />}
           {tab === 'payments' && <PaymentMethodSettings methods={catalog.paymentMethods} />}
           {tab === 'modes' && <SalesModeSettings modes={catalog.salesModes} />}
+          {tab === 'staff' && <StaffSettings store={store} />}
         </div>
       </div>
     </section>
