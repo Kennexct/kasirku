@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Phase 0 Brainstorming — M15 decomposed into `staff-pin`, `owner-login`, `sync-pull`; awaiting user's choice of first sub-project
+**Phase:** Phase 0 Brainstorming — M15 decomposed into `staff-pin`, `owner-login`, `sync-pull`; user chose `staff-pin` first; design presented, awaiting approval (open question: owner-mode timeout behaviour)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 **Branch:** `feat/reports-export` (not yet merged to `main`)
 
