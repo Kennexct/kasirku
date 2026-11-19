@@ -9,7 +9,7 @@ interface SwitchProps {
 /** Toggle row: label + optional description on the left, switch on the right (48px row). */
 export function Switch({ checked, onChange, label, description, disabled = false }: SwitchProps) {
   return (
-    <label className={`flex min-h-12 items-center gap-4 ${disabled ? 'opacity-50' : 'cursor-pointer'}`}>
+    <label className={`relative flex min-h-12 items-center gap-4 ${disabled ? 'opacity-50' : 'cursor-pointer'}`}>
       <span className="min-w-0 flex-1">
         <span className="block text-[15px] font-medium text-ink">{label}</span>
         {description && <span className="block text-[13px] text-muted">{description}</span>}

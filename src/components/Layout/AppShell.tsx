@@ -93,7 +93,7 @@ export function AppShell() {
   const isLocked = (item: NavItem) => access.kind === 'locked' && item.isOwnerOnly === true;
 
   return (
-    <div className="flex h-dvh bg-canvas text-ink">
+    <div className="flex h-dvh overflow-hidden bg-canvas text-ink">
       <nav aria-label={t('Navigasi utama')} className="hidden w-[84px] shrink-0 flex-col border-r border-line bg-surface px-3 py-3 md:flex">
         <div className="mb-4 flex justify-center">
           <LogoMark size={36} />
@@ -123,7 +123,7 @@ export function AppShell() {
         </div>
       </nav>
 
-      <main className="flex min-w-0 flex-1 flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
+      <main className="relative flex min-w-0 flex-1 flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
         <Outlet />
       </main>
 

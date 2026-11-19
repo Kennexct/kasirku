@@ -59,6 +59,7 @@
   html {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation; /* removes 300ms tap delay on mobile */
+    overscroll-behavior: none; /* no rubber-band bounce of the whole app */
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }

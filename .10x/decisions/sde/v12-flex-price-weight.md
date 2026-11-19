@@ -23,3 +23,9 @@ Tech debt
 
 ## v0.12.1 — layout fix (user feedback, 19 Nov 2026)
 Settings looked pushed to the left on wide screens (content capped at `max-w-2xl` and left-aligned, empty space on the right). `PageHeader` gained `isNarrow` and exports `NARROW_COLUMN` (`mx-auto w-full max-w-3xl`); Settings and Help now put the title, tabs and content in the same centred column. Other pages (lists, reports, Kas) keep the full width. No behaviour change.
+
+## v0.12.2 — page overscroll fix (user feedback, 19 Nov 2026)
+Symptom: on Settings (and any screen with switches) the whole page could scroll past the app, showing empty space under the nav rail.
+Cause: `Switch` hides its checkbox with `sr-only` (position: absolute) but its label had no positioning, so the checkbox was placed relative to the page instead of the scrolling panel and stretched the document (Shop & Receipt: 1 475 px tall on a 768 px screen).
+Fix: `relative` on the Switch label; the app shell is `overflow-hidden` and `main` is `relative`, so nothing inside can enlarge the page again; `overscroll-behavior: none` on `html` as well as `body`.
+Check: document height equals the screen on all 13 app screens at 1900, 1024 and 390 px (script measures `scrollHeight` vs `innerHeight`); browser flows pass.
