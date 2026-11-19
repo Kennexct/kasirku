@@ -1,7 +1,7 @@
 # Status
 
-**Phase:** Delivery Complete — v0.9. Next: v0.10 (first-time journey, help centre)
-**Branch:** `feat/v0.9-profit-closing-backup` (stacked: reports-export → staff-pin → customers → v0.8-feedback → v0.9)
+**Phase:** Implementation — v0.10 (design complete: ADR-009)
+**Branch:** `feat/v0.10-onboarding-help` (stacked: … → v0.8-feedback → v0.9 → v0.10)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
 | Feature | Phase | Notes |

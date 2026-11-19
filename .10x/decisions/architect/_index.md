@@ -12,3 +12,4 @@
 - customers (M7) — ADR-005 → `customers.md`
 - v0.8 feedback batch — ADR-006 → `v08-feedback.md`
 - v0.9 profit, expenses, close of day, backup — ADR-007, ADR-008 → `v09-profit-closing-backup.md`
+- v0.10 first-time journey, help centre — ADR-009 → `v10-onboarding-help.md`
