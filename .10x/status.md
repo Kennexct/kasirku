@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Delivery Complete — v0.10. Next: v0.11 (English)
+**Phase:** Implementation — v0.11 English (design complete: ADR-010)
 **Branch:** `feat/v0.10-onboarding-help` (stacked: … → v0.8-feedback → v0.9 → v0.10)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
