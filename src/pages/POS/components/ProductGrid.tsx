@@ -5,6 +5,7 @@ import { formatRupiah } from '../../../lib/money';
 import { isUsingFallbackPrice, resolveModePrice } from '../../../lib/pricing';
 import type { Id, Product, SalesMode } from '../../../types';
 import { t } from '../../../i18n';
+import { perUnit } from '../../../lib/quantity';
 
 interface ProductGridProps {
   products: Product[];
@@ -41,7 +42,7 @@ export function ProductGrid({ products, salesMode, qtyByProduct, onSelect }: Pro
                 <span className={`line-clamp-2 text-[13px] font-semibold leading-snug md:text-[14px] ${isSoldOut ? 'text-muted' : 'text-ink'}`}>{product.name}</span>
                 <span className="mt-auto flex items-center gap-1.5">
                   <span className={`num text-[13px] font-semibold md:text-[14px] ${isSoldOut ? 'text-faint' : 'text-ink-soft'}`}>
-                    {formatRupiah(resolveModePrice(product, salesMode))}
+                    {formatRupiah(resolveModePrice(product, salesMode))}{perUnit(product.unit)}
                   </span>
                   {hasVariants && <Layers aria-label={t('Ada varian')} size={14} className="text-faint" />}
                   {isUsingFallbackPrice(product, salesMode) && (

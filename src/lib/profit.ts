@@ -1,6 +1,7 @@
 import type { Expense, Order } from '../types';
 import { isCountedSale, type ReportSummary } from './reports';
 import { t } from '../i18n';
+import { countUnits } from './quantity';
 
 /**
  * The ONLY place profit is defined (ADR-007).
@@ -53,12 +54,13 @@ export function buildProfit({ sales, summary, expenses }: ProfitInput): Profit {
   for (const order of sales) {
     if (!isCountedSale(order)) continue;
     for (const item of order.items) {
+      const units = countUnits([item]);
       if (item.unitCost === undefined) {
-        uncostedQty += item.qty;
-        uncosted.set(item.nameSnapshot, (uncosted.get(item.nameSnapshot) ?? 0) + item.qty);
+        uncostedQty += units;
+        uncosted.set(item.nameSnapshot, (uncosted.get(item.nameSnapshot) ?? 0) + units);
       } else {
-        cogs += item.unitCost * item.qty;
-        costedQty += item.qty;
+        cogs += Math.round(item.unitCost * item.qty); // cost per kg × weight, whole Rupiah per line (ADR-011)
+        costedQty += units;
       }
     }
   }

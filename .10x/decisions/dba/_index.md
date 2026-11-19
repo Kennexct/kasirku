@@ -9,3 +9,4 @@
 - staff-pin — recovery_hash column, column-privilege note for later → `staff-pin.md`
 - customers — `orders.customer_name_snapshot text` (additive, parses; not applied — no project). Existing `customers` RLS + phone check reused.
 - v0.9 cost price, expenses, day closings → `v09-profit-closing-backup.md`
+- v0.12 unit, flexible price, order_lines view → `v12-flex-price-weight.md`

@@ -4,7 +4,7 @@ import { HELP_ID } from './help.id';
 
 /** Help centre content (ADR-009): typed data bundled with the app so it works offline. */
 export const HELP_TOPIC_IDS = [
-  'jual', 'varian', 'diskon', 'simpan', 'qris', 'struk', 'riwayat', 'laporan', 'kas', 'produk', 'pelanggan', 'staf', 'offline', 'cadangan', 'pasang',
+  'jual', 'varian', 'diskon', 'simpan', 'qris', 'struk', 'riwayat', 'laporan', 'kas', 'produk', 'timbang', 'pelanggan', 'staf', 'offline', 'cadangan', 'pasang',
 ] as const;
 export type HelpTopicId = (typeof HELP_TOPIC_IDS)[number];
 

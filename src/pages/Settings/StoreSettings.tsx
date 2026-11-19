@@ -81,6 +81,15 @@ export function StoreSettings({ store }: { store: Store }) {
         </div>
       </SettingsSection>
 
+      <SettingsSection title={t('Jual per berat atau ukuran')} description={t('Untuk pedagang pasar yang menjual per kilo, ons, liter, atau meter.')}>
+        <Switch
+          checked={draft.settings.isWeightSaleEnabled === true}
+          onChange={(isWeightSaleEnabled) => update({ settings: { ...draft.settings, isWeightSaleEnabled } })}
+          label={t('Aktifkan satuan berat dan ukuran')}
+          description={t('Di halaman Produk muncul pilihan "Dijual per". Di kasir, berat atau nominal diketik saat menjual.')}
+        />
+      </SettingsSection>
+
       <SettingsSection title={t('Pajak & service')} description={t('Isi 0 jika usaha Anda tidak memungut pajak.')}>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>

@@ -139,6 +139,25 @@ export const HELP_EN: HelpContent = {
       notes: ['A Sold out item stays visible in the register but cannot be sold. Cashiers may change it too.', 'Inactive products are hidden from the register but stay in history.', 'Changing a cost price does not change the profit of past sales.'],
       keywords: 'menu item photo category cogs sold out empty stock',
     },
+    timbang: {
+      title: 'Selling by weight and changing the price',
+      summary: 'For market sellers: sell by the kilo, ons, litre or metre, and type today\'s price right in the register.',
+      steps: [
+        'Open Settings, Shop & Receipt tab, turn on "Turn on weight and measure units", then save.',
+        'In Products, choose "Sold per" (for example kg) and enter the price per that unit.',
+        'For goods whose price moves, turn on "Price can be changed when selling".',
+        'In the Register, tap the item, then type the weight (for example 0.75), or choose Amount and type the buyer\'s money (for example Rp10.000).',
+        'If today\'s price is different, change the price in the same box, then "Add to order".',
+      ],
+      notes: [
+        'Line total = price × weight, rounded to whole Rupiah. With Amount, the buyer pays exactly that amount.',
+        'Each weighing is its own line. Change the weight or price with the button on the cart line.',
+        'The normal price is still recorded. In History, sales with a changed price are marked, and the Items export has a Normal price column.',
+        'Refunding a weighed item returns the whole line.',
+        'The app is not connected to a digital scale yet. The weight is typed in.',
+      ],
+      keywords: 'weigh scale kilo kg ons gram litre liter metre meter market vegetables fish meat open price flexible bargain',
+    },
     pelanggan: {
       title: 'Customers and who has not paid',
       summary: 'Keep the names and phone numbers of regulars, see how often they buy, and who still has a tab.',

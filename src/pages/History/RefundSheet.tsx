@@ -8,6 +8,7 @@ import type { ReasonInput } from '../../services/refunds';
 import type { Id, Order, Refund } from '../../types';
 import { ReasonPicker } from './ReasonPicker';
 import { t } from '../../i18n';
+import { formatQuantity, isMeasured, perUnit } from '../../lib/quantity';
 
 interface RefundSheetProps {
   order: Order;
@@ -67,19 +68,21 @@ export function RefundSheet({ order, refunds, isSubmitting, onConfirm, onClose }
         {order.items.map((item) => {
           const left = remaining.get(item.id) ?? 0;
           const selected = qty[item.id] ?? 0;
+          // A weighed line goes back whole (ADR-011); pieces one at a time.
+          const step = isMeasured(item.unit) ? left : 1;
           return (
             <li key={item.id} className={`flex items-center gap-3 px-3.5 py-2.5 ${left === 0 ? 'opacity-50' : ''}`}>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[15px] font-semibold">{item.nameSnapshot}</p>
                 <p className="num text-[13px] text-muted">
-                  {formatRupiah(item.unitPrice)} · {left === 0 ? t('sudah direfund') : t('sisa {0} dari {1}', left, item.qty)}
+                  {formatRupiah(item.unitPrice)}{perUnit(item.unit)} · {left === 0 ? t('sudah direfund') : t('sisa {0} dari {1}', formatQuantity(left, item.unit), formatQuantity(item.qty, item.unit))}
                 </p>
               </div>
-              <button type="button" aria-label={t('Kurangi refund {0}', item.nameSnapshot)} disabled={selected === 0} onClick={() => change(item.id, -1)} className={btnIcon}>
+              <button type="button" aria-label={t('Kurangi refund {0}', item.nameSnapshot)} disabled={selected === 0} onClick={() => change(item.id, -step)} className={btnIcon}>
                 <Minus aria-hidden size={17} />
               </button>
-              <span className="num w-7 text-center text-[15px] font-bold">{selected}</span>
-              <button type="button" aria-label={t('Tambah refund {0}', item.nameSnapshot)} disabled={selected >= left} onClick={() => change(item.id, 1)} className={btnIcon}>
+              <span className="num min-w-7 text-center text-[15px] font-bold">{formatQuantity(selected, item.unit)}</span>
+              <button type="button" aria-label={t('Tambah refund {0}', item.nameSnapshot)} disabled={selected >= left} onClick={() => change(item.id, step)} className={btnIcon}>
                 <Plus aria-hidden size={17} />
               </button>
             </li>

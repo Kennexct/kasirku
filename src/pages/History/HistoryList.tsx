@@ -6,6 +6,7 @@ import { formatBusinessDate } from '../../lib/dateRange';
 import { formatRupiah } from '../../lib/money';
 import type { BusinessDate, Id, Order } from '../../types';
 import { DATE_LOCALE, t } from '../../i18n';
+import { formatLineQty } from '../../lib/quantity';
 
 const timeFormat = new Intl.DateTimeFormat(DATE_LOCALE, { hour: '2-digit', minute: '2-digit' });
 const COLUMNS = 'lg:grid-cols-[64px_minmax(150px,190px)_1fr_120px_130px_120px_20px]';
@@ -63,7 +64,7 @@ export function HistoryList({ orders, onSelect }: HistoryListProps) {
                   </span>
                   <span className="hidden min-w-0 truncate text-[14px] text-ink-soft lg:block">
                     {[order.customerNameSnapshot, order.label].filter(Boolean).map((part) => `${part} · `).join('')}
-                    {order.items.map((i) => `${i.qty}× ${i.nameSnapshot}`).join(', ')}
+                    {order.items.map((i) => `${formatLineQty(i)} ${i.nameSnapshot}`).join(', ')}
                   </span>
                   <span className="hidden text-[14px] text-ink-soft lg:block">{order.payments[0]?.methodNameSnapshot ?? '—'}</span>
                   <span className="hidden lg:block"><StatusBadge status={order.status} /></span>

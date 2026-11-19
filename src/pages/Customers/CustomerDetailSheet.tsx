@@ -10,6 +10,7 @@ import { formatRupiah } from '../../lib/money';
 import { whatsAppShareUrl } from '../../lib/receiptText';
 import type { Customer } from '../../types';
 import { DATE_LOCALE, t } from '../../i18n';
+import { formatLineQty } from '../../lib/quantity';
 
 const RECENT_ORDERS = 5;
 const dateFormat = new Intl.DateTimeFormat(DATE_LOCALE, { day: 'numeric', month: 'short', year: 'numeric' });
@@ -87,7 +88,7 @@ export function CustomerDetailSheet({ customer, stats, storeName, timeZone, onEd
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14px] font-semibold">{order.label || t('Pesanan tersimpan')}</span>
                   <span className="block truncate text-[13px] text-muted">
-                    {formatVisit(order.createdAt)} · {order.items.map((i) => `${i.qty}× ${i.nameSnapshot}`).join(', ')}
+                    {formatVisit(order.createdAt)} · {order.items.map((i) => `${formatLineQty(i)} ${i.nameSnapshot}`).join(', ')}
                   </span>
                 </span>
                 <span className="num text-[14px] font-semibold">{formatRupiah(order.totals.grandTotal)}</span>
@@ -116,7 +117,7 @@ export function CustomerDetailSheet({ customer, stats, storeName, timeZone, onEd
             <li key={order.id} className="flex items-center gap-3 px-3.5 py-2.5">
               <span className="min-w-0 flex-1">
                 <span className="num block truncate text-[14px] font-semibold">{order.receiptNo}</span>
-                <span className="block truncate text-[13px] text-muted">{order.items.map((i) => `${i.qty}× ${i.nameSnapshot}`).join(', ')}</span>
+                <span className="block truncate text-[13px] text-muted">{order.items.map((i) => `${formatLineQty(i)} ${i.nameSnapshot}`).join(', ')}</span>
               </span>
               <span className="flex flex-col items-end gap-1">
                 <span className="num text-[14px] font-semibold">{formatRupiah(order.totals.grandTotal)}</span>

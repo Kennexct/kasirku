@@ -4,6 +4,7 @@ import type { Profit } from '../profit';
 import type { ReportInput } from '../reports';
 import type { Expense, Order, OrderItem, Refund } from '../../types';
 import { t } from '../../i18n';
+import { countUnits, roundQuantity, UNIT_INFO } from '../quantity';
 
 /**
  * Column definitions shared by CSV and XLSX (ADR-001) — one place decides what a dataset contains.
@@ -70,7 +71,7 @@ export const TRANSACTION_COLUMNS: ReadonlyArray<ExportColumn<TransactionRow>> = 
   { header: t('Kasir::orang'), width: 14, kind: 'text', value: (r) => r.cashier },
   { header: t('Metode'), width: 14, kind: 'text', value: (r) => methodOf(r.order) },
   { header: t('Referensi'), width: 14, kind: 'text', value: (r) => r.order.payments[0]?.reference ?? '' },
-  { header: t('Item'), width: 7, kind: 'int', value: (r) => r.order.items.reduce((s, i) => s + i.qty, 0) },
+  { header: t('Item'), width: 7, kind: 'int', value: (r) => countUnits(r.order.items) },
   { header: t('Subtotal'), width: 12, kind: 'money', value: (r) => r.order.totals.subtotal },
   { header: t('Diskon'), width: 11, kind: 'money', value: (r) => r.order.totals.itemDiscountTotal + r.order.totals.orderDiscountTotal },
   { header: t('Service'), width: 10, kind: 'money', value: (r) => r.order.totals.serviceTotal },
@@ -85,9 +86,12 @@ export const ITEM_COLUMNS: ReadonlyArray<ExportColumn<ItemRow>> = [
   { header: t('Produk'), width: 22, kind: 'text', value: (r) => r.item.nameSnapshot },
   { header: t('Varian'), width: 22, kind: 'text', value: (r) => r.item.options.map((o) => o.name).join(', ') },
   { header: t('Catatan'), width: 18, kind: 'text', value: (r) => r.item.note },
-  { header: t('Qty'), width: 6, kind: 'int', value: (r) => r.item.qty },
+  { header: t('Qty'), width: 8, kind: 'int', value: (r) => roundQuantity(r.item.qty) },
   { header: t('Harga Satuan'), width: 13, kind: 'money', value: (r) => r.item.unitPrice },
   { header: t('Total Baris'), width: 13, kind: 'money', value: (r) => lineTotal(r.item) },
+  // Appended so existing columns keep their positions (ADR-011).
+  { header: t('Satuan'), width: 8, kind: 'text', value: (r) => UNIT_INFO[r.item.unit ?? 'pcs'].symbol || 'pcs' },
+  { header: t('Harga Normal'), width: 13, kind: 'money', value: (r) => r.item.listPrice ?? r.item.unitPrice },
 ];
 
 export const REFUND_COLUMNS: ReadonlyArray<ExportColumn<RefundRow>> = [
@@ -96,7 +100,7 @@ export const REFUND_COLUMNS: ReadonlyArray<ExportColumn<RefundRow>> = [
   { header: t('No. Struk'), width: 22, kind: 'text', value: (r) => r.order?.receiptNo ?? '' },
   { header: t('Tanggal Penjualan'), width: 16, kind: 'text', value: (r) => r.order?.businessDate ?? '' },
   { header: t('Metode Asal'), width: 14, kind: 'text', value: (r) => methodOf(r.order) },
-  { header: t('Item'), width: 7, kind: 'int', value: (r) => r.refund.items.reduce((s, i) => s + i.qty, 0) },
+  { header: t('Item'), width: 7, kind: 'int', value: (r) => countUnits(r.refund.items.map((i) => ({ qty: i.qty, unit: r.order?.items.find((line) => line.id === i.orderItemId)?.unit }))) },
   { header: t('Jumlah'), width: 12, kind: 'money', value: (r) => r.refund.amount },
   { header: t('Alasan'), width: 16, kind: 'text', value: (r) => REFUND_REASON_LABEL[r.refund.reasonCode] },
   { header: t('Catatan'), width: 22, kind: 'text', value: (r) => r.refund.reasonNote },

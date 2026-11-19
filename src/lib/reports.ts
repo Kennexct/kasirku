@@ -1,7 +1,8 @@
-import type { BusinessDate, Id, Order, Refund, Store } from '../types';
+import type { BusinessDate, Id, Order, Refund, SaleUnit, Store } from '../types';
 import { datesInRange, type DateRange } from './dateRange';
 import { lineTotal } from './pricing';
 import { t } from '../i18n';
+import { countUnits, roundQuantity } from './quantity';
 
 /**
  * The ONLY place report metrics are defined (spec: .10x/specs/2026-11-18-reports-export-design.md).
@@ -45,7 +46,7 @@ export interface BreakdownRow {
 
 export interface HourRow { hour: number; transactions: number; gross: number }
 export interface DayRow { date: BusinessDate; transactions: number; gross: number; refunds: number; net: number }
-export interface ProductRow { productId: Id; name: string; qty: number; revenue: number }
+export interface ProductRow { productId: Id; name: string; qty: number; revenue: number; unit?: SaleUnit }
 
 export interface Report {
   range: DateRange;
@@ -81,7 +82,7 @@ export function summarize(sales: readonly Order[], refunds: readonly Refund[]): 
     netSales: grossSales - refundTotal,
     transactions: counted.length,
     averageTicket: counted.length > 0 ? Math.round(grossSales / counted.length) : 0,
-    itemsSold: sum(counted, (o) => o.items.reduce((s, i) => s + i.qty, 0)),
+    itemsSold: sum(counted, (o) => countUnits(o.items)),
     voidCount: voids.length,
     voidAmount: sum(voids, (o) => o.totals.grandTotal),
     serviceTotal: sum(counted, (o) => o.totals.serviceTotal),
@@ -153,8 +154,8 @@ function products(counted: readonly Order[]): ProductRow[] {
   const rows = new Map<Id, ProductRow>();
   for (const order of counted) {
     for (const item of order.items) {
-      const row = rows.get(item.productId) ?? { productId: item.productId, name: item.nameSnapshot, qty: 0, revenue: 0 };
-      rows.set(item.productId, { ...row, qty: row.qty + item.qty, revenue: row.revenue + lineTotal(item) });
+      const row: ProductRow = rows.get(item.productId) ?? { productId: item.productId, name: item.nameSnapshot, qty: 0, revenue: 0, ...(item.unit ? { unit: item.unit } : {}) };
+      rows.set(item.productId, { ...row, qty: roundQuantity(row.qty + item.qty), revenue: row.revenue + lineTotal(item) });
     }
   }
   return Array.from(rows.values()).sort((a, b) => b.revenue - a.revenue || b.qty - a.qty);

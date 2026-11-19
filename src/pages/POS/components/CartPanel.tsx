@@ -1,11 +1,12 @@
-import { Minus, Percent, Plus, ShoppingBasket, StickyNote, Trash2, UserRound } from 'lucide-react';
+import { Minus, Pencil, Percent, Plus, ShoppingBasket, StickyNote, Trash2, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { btnGhost, btnIcon, btnPrimary, btnSecondary, inputBase } from '../../../components/ui/styles';
 import { formatRupiah } from '../../../lib/money';
 import { lineTotal } from '../../../lib/pricing';
+import { countUnits, formatQuantity, hasPriceChange, isMeasured, perUnit } from '../../../lib/quantity';
 import { useCartStore } from '../../../store/useCartStore';
-import type { OrderTotals } from '../../../types';
+import type { OrderItem, OrderTotals } from '../../../types';
 import { t } from '../../../i18n';
 
 interface CartPanelProps {
@@ -16,22 +17,25 @@ interface CartPanelProps {
   customerName: string | null;
   onOpenCustomer: () => void;
   onOpenDiscount: () => void;
+  /** Opens the entry sheet for a measured or flexible-price line (ADR-011). */
+  onEditItem: (item: OrderItem) => void;
   onSave: () => void;
   onPay: () => void;
 }
 
-export function CartPanel({ totals, modeName, hasTitle = true, customerName, onOpenCustomer, onOpenDiscount, onSave, onPay }: CartPanelProps) {
+export function CartPanel({ totals, modeName, hasTitle = true, customerName, onOpenCustomer, onOpenDiscount, onEditItem, onSave, onPay }: CartPanelProps) {
   const items = useCartStore((s) => s.items);
   const label = useCartStore((s) => s.label);
   const openOrderId = useCartStore((s) => s.openOrderId);
   const orderDiscount = useCartStore((s) => s.orderDiscount);
   const setQty = useCartStore((s) => s.setQty);
+  const removeItem = useCartStore((s) => s.removeItem);
   const setItemNote = useCartStore((s) => s.setItemNote);
   const clear = useCartStore((s) => s.clear);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
 
   const isEmpty = items.length === 0;
-  const itemCount = items.reduce((sum, item) => sum + item.qty, 0);
+  const itemCount = countUnits(items);
   const discountTotal = totals.itemDiscountTotal + totals.orderDiscountTotal;
 
   return (
@@ -77,6 +81,13 @@ export function CartPanel({ totals, modeName, hasTitle = true, customerName, onO
               <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-semibold leading-snug">{item.nameSnapshot}</p>
                 {item.options.length > 0 && <p className="text-[13px] text-muted">{item.options.map((o) => o.name).join(' · ')}</p>}
+                {(isMeasured(item.unit) || item.listPrice !== undefined) && (
+                  <p className="num text-[13px] text-muted">
+                    {isMeasured(item.unit) ? `${formatQuantity(item.qty, item.unit)} × ` : ''}
+                    {formatRupiah(item.unitPrice)}{perUnit(item.unit)}
+                    {hasPriceChange(item) && <span className="text-warn-700"> · {t('harga diubah')}</span>}
+                  </p>
+                )}
               </div>
               <p className="num text-[15px] font-semibold">{formatRupiah(lineTotal(item))}</p>
             </div>
@@ -104,15 +115,31 @@ export function CartPanel({ totals, modeName, hasTitle = true, customerName, onO
                   <StickyNote aria-hidden size={15} className="shrink-0" />
                   <span className="truncate">{item.note || t('Tambah catatan')}</span>
                 </button>
-                <div className="flex items-center rounded-lg">
-                  <button type="button" aria-label={t('Kurangi {0}', item.nameSnapshot)} onClick={() => setQty(item.id, item.qty - 1)} className={btnIcon}>
-                    {item.qty === 1 ? <Trash2 aria-hidden size={17} className="text-danger-600" /> : <Minus aria-hidden size={17} />}
-                  </button>
-                  <span className="num w-9 text-center text-[15px] font-bold">{item.qty}</span>
-                  <button type="button" aria-label={t('Tambah {0}', item.nameSnapshot)} onClick={() => setQty(item.id, item.qty + 1)} className={btnIcon}>
-                    <Plus aria-hidden size={17} />
-                  </button>
-                </div>
+                {isMeasured(item.unit) ? (
+                  <div className="flex items-center gap-1">
+                    <button type="button" aria-label={t('Hapus {0}', item.nameSnapshot)} onClick={() => removeItem(item.id)} className={btnIcon}>
+                      <Trash2 aria-hidden size={17} className="text-danger-600" />
+                    </button>
+                    <button type="button" aria-label={t('Ubah berat {0}', item.nameSnapshot)} onClick={() => onEditItem(item)} className={`${btnSecondary} num h-11 gap-1.5 px-3 text-[14px]`}>
+                      <Pencil aria-hidden size={14} /> {formatQuantity(item.qty, item.unit)}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center rounded-lg">
+                    {item.listPrice !== undefined && (
+                      <button type="button" aria-label={t('Ubah harga {0}', item.nameSnapshot)} onClick={() => onEditItem(item)} className={`${btnIcon} mr-1`}>
+                        <Pencil aria-hidden size={16} />
+                      </button>
+                    )}
+                    <button type="button" aria-label={t('Kurangi {0}', item.nameSnapshot)} onClick={() => setQty(item.id, item.qty - 1)} className={btnIcon}>
+                      {item.qty === 1 ? <Trash2 aria-hidden size={17} className="text-danger-600" /> : <Minus aria-hidden size={17} />}
+                    </button>
+                    <span className="num w-9 text-center text-[15px] font-bold">{item.qty}</span>
+                    <button type="button" aria-label={t('Tambah {0}', item.nameSnapshot)} onClick={() => setQty(item.id, item.qty + 1)} className={btnIcon}>
+                      <Plus aria-hidden size={17} />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </li>

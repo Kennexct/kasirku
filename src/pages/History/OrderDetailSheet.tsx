@@ -10,6 +10,7 @@ import { totalRefunded } from '../../lib/refunds';
 import type { Eligibility } from '../../services/refunds';
 import type { Order, Refund, Store } from '../../types';
 import { DATE_LOCALE, t } from '../../i18n';
+import { hasPriceChange, perUnit } from '../../lib/quantity';
 
 interface OrderDetailSheetProps {
   order: Order;
@@ -36,6 +37,8 @@ export function OrderDetailSheet(props: OrderDetailSheetProps) {
   const isAnyActionable = canAct(voidEligibility) || canAct(refundEligibility);
   const blockedReason = isAnyActionable ? null : refundEligibility.ok ? null : refundEligibility.reason;
   const voidHint = !canAct(voidEligibility) && canAct(refundEligibility) && order.status === 'paid' && !voidEligibility.ok ? voidEligibility.reason : null;
+
+  const changedPrices = order.items.filter(hasPriceChange);
 
   return (
     <Sheet
@@ -95,6 +98,18 @@ export function OrderDetailSheet(props: OrderDetailSheetProps) {
           </dd>
         </div>
       </dl>
+      {changedPrices.length > 0 && (
+        <div className="mb-3 rounded-lg border border-warn-200 bg-warn-50 px-3.5 py-2.5 text-[13px] text-warn-700">
+          <p className="font-semibold">{t('Harga diubah saat jual')}</p>
+          <ul className="num mt-1 flex flex-col gap-0.5">
+            {changedPrices.map((item) => (
+              <li key={item.id}>
+                {item.nameSnapshot}: {formatRupiah(item.unitPrice)}{perUnit(item.unit)} · {t('harga normal {0}', `${formatRupiah(item.listPrice ?? 0)}${perUnit(item.unit)}`)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="rounded-lg bg-subtle px-3 py-4">
         <ReceiptView order={order} store={store} cashierName={cashierName} refunds={refunds} />
       </div>

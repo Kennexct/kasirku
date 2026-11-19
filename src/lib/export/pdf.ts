@@ -5,6 +5,7 @@ import { formatRupiah } from '../money';
 import { profitLines, type Profit } from '../profit';
 import type { BreakdownRow, Report } from '../reports';
 import { DATE_LOCALE, t } from '../../i18n';
+import { formatQuantity } from '../quantity';
 
 /** A4 summary report (ADR-001). Loaded with `import()` only when exporting. Standard Helvetica (WinAnsi). */
 const BRAND: [number, number, number] = [11, 122, 90];
@@ -90,7 +91,7 @@ export function buildPdf(storeName: string, report: Report, generatedAt: Date, p
     t('Produk terlaris (top {0})', TOP_PRODUCTS),
     y,
     ['#', t('Produk'), t('Qty'), t('Pendapatan')],
-    report.products.slice(0, TOP_PRODUCTS).map((p, i) => [String(i + 1), p.name, String(p.qty), formatRupiah(p.revenue)]),
+    report.products.slice(0, TOP_PRODUCTS).map((p, i) => [String(i + 1), p.name, formatQuantity(p.qty, p.unit), formatRupiah(p.revenue)]),
     [2, 3],
   );
   section(doc, t('Per kasir'), y, head, breakdownBody(report.byCashier), [1, 2, 3, 4]);

@@ -138,6 +138,25 @@ export const HELP_ID: HelpContent = {
       notes: ['Menu Habis tetap terlihat di kasir tetapi tidak bisa dijual. Kasir juga boleh mengubahnya.', 'Produk nonaktif disembunyikan dari kasir, tetapi tetap ada di riwayat.', 'Mengubah harga modal tidak mengubah laba penjualan yang sudah lewat.'],
       keywords: 'menu barang foto kategori hpp sold out kosong stok',
     },
+    timbang: {
+      title: 'Jual per berat dan harga yang bisa diubah',
+      summary: 'Untuk pedagang pasar: jual per kilo, ons, liter, atau meter, dan ketik harga hari ini langsung di kasir.',
+      steps: [
+        'Buka Pengaturan, tab Toko & Struk, nyalakan "Aktifkan satuan berat dan ukuran", lalu simpan.',
+        'Di Produk, pilih "Dijual per" (misalnya kg) dan isi harga per satuan itu.',
+        'Untuk barang yang harganya naik-turun, nyalakan "Harga bisa diubah saat jual".',
+        'Di Kasir, ketuk barangnya, lalu ketik beratnya (misalnya 0,75), atau pilih Nominal dan ketik uang pembeli (misalnya Rp10.000).',
+        'Kalau harga hari ini berbeda, ganti harganya di kotak yang sama, lalu "Tambah ke pesanan".',
+      ],
+      notes: [
+        'Total baris = harga × berat, dibulatkan ke rupiah. Kalau memakai Nominal, pembeli membayar persis sejumlah itu.',
+        'Setiap timbangan menjadi baris sendiri. Ubah berat atau harga lewat tombol di baris keranjang.',
+        'Harga normal tetap tercatat. Di Riwayat, transaksi yang harganya diubah diberi tanda, dan ekspor Item memuat kolom Harga Normal.',
+        'Refund barang timbangan mengembalikan satu baris utuh.',
+        'Aplikasi belum tersambung ke timbangan digital. Berat diketik sendiri.',
+      ],
+      keywords: 'timbang kilo kg ons gram liter meter pasar sayur ikan daging harga bebas nego tawar',
+    },
     pelanggan: {
       title: 'Pelanggan dan yang belum bayar',
       summary: 'Simpan nama dan nomor HP langganan, lihat berapa kali mereka belanja, dan siapa yang masih punya bon.',

@@ -13,3 +13,4 @@
 - v0.9 profit, expenses, close of day, backup → `v09-profit-closing-backup.md`
 - v0.10 first-time journey, help centre → `v10-onboarding-help.md`
 - v0.11 English → `v11-english.md`
+- v0.12 flexible price, sell by weight → `v12-flex-price-weight.md`

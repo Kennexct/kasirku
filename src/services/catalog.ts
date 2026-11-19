@@ -3,6 +3,7 @@ import { nowIso, uuidv7 } from '../lib/id';
 import type { Category, Id, PaymentMethod, Product, SalesMode, SyncMeta, VariantGroup } from '../types';
 import { saveAndQueue } from './sync';
 import { t } from '../i18n';
+import { SALE_UNITS } from '../lib/quantity';
 
 const NAME_MAX = 80;
 
@@ -26,6 +27,7 @@ export async function saveProduct(product: Product): Promise<void> {
   requireName(product.name, t('Nama produk'));
   requirePrice(product.basePrice, t('Harga dasar'));
   if (product.costPrice !== undefined) requirePrice(product.costPrice, t('Harga modal'));
+  if (product.unit !== undefined && !SALE_UNITS.includes(product.unit)) throw new Error(t('Satuan tidak dikenal.'));
   Object.values(product.modePrices).forEach((price) => requirePrice(price, t('Harga mode')));
   await saveAndQueue('products', { ...product, name: product.name.trim(), updatedAt: nowIso() });
 }

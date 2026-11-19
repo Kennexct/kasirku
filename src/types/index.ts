@@ -74,7 +74,12 @@ export interface StoreRules {
   cashierMaxDiscountPct: number;
   isReasonRequired: boolean;
   shouldAutoShowReceipt: boolean;
+  /** Shows "Dijual per" (kg, ons, liter…) in the product form (ADR-011). Absent on older stores = off. */
+  isWeightSaleEnabled?: boolean;
 }
+
+/** What one unit of quantity means. `pcs` = pieces (whole numbers); the rest are measured (decimals). */
+export type SaleUnit = 'pcs' | 'kg' | 'ons' | 'g' | 'l' | 'm';
 
 export interface StoreMember extends SyncMeta {
   userId: Id | null;
@@ -95,6 +100,10 @@ export interface Product extends SyncMeta {
   categoryId: Id | null;
   name: string;
   basePrice: Rupiah;
+  /** Sold by weight or measure; prices and cost are per this unit. Absent = pieces (ADR-011). */
+  unit?: SaleUnit;
+  /** "Harga bisa diubah saat jual": the seller may type the price at the cashier (ADR-011). */
+  isPriceEditable?: boolean;
   /** "Harga modal": optional cost of one unit, copied onto each sold item (ADR-007). */
   costPrice?: Rupiah;
   photoUrl?: string;
@@ -181,6 +190,10 @@ export interface OrderItem {
   unitPrice: Rupiah;
   /** Cost of one unit when it was added to the cart; absent when the product had no cost price (ADR-007). */
   unitCost?: Rupiah;
+  /** Normal unit price when sold, kept only for flexible-price products; differs from `unitPrice` when the seller changed it (ADR-011). */
+  listPrice?: Rupiah;
+  /** Absent = pieces. For a measured unit, `qty` is a decimal weight/length/volume (ADR-011). */
+  unit?: SaleUnit;
   qty: number;
   options: SelectedOption[];
   discount: AppliedDiscount | null;

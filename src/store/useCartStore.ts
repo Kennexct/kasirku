@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { uuidv7 } from '../lib/id';
-import type { AppliedDiscount, Id, Order, OrderItem, SelectedOption } from '../types';
+import { hasPriceChange, isMeasured } from '../lib/quantity';
+import type { AppliedDiscount, Id, Order, OrderItem, SaleUnit, SelectedOption } from '../types';
 
 interface AddItemInput {
   productId: Id;
@@ -10,6 +11,11 @@ interface AddItemInput {
   /** Product cost price at this moment, if the product has one (ADR-007). */
   unitCost?: number;
   options: SelectedOption[];
+  /** Defaults to 1 piece. A weight for measured products (ADR-011). */
+  qty?: number;
+  unit?: SaleUnit;
+  /** Normal price, for flexible-price products only. */
+  listPrice?: number;
 }
 
 interface CartState {
@@ -22,6 +28,8 @@ interface CartState {
   orderDiscount: AppliedDiscount | null;
   addItem: (input: AddItemInput) => void;
   setQty: (itemId: Id, qty: number) => void;
+  /** Change the weight and/or price of a line through the entry sheet. */
+  updateItem: (itemId: Id, patch: Pick<OrderItem, 'qty' | 'unitPrice'>) => void;
   removeItem: (itemId: Id) => void;
   setItemNote: (itemId: Id, note: string) => void;
   setItemDiscount: (itemId: Id, discount: AppliedDiscount | null) => void;
@@ -29,7 +37,7 @@ interface CartState {
   setSalesMode: (salesModeId: Id) => void;
   setCustomer: (customerId: Id | null) => void;
   setLabel: (label: string) => void;
-  /** Re-price every line, e.g. after switching Dine In -> Takeaway. */
+  /** Re-price every line, e.g. after switching Dine In -> Takeaway. A price typed by the seller is kept (ADR-011). */
   repriceItems: (priceFor: (item: OrderItem) => number) => void;
   /** Resume a saved open order (M8). */
   loadOrder: (order: Order) => void;
@@ -58,11 +66,13 @@ export const useCartStore = create<CartState>()(
       ...EMPTY_CART,
       items: [],
 
-      addItem: ({ productId, name, unitPrice, unitCost, options }) =>
+      addItem: ({ productId, name, unitPrice, unitCost, options, qty = 1, unit, listPrice }) =>
         set((state) => {
-          const existing = state.items.find(
-            (item) => item.productId === productId && sameOptions(item.options, options) && item.note === '',
-          );
+          // Each weighing, and each flexible-price entry, is its own line.
+          const isOwnLine = isMeasured(unit) || listPrice !== undefined;
+          const existing = isOwnLine
+            ? undefined
+            : state.items.find((item) => item.productId === productId && sameOptions(item.options, options) && item.note === '' && item.listPrice === undefined);
           if (existing) {
             return {
               items: state.items.map((item) => (item.id === existing.id ? { ...item, qty: item.qty + 1 } : item)),
@@ -74,7 +84,9 @@ export const useCartStore = create<CartState>()(
             nameSnapshot: name,
             unitPrice,
             ...(unitCost !== undefined ? { unitCost } : {}),
-            qty: 1,
+            ...(listPrice !== undefined ? { listPrice } : {}),
+            ...(isMeasured(unit) ? { unit } : {}),
+            qty,
             options,
             discount: null,
             note: '',
@@ -90,6 +102,9 @@ export const useCartStore = create<CartState>()(
               : state.items.map((item) => (item.id === itemId ? { ...item, qty } : item)),
         })),
 
+      updateItem: (itemId, patch) =>
+        set((state) => ({ items: state.items.map((item) => (item.id === itemId ? { ...item, ...patch } : item)) })),
+
       removeItem: (itemId) => set((state) => ({ items: state.items.filter((item) => item.id !== itemId) })),
 
       setItemNote: (itemId, note) =>
@@ -103,7 +118,13 @@ export const useCartStore = create<CartState>()(
       setCustomer: (customerId) => set({ customerId }),
       setLabel: (label) => set({ label }),
       repriceItems: (priceFor) =>
-        set((state) => ({ items: state.items.map((item) => ({ ...item, unitPrice: priceFor(item) })) })),
+        set((state) => ({
+          items: state.items.map((item) => {
+            const normal = priceFor(item);
+            if (item.listPrice === undefined) return { ...item, unitPrice: normal };
+            return hasPriceChange(item) ? { ...item, listPrice: normal } : { ...item, unitPrice: normal, listPrice: normal };
+          }),
+        })),
       loadOrder: (order) =>
         set({
           openOrderId: order.id,

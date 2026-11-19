@@ -12,11 +12,14 @@ import { compressProductPhoto } from '../../lib/image';
 import { createCategory, newMeta, saveProduct } from '../../services/catalog';
 import type { Id, Product } from '../../types';
 import { t } from '../../i18n';
+import { isMeasured, perUnit, SALE_UNITS, UNIT_INFO } from '../../lib/quantity';
 
 interface ProductFormProps {
   product: Product | null;
   catalog: Catalog;
   storeId: Id;
+  /** Store setting: show "Dijual per" (ADR-011). */
+  isWeightSaleEnabled: boolean;
   onClose: () => void;
 }
 
@@ -32,7 +35,7 @@ const newProduct = (storeId: Id, sortOrder: number): Product => ({
 });
 
 /** M2 + M3: product with category, base price, per-mode prices, variant groups and photo. */
-export function ProductForm({ product, catalog, storeId, onClose }: ProductFormProps) {
+export function ProductForm({ product, catalog, storeId, onClose, isWeightSaleEnabled }: ProductFormProps) {
   const [draft, setDraft] = useState<Product>(() => product ?? newProduct(storeId, catalog.products.length));
   const [newCategory, setNewCategory] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -85,6 +88,9 @@ export function ProductForm({ product, catalog, storeId, onClose }: ProductFormP
     }
   };
 
+  const unit = draft.unit ?? 'pcs';
+  /** Shown when the store setting is on — or when this product already uses a unit, so it can be switched back. */
+  const showsUnit = isWeightSaleEnabled || isMeasured(draft.unit);
   const priceModes = catalog.salesModes.filter((m) => m.priceRule === 'mode_price');
   const markupModes = catalog.salesModes.filter((m) => m.priceRule === 'markup');
 
@@ -148,9 +154,22 @@ export function ProductForm({ product, catalog, storeId, onClose }: ProductFormP
 
           <fieldset className="rounded-lg border border-line p-4">
             <legend className={`${sectionTitle} px-1`}>{t('Harga')}</legend>
+            {showsUnit && (
+              <div className="mb-4">
+                <p className={labelBase}>{t('Dijual per')}</p>
+                <div role="radiogroup" aria-label={t('Dijual per')} className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {SALE_UNITS.map((value) => (
+                    <button key={value} type="button" role="radio" aria-checked={unit === value} onClick={() => update({ unit: value })} className={`${option(unit === value)} h-11 px-2 text-[13px]`}>
+                      {UNIT_INFO[value].label}
+                    </button>
+                  ))}
+                </div>
+                {isMeasured(unit) && <p className={helperText}>{t('Semua harga di bawah ini adalah harga per {0}. Berat diketik di kasir saat menjual.', UNIT_INFO[unit].symbol)}</p>}
+              </div>
+            )}
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="base-price" className={labelBase}>{t('Harga dasar (Dine In)')}</label>
+                <label htmlFor="base-price" className={labelBase}>{t('Harga dasar (Dine In)')} <span className="num font-normal text-muted">{perUnit(unit)}</span></label>
                 <RupiahInput id="base-price" value={draft.basePrice} onChange={(v) => update({ basePrice: v ?? 0 })} />
               </div>
               {priceModes.map((mode) => (
@@ -169,7 +188,9 @@ export function ProductForm({ product, catalog, storeId, onClose }: ProductFormP
                 />
                 <p className={helperText}>
                   {draft.costPrice !== undefined && draft.basePrice > 0
-                    ? t('Untung per porsi {0} (harga dasar).', formatRupiah(draft.basePrice - draft.costPrice))
+                    ? isMeasured(unit)
+                      ? t('Untung per {0} {1} (harga dasar).', UNIT_INFO[unit].symbol, formatRupiah(draft.basePrice - draft.costPrice))
+                      : t('Untung per porsi {0} (harga dasar).', formatRupiah(draft.basePrice - draft.costPrice))
                     : t('Biaya membuat satu porsi. Dipakai untuk menghitung laba di Laporan.')}
                 </p>
               </div>
@@ -177,6 +198,14 @@ export function ProductForm({ product, catalog, storeId, onClose }: ProductFormP
             {markupModes.length > 0 && (
               <p className={helperText}>{markupModes.map((m) => t('{0}: otomatis +{1}% dari harga dasar', m.name, m.markupPct)).join(' · ')}</p>
             )}
+            <div className="mt-4 border-t border-line pt-3">
+              <Switch
+                checked={draft.isPriceEditable === true}
+                onChange={(isPriceEditable) => update({ isPriceEditable })}
+                label={t('Harga bisa diubah saat jual')}
+                description={t('Kasir bisa mengetik harga lain di kasir. Harga di atas tetap menjadi harga normal dan ikut tercatat.')}
+              />
+            </div>
           </fieldset>
 
           <fieldset>

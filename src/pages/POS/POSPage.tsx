@@ -19,16 +19,32 @@ import { writeAudit } from '../../services/audit';
 import { completeOrder, saveOpenOrder, type PaymentInput } from '../../services/orders';
 import { requestOwnerApproval } from '../../store/usePinPromptStore';
 import { useCartStore } from '../../store/useCartStore';
-import type { AppliedDiscount, Id, Order, Product, SalesMode } from '../../types';
+import { countUnits, isMeasured } from '../../lib/quantity';
+import type { AppliedDiscount, Id, Order, OrderItem, Product, SalesMode, SaleUnit, SelectedOption } from '../../types';
 import { CartPanel } from './components/CartPanel';
 import { CustomerPicker } from './components/CustomerPicker';
 import { DiscountSheet } from './components/DiscountSheet';
 import { PaymentSheet } from './components/PaymentSheet';
 import { ProductGrid } from './components/ProductGrid';
+import { SaleEntrySheet } from './components/SaleEntrySheet';
 import { SaveOrderSheet } from './components/SaveOrderSheet';
 import { SoldOutSheet } from './components/SoldOutSheet';
 import { VariantSheet } from './components/VariantSheet';
 import { t } from '../../i18n';
+
+/** What the entry sheet needs: a product being added, or a cart line being changed. */
+interface EntryRequest {
+  productId: Id;
+  name: string;
+  unit: SaleUnit | undefined;
+  isPriceEditable: boolean;
+  unitCost: number | undefined;
+  options: SelectedOption[];
+  normalPrice: number;
+  editing?: OrderItem;
+}
+
+const needsEntry = (product: Product): boolean => isMeasured(product.unit) || product.isPriceEditable === true;
 
 type Panel = 'none' | 'cart' | 'discount' | 'customer' | 'payment' | 'save' | 'soldOut';
 const ALL_CATEGORIES = 'all';
@@ -44,6 +60,7 @@ export function POSPage() {
   const customer = useCustomer(cart.customerId);
   const customerName = customer && !customer.deletedAt ? customer.name : null;
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
+  const [entry, setEntry] = useState<EntryRequest | null>(null);
   const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
   const [categoryId, setCategoryId] = useState<Id>(ALL_CATEGORIES);
   const [search, setSearch] = useState('');
@@ -84,7 +101,7 @@ export function POSPage() {
   const soldOutCount = sellableProducts.filter((p) => p.isSoldOut).length;
   const qtyByProduct = useMemo(() => {
     const map = new Map<Id, number>();
-    cart.items.forEach((item) => map.set(item.productId, (map.get(item.productId) ?? 0) + item.qty));
+    cart.items.forEach((item) => map.set(item.productId, (map.get(item.productId) ?? 0) + countUnits([item])));
     return map;
   }, [cart.items]);
   const totals = useMemo(
@@ -107,8 +124,29 @@ export function POSPage() {
       setVariantProduct(product);
       return;
     }
-    cart.addItem({ productId: product.id, name: product.name, unitPrice: resolveModePrice(product, mode), unitCost: product.costPrice, options: [] });
+    addOrAsk(product, [], resolveModePrice(product, mode));
   };
+
+  /** Measured and flexible-price products go through the entry sheet; everything else is added at once (ADR-011). */
+  const addOrAsk = (product: Product, options: SelectedOption[], normalPrice: number) => {
+    if (needsEntry(product)) {
+      setEntry({ productId: product.id, name: product.name, unit: product.unit, isPriceEditable: product.isPriceEditable === true, unitCost: product.costPrice, options, normalPrice });
+      return;
+    }
+    cart.addItem({ productId: product.id, name: product.name, unitPrice: normalPrice, unitCost: product.costPrice, options });
+  };
+
+  const handleEditItem = (item: OrderItem) =>
+    setEntry({
+      productId: item.productId,
+      name: item.nameSnapshot,
+      unit: item.unit,
+      isPriceEditable: item.listPrice !== undefined,
+      unitCost: item.unitCost,
+      options: item.options,
+      normalPrice: item.listPrice ?? item.unitPrice,
+      editing: item,
+    });
 
   const handleModeChange = (next: SalesMode) => {
     cart.setSalesMode(next.id);
@@ -185,6 +223,7 @@ export function POSPage() {
       totals={totals}
       modeName={mode.name}
       customerName={customerName}
+      onEditItem={handleEditItem}
       onOpenCustomer={() => openSub('customer')}
       onOpenDiscount={() => openSub('discount')}
       onSave={() => setPanel('save')}
@@ -256,6 +295,7 @@ export function POSPage() {
           totals={totals}
           modeName={mode.name}
           hasTitle={false}
+          onEditItem={handleEditItem}
           customerName={customerName}
           onOpenCustomer={() => openSub('customer')}
           onOpenDiscount={() => openSub('discount')}
@@ -264,6 +304,32 @@ export function POSPage() {
         />
       </Sheet>
 
+      {entry && (
+        <SaleEntrySheet
+          name={entry.name}
+          unit={entry.unit}
+          isPriceEditable={entry.isPriceEditable}
+          normalPrice={entry.normalPrice}
+          initial={entry.editing ? { qty: entry.editing.qty, unitPrice: entry.editing.unitPrice } : undefined}
+          onClose={() => setEntry(null)}
+          onConfirm={({ qty, unitPrice }) => {
+            if (entry.editing) cart.updateItem(entry.editing.id, { qty, unitPrice });
+            else {
+              cart.addItem({
+                productId: entry.productId,
+                name: entry.name,
+                unitPrice,
+                unitCost: entry.unitCost,
+                options: entry.options,
+                qty,
+                unit: entry.unit,
+                listPrice: entry.isPriceEditable ? entry.normalPrice : undefined,
+              });
+            }
+            setEntry(null);
+          }}
+        />
+      )}
       {variantProduct && (
         <VariantSheet
           product={variantProduct}
@@ -271,8 +337,8 @@ export function POSPage() {
           modePrice={resolveModePrice(variantProduct, mode)}
           onClose={() => setVariantProduct(null)}
           onConfirm={(options, unitPrice) => {
-            cart.addItem({ productId: variantProduct.id, name: variantProduct.name, unitPrice, unitCost: variantProduct.costPrice, options });
             setVariantProduct(null);
+            addOrAsk(variantProduct, options, unitPrice);
           }}
         />
       )}

@@ -13,6 +13,7 @@ import type { Product, VariantGroup } from '../../types';
 import { ProductForm } from './ProductForm';
 import { VariantGroupForm } from './VariantGroupForm';
 import { t } from '../../i18n';
+import { perUnit } from '../../lib/quantity';
 
 type Tab = 'products' | 'variants';
 type Editing<T> = { item: T | null } | null;
@@ -99,7 +100,7 @@ export function ProductsPage() {
                       <span className="hidden truncate text-[13px] text-ink-soft lg:block">
                         {p.variantGroupIds.map((id) => groupName.get(id)).filter(Boolean).join(', ') || '—'}
                       </span>
-                      <span className="num text-right text-[15px] font-semibold">{formatRupiah(p.basePrice)}</span>
+                      <span className="num text-right text-[15px] font-semibold">{formatRupiah(p.basePrice)}{perUnit(p.unit)}</span>
                       <span className="num hidden text-right text-[14px] text-ink-soft lg:block">
                         {takeawayMode && p.modePrices[takeawayMode.id] !== undefined ? formatRupiah(p.modePrices[takeawayMode.id] ?? 0) : '—'}
                       </span>
@@ -137,7 +138,7 @@ export function ProductsPage() {
         )}
       </div>
 
-      {editingProduct && <ProductForm product={editingProduct.item} catalog={catalog} storeId={store.id} onClose={() => setEditingProduct(null)} />}
+      {editingProduct && <ProductForm product={editingProduct.item} catalog={catalog} storeId={store.id} isWeightSaleEnabled={store.settings.isWeightSaleEnabled === true} onClose={() => setEditingProduct(null)} />}
       {editingGroup && <VariantGroupForm group={editingGroup.item} storeId={store.id} onClose={() => setEditingGroup(null)} />}
     </section>
   );

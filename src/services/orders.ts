@@ -6,6 +6,7 @@ import { calculateTotals } from '../lib/pricing';
 import type { AppliedDiscount, Id, Order, OrderItem, OrderPayment, PaymentMethod, SalesMode, Store } from '../types';
 import { saveAndQueue } from './sync';
 import { t } from '../i18n';
+import { MAX_QUANTITY } from '../lib/quantity';
 
 const DEVICE_CODE_KEY = 'deviceCode';
 const DEVICE_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -57,6 +58,9 @@ async function nextReceiptNo(businessDate: string): Promise<string> {
 
 async function buildOrder(cart: CartSnapshot, ctx: OrderContext): Promise<Order> {
   if (cart.items.length === 0) throw new Error(t('Keranjang masih kosong.'));
+  // Weights and typed prices come from the entry sheet; never store a line that is not a positive quantity at a valid price.
+  const isBadLine = (item: OrderItem) => !Number.isFinite(item.qty) || item.qty <= 0 || item.qty > MAX_QUANTITY || !Number.isSafeInteger(item.unitPrice) || item.unitPrice < 0;
+  if (cart.items.some(isBadLine)) throw new Error(t('Jumlah atau harga item tidak valid.'));
 
   const now = nowIso();
   const existing = cart.openOrderId ? await localDb.orders.get(cart.openOrderId) : undefined;

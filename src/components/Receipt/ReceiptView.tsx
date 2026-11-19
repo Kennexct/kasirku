@@ -2,6 +2,8 @@ import { formatRupiah } from '../../lib/money';
 import { REFUND_REASON_LABEL } from '../../constants';
 import type { Order, Refund, Store } from '../../types';
 import { DATE_LOCALE, t } from '../../i18n';
+import { lineGross } from '../../lib/pricing';
+import { formatQuantity } from '../../lib/quantity';
 
 interface ReceiptViewProps {
   order: Order;
@@ -47,8 +49,8 @@ export function ReceiptView({ order, store, cashierName, refunds = [] }: Receipt
             {item.options.length > 0 && <p className="pl-2 text-muted">+ {item.options.map((o) => o.name).join(', ')}</p>}
             {item.note && <p className="pl-2 text-muted">» {item.note}</p>}
             <p className="flex justify-between pl-2">
-              <span>{item.qty} × {formatRupiah(item.unitPrice)}</span>
-              <span>{formatRupiah(item.unitPrice * item.qty)}</span>
+              <span>{formatQuantity(item.qty, item.unit)} × {formatRupiah(item.unitPrice)}</span>
+              <span>{formatRupiah(lineGross(item))}</span>
             </p>
           </li>
         ))}

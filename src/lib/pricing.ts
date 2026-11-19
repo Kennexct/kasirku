@@ -42,8 +42,9 @@ export function discountAmount(base: Rupiah, discount: AppliedDiscount | null): 
   return Math.min(base, Math.max(0, toRupiah(raw)));
 }
 
-export function lineGross(item: OrderItem): Rupiah {
-  return item.unitPrice * item.qty;
+/** The value of a line before discounts — the single definition. Whole Rupiah even for decimal quantities (ADR-011). */
+export function lineGross(item: Pick<OrderItem, 'unitPrice' | 'qty'>): Rupiah {
+  return Math.round(item.unitPrice * item.qty);
 }
 
 export function lineTotal(item: OrderItem): Rupiah {

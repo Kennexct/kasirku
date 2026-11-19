@@ -4,6 +4,7 @@ import { card } from '../../components/ui/styles';
 import { formatRupiah } from '../../lib/money';
 import type { ProductRow } from '../../lib/reports';
 import { t } from '../../i18n';
+import { formatLineQty } from '../../lib/quantity';
 
 const TOP_N = 10;
 type Metric = 'revenue' | 'qty';
@@ -41,8 +42,8 @@ export function TopProducts({ products }: { products: ProductRow[] }) {
                 </span>
               </span>
               <span className="num text-right text-[14px] font-semibold">
-                {metric === 'revenue' ? formatRupiah(p.revenue) : `${p.qty}×`}
-                <span className="block text-[12px] font-normal text-muted">{metric === 'revenue' ? `${p.qty}×` : formatRupiah(p.revenue)}</span>
+                {metric === 'revenue' ? formatRupiah(p.revenue) : formatLineQty(p)}
+                <span className="block text-[12px] font-normal text-muted">{metric === 'revenue' ? formatLineQty(p) : formatRupiah(p.revenue)}</span>
               </span>
             </li>
           ))}

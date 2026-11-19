@@ -1,6 +1,8 @@
 import type { Order, Store } from '../types';
 import { formatRupiah } from './money';
 import { t } from '../i18n';
+import { lineGross } from './pricing';
+import { formatQuantity, isMeasured } from './quantity';
 
 const DIVIDER = '--------------------------------';
 
@@ -15,7 +17,8 @@ export function buildReceiptText(order: Order, store: Pick<Store, 'name' | 'addr
   lines.push(DIVIDER);
 
   for (const item of order.items) {
-    lines.push(`${item.qty}x ${item.nameSnapshot}  ${formatRupiah(item.unitPrice * item.qty)}`);
+    const quantity = isMeasured(item.unit) ? formatQuantity(item.qty, item.unit) : `${item.qty}x`;
+    lines.push(`${quantity} ${item.nameSnapshot}  ${formatRupiah(lineGross(item))}`);
     if (item.options.length > 0) lines.push(`   ${item.options.map((o) => o.name).join(', ')}`);
     if (item.note) lines.push(t('   Catatan: {0}', item.note));
   }

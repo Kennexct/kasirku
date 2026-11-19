@@ -15,6 +15,7 @@ import { useCartStore } from '../../store/useCartStore';
 import { useSessionStore } from '../../store/useSessionStore';
 import type { Order } from '../../types';
 import { t } from '../../i18n';
+import { formatLineQty } from '../../lib/quantity';
 
 const CANCEL_REASONS = [t('Pelanggan batal'), t('Salah input'), t('Produk habis')] as const;
 const MINUTE_MS = 60_000;
@@ -96,7 +97,7 @@ export function OpenOrdersPage() {
                   </span>
                 </div>
                 <p className="line-clamp-2 px-4 pt-2 text-[13px] text-ink-soft">
-                  {order.items.map((i) => `${i.qty}× ${i.nameSnapshot}`).join(', ')}
+                  {order.items.map((i) => `${formatLineQty(i)} ${i.nameSnapshot}`).join(', ')}
                 </p>
                 <div className="mt-auto flex items-center gap-2 px-4 pb-4 pt-3">
                   <p className="num flex-1 text-[20px] font-bold tracking-[-0.02em]">{formatRupiah(order.totals.grandTotal)}</p>
