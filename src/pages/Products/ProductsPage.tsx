@@ -36,6 +36,7 @@ export function ProductsPage() {
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
         title="Produk"
+        helpTopic="produk"
         description="Menu, harga per mode penjualan, dan varian."
         actions={
           <button

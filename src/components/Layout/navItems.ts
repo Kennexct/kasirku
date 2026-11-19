@@ -1,4 +1,4 @@
-import { BarChart3, ClipboardList, Package, ReceiptText, Settings, Store, Users, Wallet } from 'lucide-react';
+import { BarChart3, CircleHelp, ClipboardList, Package, ReceiptText, Settings, Store, Users, Wallet } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ROUTES } from '../../constants';
 
@@ -21,4 +21,5 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { to: ROUTES.products, label: 'Produk', icon: Package, isOwnerOnly: true },
   { to: ROUTES.customers, label: 'Pelanggan', icon: Users },
   { to: ROUTES.settings, label: 'Pengaturan', icon: Settings, isOwnerOnly: true },
+  { to: ROUTES.help, label: 'Bantuan', icon: CircleHelp },
 ];

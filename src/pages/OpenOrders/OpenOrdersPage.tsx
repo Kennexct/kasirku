@@ -69,6 +69,7 @@ export function OpenOrdersPage() {
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
         title="Pesanan terbuka"
+        helpTopic="simpan"
         description={orders && orders.length > 0 ? `${orders.length} pesanan belum dibayar · ${formatRupiah(total)}` : 'Pesanan yang disimpan untuk dibayar nanti.'}
       />
       <div className="min-h-0 flex-1 overflow-y-auto p-4 md:px-8 md:py-6">

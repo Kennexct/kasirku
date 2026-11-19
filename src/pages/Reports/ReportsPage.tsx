@@ -92,6 +92,7 @@ export default function ReportsPage() {
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
         title="Laporan"
+        helpTopic="laporan"
         description={`${formatRange(dateRange.range)} · transaksi di perangkat ini`}
         actions={
           <button type="button" aria-label="Ekspor laporan" disabled={!report} onClick={() => setIsExportOpen(true)} className={`${btnPrimary} h-11`}>

@@ -11,11 +11,11 @@ import { StaffSettings } from './StaffSettings';
 import { StoreSettings } from './StoreSettings';
 
 const TABS = [
-  { value: 'store', label: 'Toko & Struk' },
-  { value: 'payments', label: 'Pembayaran' },
-  { value: 'modes', label: 'Mode Penjualan' },
-  { value: 'staff', label: 'Staf & PIN' },
-  { value: 'backup', label: 'Cadangan' },
+  { value: 'store', label: 'Toko & Struk', help: 'struk' },
+  { value: 'payments', label: 'Pembayaran', help: 'qris' },
+  { value: 'modes', label: 'Mode Penjualan', help: 'varian' },
+  { value: 'staff', label: 'Staf & PIN', help: 'staf' },
+  { value: 'backup', label: 'Cadangan', help: 'cadangan' },
 ] as const;
 type TabId = (typeof TABS)[number]['value'];
 
@@ -29,7 +29,7 @@ export function SettingsPage() {
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      <PageHeader title="Pengaturan" description="Profil toko, struk, pembayaran, mode penjualan, staf dan PIN.">
+      <PageHeader title="Pengaturan" description="Profil toko, struk, pembayaran, mode penjualan, staf, dan cadangan." helpTopic={TABS.find((t) => t.value === tab)?.help}>
         <Tabs label="Bagian pengaturan" items={TABS} value={tab} onChange={setTab} />
       </PageHeader>
       <div className="min-h-0 flex-1 overflow-y-auto p-4 md:px-8 md:py-6">

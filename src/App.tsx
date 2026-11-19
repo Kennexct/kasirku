@@ -11,8 +11,10 @@ import { useBootstrap } from './hooks/useBootstrap';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { CashPage } from './pages/Cash/CashPage';
 import { CustomersPage } from './pages/Customers/CustomersPage';
+import { HelpPage } from './pages/Help/HelpPage';
 import { HistoryPage } from './pages/History/HistoryPage';
 import { MorePage } from './pages/More/MorePage';
+import { OnboardingPage } from './pages/Onboarding/OnboardingPage';
 import { OpenOrdersPage } from './pages/OpenOrders/OpenOrdersPage';
 import { POSPage } from './pages/POS/POSPage';
 import { ProductsPage } from './pages/Products/ProductsPage';
@@ -48,6 +50,16 @@ export default function App() {
     />
   );
 
+  // ADR-009: no store on this device yet → the first-time journey, before anything is created.
+  if (boot.status === 'onboarding') {
+    return (
+      <>
+        <OnboardingPage onComplete={boot.completeOnboarding} />
+        {toaster}
+      </>
+    );
+  }
+
   // ADR-004: a PIN exists and nobody is signed in on this device → choose the seller first.
   if (!hasSeller) {
     return (
@@ -79,6 +91,7 @@ export default function App() {
           <Route path={ROUTES.settings} element={<OwnerGate><SettingsPage /></OwnerGate>} />
           <Route path={ROUTES.customers} element={<CustomersPage />} />
           <Route path={ROUTES.cash} element={<CashPage />} />
+          <Route path={ROUTES.help} element={<HelpPage />} />
           <Route path={ROUTES.more} element={<MorePage />} />
         </Route>
         <Route path="*" element={<Navigate to={ROUTES.pos} replace />} />

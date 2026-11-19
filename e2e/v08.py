@@ -41,6 +41,8 @@ def run(p, name, viewport, is_mobile):
 
     # 1. Payment methods: add, refuse a duplicate, move up, rename, delete another one.
     page.goto(BASE + '/pengaturan?tab=payments')
+    page.get_by_role('button', name='Lewati, pakai contoh toko').click()  # first-time journey: take the example store
+    page.get_by_role('heading', name='Toko Anda').wait_for(state='hidden')  # store is created before moving on
     page.get_by_role('button', name='Tambah metode').click()
     page.locator('#method-name').fill('GoPay')
     shot(page, f'{name}-v1-add-method')

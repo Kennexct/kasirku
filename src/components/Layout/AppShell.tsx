@@ -97,12 +97,12 @@ export function AppShell() {
         <div className="mb-4 flex justify-center">
           <LogoMark size={36} />
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto [scrollbar-width:none]">
           {NAV_ITEMS.map((item) => (
             <RailLink key={item.to} item={item} badge={badgeFor(item)} isLocked={isLocked(item)} />
           ))}
         </div>
-        <div className="mt-auto flex flex-col items-center gap-3 border-t border-line pt-3">
+        <div className="mt-2 flex shrink-0 flex-col items-center gap-3 border-t border-line pt-3">
           <SyncBadge />
           {access.kind === 'unlocked' && (
             <button type="button" onClick={lockOwner} title="Kunci mode pemilik" className="flex h-11 w-full flex-col items-center justify-center rounded-lg text-[11px] font-semibold text-brand-700 hover:bg-brand-50">

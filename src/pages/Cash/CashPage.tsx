@@ -99,6 +99,7 @@ export function CashPage() {
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
         title="Kas"
+        helpTopic="kas"
         description={view === 'day' ? formatBusinessDate(date) : 'Pengeluaran dan tutup kasir'}
         actions={
           <button type="button" aria-label="Catat pengeluaran" onClick={() => setDialog({ kind: 'expense' })} className={`${btnPrimary} h-11`}>

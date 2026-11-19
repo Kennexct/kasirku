@@ -11,3 +11,4 @@
 - customers (M7) → `customers.md`
 - v0.8 feedback round (custom methods/modes, sold-out, debt) → `v08-feedback.md`
 - v0.9 profit, expenses, close of day, backup → `v09-profit-closing-backup.md`
+- v0.10 first-time journey, help centre → `v10-onboarding-help.md`

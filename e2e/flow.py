@@ -12,6 +12,8 @@ def run(p, name, viewport, is_mobile):
     page.on('pageerror', lambda e: errors.append(f'{name} pageerror: {e}'))
     page.on('console', lambda m: m.type == 'error' and errors.append(f'{name} console: {m.text}'))
     page.goto(BASE)
+    page.get_by_role('button', name='Lewati, pakai contoh toko').click()  # first-time journey: take the example store
+    page.get_by_role('heading', name='Toko Anda').wait_for(state='hidden')  # store is created before moving on
     page.get_by_role('button', name='Es Teh').first.wait_for()
     page.wait_for_timeout(400); page.screenshot(path=f'{OUT}/{name}-1-pos.png')
 

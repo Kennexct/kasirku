@@ -1,0 +1,205 @@
+import type { HelpContent } from './help';
+
+export const HELP_ID: HelpContent = {
+  intro: [
+    { title: 'Jual dalam tiga ketukan', body: 'Ketuk menu, ketuk Bayar, pilih cara bayar. Struk bisa dicetak atau dikirim lewat WhatsApp.' },
+    { title: 'Belum bayar? Simpan dulu', body: 'Pesanan meja atau bon pelanggan bisa disimpan dan dibayar nanti dari menu Pesanan.' },
+    { title: 'Tutup kasir setiap malam', body: 'Hitung uang di laci, ketik jumlahnya, dan aplikasi menunjukkan apakah pas, kurang, atau lebih.' },
+    { title: 'Data ada di perangkat ini', body: 'Aplikasi tetap jalan tanpa internet. Simpan cadangan seminggu sekali supaya data aman kalau perangkat rusak.' },
+  ],
+  topics: {
+    jual: {
+      title: 'Menjual dan menerima pembayaran',
+      summary: 'Layar Kasir dipakai untuk mencatat setiap penjualan. Semua langsung tersimpan di perangkat, dengan atau tanpa internet.',
+      steps: [
+        'Ketuk menu yang dipesan. Ketuk lagi untuk menambah jumlah.',
+        'Periksa pesanan di sebelah kanan (di HP: ketuk "Lihat pesanan"). Jumlah dan catatan bisa diubah di sana.',
+        'Ketuk Bayar, lalu pilih cara bayar.',
+        'Untuk tunai, ketuk "Uang pas" atau nominal yang diterima. Kembalian dihitung otomatis.',
+        'Ketuk "Selesaikan pembayaran". Struk muncul dan siap dicetak atau dikirim.',
+      ],
+      notes: ['Keranjang tidak hilang kalau aplikasi tertutup tidak sengaja.', 'Salah input setelah dibayar? Lihat topik "Riwayat, void, dan refund".'],
+      keywords: 'kasir transaksi bayar tunai kembalian keranjang',
+    },
+    varian: {
+      title: 'Varian dan mode penjualan',
+      summary: 'Varian adalah pilihan pada satu menu (level pedas, ukuran, topping). Mode penjualan membedakan harga makan di tempat, bungkus, atau ojek online.',
+      steps: [
+        'Menu yang punya varian membuka pilihan saat diketuk. Pilih, lalu "Tambah ke pesanan".',
+        'Ganti mode (Dine In, Takeaway, dan lainnya) di atas daftar menu. Harga di keranjang ikut berubah.',
+        'Atur varian di Produk, tab Varian. Atur mode di Pengaturan, tab Mode Penjualan.',
+      ],
+      notes: [
+        'Tiga cara harga per mode: sama dengan harga dasar, harga khusus per produk, atau naik sekian persen (cocok untuk komisi ojol).',
+        'Kasir tetap memakai mode terakhir sampai Anda menggantinya.',
+        'Anda bisa menambah mode sendiri, paling banyak 8.',
+      ],
+      keywords: 'takeaway bungkus dine in gofood grab shopeefood markup topping level ukuran',
+    },
+    diskon: {
+      title: 'Diskon',
+      summary: 'Potongan untuk satu pesanan, dalam persen atau rupiah.',
+      steps: ['Di keranjang, ketuk "Tambah diskon".', 'Pilih diskon yang sudah disiapkan, atau ketik persen atau rupiah sendiri.', 'Total langsung berubah. Hapus diskon dari tempat yang sama.'],
+      notes: ['Pemilik bisa membatasi diskon kasir di Pengaturan, tab Staf & PIN. Di atas batas itu, aplikasi meminta PIN pemilik.'],
+      keywords: 'potongan promo persen',
+    },
+    simpan: {
+      title: 'Simpan pesanan (bayar nanti atau bon)',
+      summary: 'Untuk pelanggan yang makan dulu baru bayar, atau langganan yang bayar belakangan.',
+      steps: [
+        'Isi keranjang seperti biasa, lalu ketuk Simpan.',
+        'Beri label, misalnya "Meja 3" atau "Bon Bu Sari". Pilih pelanggan kalau ini bon.',
+        'Saat pelanggan membayar, buka menu Pesanan, ketuk pesanannya, lalu Bayar.',
+      ],
+      notes: [
+        'Pesanan dihitung sebagai penjualan pada hari dibayar, bukan hari disimpan.',
+        'Bon yang punya nama pelanggan muncul di Pelanggan, tab "Belum bayar".',
+        'Pesanan yang batal bisa dibatalkan dengan alasan, dan tetap tercatat.',
+      ],
+      keywords: 'open bill meja hutang kasbon tersimpan',
+    },
+    qris: {
+      title: 'QRIS statis',
+      summary: 'Unggah gambar QRIS toko Anda sekali, lalu tampilkan ke pelanggan setiap ada pembayaran QRIS.',
+      steps: [
+        'Buka Pengaturan, tab Pembayaran, bagian QRIS, lalu unggah foto atau gambar QRIS.',
+        'Saat membayar, pilih QRIS. Kode tampil besar bersama total yang harus dibayar.',
+        'Setelah uang masuk di aplikasi bank atau dompet Anda, ketuk "Sudah dibayar".',
+      ],
+      notes: ['Aplikasi tidak tahu apakah uang sudah masuk. Selalu periksa notifikasi dari bank sebelum menekan "Sudah dibayar".', 'Nomor referensi bisa dicatat kalau diperlukan untuk pencocokan.'],
+      keywords: 'qr scan barcode gopay ovo dana transfer',
+    },
+    struk: {
+      title: 'Struk: cetak atau kirim WhatsApp',
+      summary: 'Setiap penjualan punya struk dengan nomor unik.',
+      steps: [
+        'Setelah pembayaran, struk tampil otomatis. Ketuk Cetak atau WhatsApp.',
+        'Untuk mengirim ulang, buka Riwayat, ketuk transaksinya, lalu pilih Cetak atau WhatsApp.',
+        'Atur nama toko, alamat, teks kaki struk, dan ukuran kertas (58 atau 80 mm) di Pengaturan, tab Toko & Struk.',
+      ],
+      notes: ['Kalau pesanan punya pelanggan dengan nomor HP, WhatsApp langsung terbuka ke nomor itu.', 'Cetak memakai printer yang terpasang di perangkat.'],
+      keywords: 'nota bon kertas printer thermal kirim',
+    },
+    riwayat: {
+      title: 'Riwayat, void, dan refund',
+      summary: 'Semua penjualan ada di Riwayat. Void membatalkan seluruh transaksi di hari yang sama. Refund mengembalikan sebagian atau semua item.',
+      steps: [
+        'Buka Riwayat dan pilih periode. Cari dengan nomor struk, label, atau nama pelanggan.',
+        'Ketuk transaksi untuk melihat rinciannya.',
+        'Pilih Void (hari yang sama, seluruh transaksi) atau Refund (pilih item dan jumlahnya), lalu pilih alasan.',
+      ],
+      notes: [
+        'Refund dihitung pada hari refund dilakukan, bukan hari penjualannya.',
+        'Siapa yang boleh void dan refund, dan sampai berapa hari, diatur pemilik di Pengaturan, tab Staf & PIN.',
+        'Transaksi tidak pernah dihapus. Void dan refund tercatat beserta pelakunya.',
+      ],
+      keywords: 'batal salah input kembalikan uang retur hapus transaksi',
+    },
+    laporan: {
+      title: 'Laporan, laba, dan ekspor',
+      summary: 'Laporan menunjukkan penjualan, jam ramai, cara bayar, menu terlaris, dan laba untuk periode yang Anda pilih. Hanya pemilik yang bisa membukanya.',
+      steps: [
+        'Buka Laporan dan pilih periode.',
+        'Penjualan bersih adalah penjualan dikurangi refund pada periode itu.',
+        'Bagian Laba muncul kalau Anda mengisi harga modal produk atau mencatat pengeluaran.',
+        'Ketuk Ekspor untuk membuat berkas Excel, PDF, atau CSV.',
+      ],
+      notes: [
+        'Dengan harga modal: laba = penjualan − modal menu terjual − biaya operasional. Belanja bahan tidak dikurangkan lagi karena sudah masuk harga modal.',
+        'Tanpa harga modal: yang ditampilkan adalah penjualan dikurangi semua pengeluaran.',
+        'Laporan hanya memuat transaksi dari perangkat ini.',
+      ],
+      keywords: 'omzet untung rugi excel pdf csv rekap harian bulanan hpp margin',
+    },
+    kas: {
+      title: 'Kas, pengeluaran, dan tutup kasir',
+      summary: 'Layar Kas menjawab pertanyaan "uang di laci harusnya berapa?" dan mencatat uang yang keluar.',
+      steps: [
+        'Pagi hari, isi Modal awal: uang kembalian yang sudah ada di laci.',
+        'Setiap ada uang keluar (belanja bahan, gas, upah), ketuk "Catat pengeluaran". Matikan "Dibayar dari uang laci" kalau uangnya bukan dari laci.',
+        'Malam hari, ketuk "Tutup kasir", hitung uang di laci, dan ketik jumlahnya.',
+        'Aplikasi mencatat selisihnya. Ringkasan bisa dikirim ke pemilik lewat WhatsApp.',
+      ],
+      notes: [
+        'Uang seharusnya = modal awal + penjualan tunai − refund tunai − pengeluaran dari laci.',
+        'Ada penjualan setelah kasir ditutup? Pemilik bisa "Buka kembali" lalu menutup lagi.',
+        'Saat menutup, menu bertanda Habis bisa dikembalikan otomatis untuk besok.',
+      ],
+      keywords: 'laci setoran selisih kurang lebih closing shift biaya belanja',
+    },
+    produk: {
+      title: 'Produk, harga modal, dan stok habis',
+      summary: 'Kelola menu, foto, kategori, harga per mode, dan tandai menu yang sedang habis.',
+      steps: [
+        'Buka Produk untuk menambah atau mengubah menu, termasuk foto dan kategori.',
+        'Isi "Harga modal" (biaya membuat satu porsi) kalau ingin melihat laba di Laporan.',
+        'Menu habis hari ini? Di Kasir, ketuk tombol kotak bersilang di samping pencarian, lalu nyalakan menunya.',
+      ],
+      notes: ['Menu Habis tetap terlihat di kasir tetapi tidak bisa dijual. Kasir juga boleh mengubahnya.', 'Produk nonaktif disembunyikan dari kasir, tetapi tetap ada di riwayat.', 'Mengubah harga modal tidak mengubah laba penjualan yang sudah lewat.'],
+      keywords: 'menu barang foto kategori hpp sold out kosong stok',
+    },
+    pelanggan: {
+      title: 'Pelanggan dan yang belum bayar',
+      summary: 'Simpan nama dan nomor HP langganan, lihat berapa kali mereka belanja, dan siapa yang masih punya bon.',
+      steps: [
+        'Di keranjang, ketuk "Tambah pelanggan" untuk memilih atau menambah pelanggan.',
+        'Buka menu Pelanggan untuk melihat kunjungan dan total belanja.',
+        'Tab "Belum bayar" berisi pelanggan yang punya pesanan tersimpan. Ketuk namanya, lalu "Ingatkan via WhatsApp".',
+      ],
+      notes: ['Hanya nomor HP Indonesia (08… atau +628…) yang diterima.', 'Menghapus pelanggan menghapus nomor HP dan catatannya. Namanya tetap ada di struk lama.'],
+      keywords: 'langganan hutang piutang bon nomor hp kontak',
+    },
+    staf: {
+      title: 'Kasir, PIN pemilik, dan izin',
+      summary: 'PIN pemilik melindungi Laporan, Produk, dan Pengaturan. Kasir punya PIN sendiri supaya setiap transaksi tercatat atas nama yang benar.',
+      steps: [
+        'Buka Pengaturan, tab Staf & PIN, lalu buat PIN pemilik. Catat kode pemulihan yang muncul dan simpan di tempat aman.',
+        'Tambah kasir dan beri masing-masing PIN.',
+        'Ganti penjual lewat tombol inisial di pojok kiri bawah (di HP: menu Lainnya).',
+        'Atur siapa yang boleh void, refund, dan memberi diskon besar.',
+      ],
+      notes: [
+        'Menjual tidak perlu PIN pemilik. Yang dikunci hanya bagian pemilik, dan terkunci lagi setelah 5 menit tidak dipakai.',
+        'Lupa PIN pemilik? Pakai kode pemulihan. Kalau keduanya hilang, bagian pemilik tidak bisa dibuka lagi.',
+        'Salah PIN berkali-kali membuat aplikasi menunggu sebelum bisa mencoba lagi.',
+      ],
+      keywords: 'karyawan pegawai kunci password sandi hak akses owner',
+    },
+    offline: {
+      title: 'Tanpa internet dan penyimpanan data',
+      summary: 'KasirKu menyimpan semuanya di perangkat ini, jadi tetap bisa dipakai saat sinyal hilang.',
+      steps: ['Jualan seperti biasa. Tidak ada yang perlu dilakukan saat internet mati.', 'Tanda "Lokal" di pojok berarti data tersimpan di perangkat ini.'],
+      notes: [
+        'Data belum otomatis tersalin ke perangkat lain. Laporan hanya memuat penjualan dari perangkat ini.',
+        'Menghapus data browser atau melepas aplikasi dapat menghapus data toko. Buat cadangan secara rutin.',
+      ],
+      keywords: 'sinyal online sinkron sync wifi kuota hilang',
+    },
+    cadangan: {
+      title: 'Cadangan dan pindah perangkat',
+      summary: 'Cadangan adalah satu berkas berisi seluruh data toko. Pakai untuk berjaga-jaga atau untuk pindah ke perangkat baru.',
+      steps: [
+        'Buka Pengaturan, tab Cadangan, lalu ketuk "Simpan cadangan". Berkas masuk ke folder Unduhan.',
+        'Kirim berkas itu ke Google Drive atau WhatsApp Anda sendiri.',
+        'Di perangkat baru: buka aplikasi, lewati pengenalan, buka Pengaturan, tab Cadangan, "Pilih berkas cadangan", lalu konfirmasi.',
+      ],
+      notes: [
+        'Memulihkan cadangan mengganti semua data di perangkat itu. Yang dicatat setelah cadangan dibuat tidak ikut.',
+        'Berkas memuat nomor HP pelanggan. Jangan dibagikan ke orang lain.',
+        'Jangan memakai cadangan yang sama di dua perangkat sekaligus: nomor struk bisa kembar.',
+      ],
+      keywords: 'backup restore pulihkan ganti hp tablet rusak hilang',
+    },
+    pasang: {
+      title: 'Pasang di layar utama',
+      summary: 'KasirKu bisa dipasang seperti aplikasi biasa supaya terbuka penuh dan lebih cepat.',
+      steps: [
+        'Android (Chrome): ketuk menu tiga titik, lalu "Tambahkan ke layar utama" atau "Instal aplikasi".',
+        'iPhone atau iPad (Safari): ketuk tombol Bagikan, lalu "Tambah ke Layar Utama".',
+        'Buka KasirKu dari ikon di layar utama.',
+      ],
+      notes: ['Buka aplikasi sekali saat ada internet setelah memasang, supaya semua bagian tersimpan untuk dipakai offline.'],
+      keywords: 'install pwa aplikasi ikon homescreen',
+    },
+  },
+};

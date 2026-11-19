@@ -44,6 +44,9 @@ def download(page, fmt_label, dataset=None):
 def run(p, name, viewport, is_mobile):
     browser = p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox'])
     page = browser.new_context(viewport=viewport, is_mobile=is_mobile, has_touch=is_mobile, accept_downloads=True).new_page()
+    page.goto(BASE + '/')
+    page.get_by_role('button', name='Lewati, pakai contoh toko').click()  # first-time journey: take the example store
+    page.get_by_role('heading', name='Toko Anda').wait_for(state='hidden')  # store is created before moving on
     page.on('pageerror', lambda e: errors.append(f'{name}: {e}'))
     page.on('response', lambda r: r.status >= 400 and errors.append(f'{name}: {r.status} {r.url}'))
 

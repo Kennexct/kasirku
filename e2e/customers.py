@@ -42,6 +42,8 @@ def run(p, name, viewport, is_mobile):
 
     # 1. Add a customer from the Customers page.
     page.goto(BASE + '/pelanggan')
+    page.get_by_role('button', name='Lewati, pakai contoh toko').click()  # first-time journey: take the example store
+    page.get_by_role('heading', name='Toko Anda').wait_for(state='hidden')  # store is created before moving on
     page.get_by_text('Belum ada pelanggan').wait_for()
     page.get_by_role('button', name='Tambah pelanggan').click()
     page.locator('#customer-name').fill('Bu Sari')

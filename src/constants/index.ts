@@ -87,6 +87,7 @@ export const ROUTES = {
   products: '/produk',
   customers: '/pelanggan',
   cash: '/kas',
+  help: '/bantuan',
   settings: '/pengaturan',
   more: '/lainnya',
 } as const;

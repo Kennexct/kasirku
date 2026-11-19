@@ -48,6 +48,8 @@ def run(p, name, viewport, is_mobile):
 
     # 1. Owner sets a PIN and gets a recovery code once.
     page.goto(BASE + '/pengaturan?tab=staff')
+    page.get_by_role('button', name='Lewati, pakai contoh toko').click()  # first-time journey: take the example store
+    page.get_by_role('heading', name='Toko Anda').wait_for(state='hidden')  # store is created before moving on
     page.locator('#owner-pin-new').fill('1234')
     page.locator('#owner-pin-confirm').fill('1234')
     page.get_by_role('button', name='Aktifkan PIN').click()

@@ -18,3 +18,11 @@
 | Lost phone, no backup | Data is only on the device | Not recoverable. Back up weekly (Settings → Cadangan shows the age). |
 
 Backup file hygiene: it contains customer phone numbers and PIN hashes — keep it in the owner's own Drive/WhatsApp, never in a shared group.
+
+## First-time journey and help (v0.10)
+| Symptom | Cause | Action |
+| --- | --- | --- |
+| The journey appears on a device that had data | Browser data was cleared, or a different browser/profile is used | Restore from a backup file: finish or skip the journey, then Pengaturan → Cadangan. |
+| Wrong business template chosen | — | Edit or delete the example products in Produk; there is no "re-run" (it would discard sales). |
+| "Langkah awal" banner is gone | It was dismissed or all steps are done | The checklist stays on the Bantuan page until complete. |
+| A checklist step will not tick | It follows the data: e.g. QRIS needs an uploaded image, backup needs "Simpan cadangan" pressed on this device | Do the step; it ticks by itself. |

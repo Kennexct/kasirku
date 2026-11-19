@@ -126,7 +126,8 @@ export function HistoryPage() {
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      <PageHeader title="Riwayat penjualan" description={formatRange(range)}>
+      <PageHeader title="Riwayat penjualan"
+        helpTopic="riwayat" description={formatRange(range)}>
         <HistoryFilters
           dateRange={dateRange}
           today={today}

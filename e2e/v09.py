@@ -84,6 +84,8 @@ def run(p, name, viewport, is_mobile):
 
     # 1. Cost price on one product; the other stays without.
     page.goto(BASE + '/produk')
+    page.get_by_role('button', name='Lewati, pakai contoh toko').click()  # first-time journey: take the example store
+    page.get_by_role('heading', name='Toko Anda').wait_for(state='hidden')  # store is created before moving on
     page.get_by_role('button', name=re.compile('^Kerupuk')).first.click()
     page.locator('#cost-price').fill('1200')
     page.get_by_text('Untung per porsi Rp800').wait_for()
@@ -115,11 +117,11 @@ def run(p, name, viewport, is_mobile):
     drawer_text = main.inner_text()
 
     # 4. Close the day Rp1.000 short; sold-out flags reset; WhatsApp summary; then a late sale makes it stale.
-    page.get_by_role('button', name='Tutup kasir').click()
+    page.get_by_role('button', name='Tutup kasir', exact=True).click()
     page.locator('#counted-cash').fill('100500')
     dialog.get_by_text('Selisih: kurang Rp1.000').wait_for()
     shot(page, f'{name}-w4-close-sheet')
-    dialog.get_by_role('button', name='Tutup kasir').click()
+    dialog.get_by_role('button', name='Tutup kasir', exact=True).click()
     page.get_by_text('Kasir ditutup, selisih kurang Rp1.000').wait_for()
     summary = unquote(page.get_by_role('link', name='Kirim ringkasan').get_attribute('href'))
     shot(page, f'{name}-w5-kas-closed')
@@ -131,10 +133,10 @@ def run(p, name, viewport, is_mobile):
     page.get_by_role('button', name='Buka kembali').click()
     dialog.get_by_role('button', name='Buka kembali').click()
     page.get_by_text('Kasir dibuka kembali').wait_for()
-    page.get_by_role('button', name='Tutup kasir').click()
+    page.get_by_role('button', name='Tutup kasir', exact=True).click()
     page.locator('#counted-cash').fill('103500')
     dialog.get_by_text('Pas, tidak ada selisih.').wait_for()
-    dialog.get_by_role('button', name='Tutup kasir').click()
+    dialog.get_by_role('button', name='Tutup kasir', exact=True).click()
     page.get_by_text('Kasir ditutup, uang laci pas').wait_for()
     toasts_gone(page)
     page.get_by_role('tab', name='Riwayat tutup').click()

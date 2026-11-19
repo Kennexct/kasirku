@@ -1,6 +1,7 @@
 import { PackageX } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { ChecklistBanner } from '../../components/Checklist/ChecklistBanner';
 import { ReceiptSheet } from '../../components/Receipt/ReceiptSheet';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { Sheet } from '../../components/ui/Sheet';
@@ -9,6 +10,7 @@ import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { btnIcon } from '../../components/ui/styles';
 import { Tabs } from '../../components/ui/Tabs';
 import { useAppData } from '../../hooks/useAppData';
+import { useChecklist } from '../../hooks/useChecklist';
 import { useCustomer } from '../../hooks/useCustomers';
 import { formatRupiah } from '../../lib/money';
 import { calculateTotals, resolveModePrice, unitPriceWithOptions } from '../../lib/pricing';
@@ -76,6 +78,7 @@ export function POSPage() {
         (query === '' || p.name.toLowerCase().includes(query)),
     );
   }, [catalog, categoryId, search]);
+  const checklist = useChecklist(store?.id ?? null);
   const sellableProducts = useMemo(() => catalog?.products.filter((p) => p.isActive) ?? [], [catalog]);
   const soldOutCount = sellableProducts.filter((p) => p.isSoldOut).length;
   const qtyByProduct = useMemo(() => {
@@ -191,6 +194,7 @@ export function POSPage() {
   return (
     <div className="flex min-h-0 flex-1">
       <section aria-label="Produk" className="flex min-w-0 flex-1 flex-col">
+        {checklist && <ChecklistBanner checklist={checklist} />}
         <div className="flex flex-col gap-3 border-b border-line bg-surface px-3 pt-3 md:px-5 md:pt-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
             <div className="flex min-w-0 flex-1 gap-2">

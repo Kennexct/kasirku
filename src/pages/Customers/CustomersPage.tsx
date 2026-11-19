@@ -70,6 +70,7 @@ export function CustomersPage() {
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
         title="Pelanggan"
+        helpTopic="pelanggan"
         description={`${customers.length} pelanggan tersimpan`}
         actions={
           <button type="button" aria-label="Tambah pelanggan" onClick={() => setDialog({ kind: 'form', customer: null })} className={`${btnPrimary} h-11`}>
