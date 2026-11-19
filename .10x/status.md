@@ -64,3 +64,6 @@
 | recommended additions | 1 close-of-day + expenses, 2 cost price → profit, 3 backup file, 5 sold-out toggle, 6 customer debt view | each small–medium; user to choose |
 
 - Landing page v1 published (Design artifact UZ6XxLt43pE2gACongRVHs); source copy in landing/index.dc.html. Pro price Rp49.000 is a placeholder.
+
+## v0.14 accounts-billing — Design Complete (2026-11-19)
+Spec `specs/2026-11-19-accounts-trial-billing-design.md`, ADR-013. Stack: Cloudflare Pages + Functions, Neon, Resend, R2 (later), GitHub.
