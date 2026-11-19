@@ -36,7 +36,7 @@ export async function buildExport(request: ExportRequest): Promise<Blob> {
       return await buildXlsx(storeName, report, ctx);
     }
     const { buildPdf } = await import('./pdf');
-    return buildPdf(storeName, report, new Date());
+    return buildPdf(storeName, report, new Date(), ctx.profit);
   } catch (error) {
     if (error instanceof TypeError && /dynamically imported module|Failed to fetch|Importing a module/i.test(error.message)) {
       throw new Error('Gagal memuat modul ekspor. Coba lagi saat online.');

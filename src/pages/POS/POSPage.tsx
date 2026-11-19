@@ -103,7 +103,7 @@ export function POSPage() {
       setVariantProduct(product);
       return;
     }
-    cart.addItem({ productId: product.id, name: product.name, unitPrice: resolveModePrice(product, mode), options: [] });
+    cart.addItem({ productId: product.id, name: product.name, unitPrice: resolveModePrice(product, mode), unitCost: product.costPrice, options: [] });
   };
 
   const handleModeChange = (next: SalesMode) => {
@@ -266,7 +266,7 @@ export function POSPage() {
           modePrice={resolveModePrice(variantProduct, mode)}
           onClose={() => setVariantProduct(null)}
           onConfirm={(options, unitPrice) => {
-            cart.addItem({ productId: variantProduct.id, name: variantProduct.name, unitPrice, options });
+            cart.addItem({ productId: variantProduct.id, name: variantProduct.name, unitPrice, unitCost: variantProduct.costPrice, options });
             setVariantProduct(null);
           }}
         />

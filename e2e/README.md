@@ -8,6 +8,7 @@ python3 -I e2e/history.py http://localhost:4173 ./shots              # 2 sales -
 python3 -I e2e/staff.py   http://localhost:4173 ./shots              # owner PIN, cashier, switch seller, PIN-approved discount + void, gate, lockout
 python3 -I e2e/customers.py http://localhost:4173 ./shots            # add customer, attach + quick-add at POS, receipt/WhatsApp, stats, delete
 python3 -I e2e/v08.py     http://localhost:4173 ./shots              # add/rename/move/delete method + mode, sold-out, unpaid customers + reminder, history after removals
+python3    e2e/v09.py     http://localhost:4173 ./shots              # cost price -> profit + Excel, expenses, close of day (short, reopen, exact), backup -> restore (needs openpyxl)
 python3    e2e/reports.py http://localhost:4173 ./shots              # sales + refund -> Reports -> download XLSX/PDF/CSV and verify (needs openpyxl)
 ```
 Both print `ERRORS: none` when no page errors, console errors or failed requests occurred. Screenshots land in `./shots`.

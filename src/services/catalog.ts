@@ -24,6 +24,7 @@ function requirePrice(value: number, label: string): void {
 export async function saveProduct(product: Product): Promise<void> {
   requireName(product.name, 'Nama produk');
   requirePrice(product.basePrice, 'Harga dasar');
+  if (product.costPrice !== undefined) requirePrice(product.costPrice, 'Harga modal');
   Object.values(product.modePrices).forEach((price) => requirePrice(price, 'Harga mode'));
   await saveAndQueue('products', { ...product, name: product.name.trim(), updatedAt: nowIso() });
 }

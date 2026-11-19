@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Implementation — v0.9 (design + planning complete: ADR-007, ADR-008)
+**Phase:** Delivery Complete — v0.9. Next: v0.10 (first-time journey, help centre)
 **Branch:** `feat/v0.9-profit-closing-backup` (stacked: reports-export → staff-pin → customers → v0.8-feedback → v0.9)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
@@ -12,18 +12,18 @@
 | staff-pin (M15 part 1) | **Delivered (v0.6)** on `feat/staff-pin` | 71 unit · 5 e2e · ADR-003, ADR-004 |
 | customers (M7) | **Delivered (v0.7)** on `feat/customers` | 80 unit · 6 e2e · ADR-005 |
 | v0.8 custom methods/modes · sold-out · unpaid customers | **Delivered (v0.8)** on `feat/v0.8-feedback` | 85 unit · 7 e2e · ADR-006 · review PASS |
-| v0.9 cost & profit · expenses · close of day · backup | Next | roadmap spec |
-| v0.10 first-time journey · help centre | Planned | roadmap spec |
+| v0.9 cost & profit · expenses · close of day · backup | **Delivered (v0.9)** on `feat/v0.9-profit-closing-backup` | 112 unit · 8 e2e · ADR-007, ADR-008 · review PASS |
+| v0.10 first-time journey · help centre | Next | roadmap spec |
 | v0.11 English | Planned | roadmap spec |
 
 ## v0.9 tasks
-- [ ] T1 Types, Dexie v4, sync tables, migration
-- [ ] T2 Cost price on product + cost snapshot on sold item; `lib/profit.ts` + tests
-- [ ] T3 Expenses service; `lib/cashDrawer.ts`; day closing service + tests
-- [ ] T4 Kas screen (today, expenses, closing history)
-- [ ] T5 Profit card in Reports + export summary rows
-- [ ] T6 Backup file + restore + Settings tab + tests
-- [ ] T7 e2e `v09.py` + regressions, review, runbook
+- [x] T1 Types, Dexie v4, sync tables, migration
+- [x] T2 Cost price on product + cost snapshot on sold item; `lib/profit.ts` + tests
+- [x] T3 Expenses service; `lib/cashDrawer.ts`; day closing service + tests
+- [x] T4 Kas screen (today, expenses, closing history)
+- [x] T5 Profit card in Reports + export summary rows
+- [x] T6 Backup file + restore + Settings tab + tests
+- [x] T7 e2e `v09.py` + regressions, review, runbook
 
 ## reports-export tasks
 - [x] T1 Refund businessDate + migrations
@@ -38,6 +38,7 @@
 - [ ] Manual: Android Chrome share sheet → WhatsApp with .xlsx
 - [ ] Manual: iPad Safari (installed PWA) download
 - [ ] Manual: PBKDF2 timing and PIN pad on a low-end Android phone
+- [ ] Manual: backup download + restore (file picker, reload) on Android Chrome and iPad Safari; backup size with many product photos
 - [ ] Apply DB migrations to a live Supabase project (checked 2026-11-18: the account has no KasirKu project; two unrelated projects exist and must not be touched)
 
 ## M15 decomposition

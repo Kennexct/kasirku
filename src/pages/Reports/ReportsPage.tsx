@@ -7,17 +7,20 @@ import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { StatTile } from '../../components/ui/StatTile';
 import { btnPrimary } from '../../components/ui/styles';
 import { useAppData } from '../../hooks/useAppData';
+import { useExpenses } from '../../hooks/useCash';
 import { useDateRange } from '../../hooks/useDateRange';
 import { usePeriodData } from '../../hooks/usePeriodData';
 import { getBusinessDate } from '../../lib/businessDate';
 import { formatRange } from '../../lib/dateRange';
 import type { ExportContext } from '../../lib/export/columns';
 import { formatRupiah } from '../../lib/money';
+import { buildProfit } from '../../lib/profit';
 import { buildReport, type DayRow, type HourRow } from '../../lib/reports';
 import { useSessionStore } from '../../store/useSessionStore';
 import { BarChartCard, type BarDatum } from './BarChartCard';
 import { BreakdownTable } from './BreakdownTable';
 import { ExportSheet } from './ExportSheet';
+import { ProfitCard } from './ProfitCard';
 import { TopProducts } from './TopProducts';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -62,6 +65,7 @@ export default function ReportsPage() {
   const today = store ? getBusinessDate(new Date(), store) : new Date().toISOString().slice(0, 10);
   const dateRange = useDateRange(today);
   const data = usePeriodData(storeId, dateRange.range);
+  const expenses = useExpenses(storeId, dateRange.range);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
   const input = useMemo(
@@ -72,9 +76,13 @@ export default function ReportsPage() {
     [store, data, dateRange.range],
   );
   const report = useMemo(() => (input ? buildReport(input) : null), [input]);
+  const profit = useMemo(
+    () => (input && report && expenses ? buildProfit({ sales: input.sales, summary: report.summary, expenses }) : null),
+    [input, report, expenses],
+  );
 
   if (!store) return <LoadingScreen />;
-  const ctx: ExportContext | null = input ? { input, timeZone: store.timezone } : null;
+  const ctx: ExportContext | null = input && profit && expenses ? { input, timeZone: store.timezone, profit, expenses } : null;
   const hours = report ? hourData(report.byHour) : [];
   const isMultiDay = dateRange.range.from !== dateRange.range.to;
   const s = report?.summary;
@@ -99,7 +107,7 @@ export default function ReportsPage() {
       <div className="min-h-0 flex-1 overflow-y-auto p-4 md:px-8 md:py-6">
         {!report || !s ? (
           <LoadingScreen />
-        ) : s.transactions === 0 && s.refunds === 0 ? (
+        ) : s.transactions === 0 && s.refunds === 0 && (expenses ?? []).length === 0 ? (
           <EmptyState icon={BarChart3} title="Belum ada penjualan" description="Tidak ada transaksi pada periode ini." />
         ) : (
           <div className="flex flex-col gap-4">
@@ -109,6 +117,8 @@ export default function ReportsPage() {
               <StatTile label="Rata-rata" value={formatRupiah(s.averageTicket)} hint="per transaksi" />
               <StatTile label="Diskon" value={formatRupiah(s.discounts)} hint={s.voidCount > 0 ? `${s.voidCount} void · ${formatRupiah(s.voidAmount)}` : 'Tanpa void'} />
             </div>
+
+            {profit && <ProfitCard profit={profit} />}
 
             <div className="grid gap-4 xl:grid-cols-2">
               {hours.length > 0 && (

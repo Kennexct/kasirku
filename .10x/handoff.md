@@ -1,6 +1,7 @@
 # Handoff
 
-**To:** SDE
+**To:** Product Manager → Architect
 
-Build v0.9 in task order T1–T7 (`status.md`). Binding: `specs/2026-11-19-v09-profit-closing-backup-design.md`, ADR-007, ADR-008, `decisions/architect/v09-profit-closing-backup.md`.
-Tricky parts: profit must reconcile to the report headline; drawer maths shared by screen and closing record; restore must be all-or-nothing.
+v0.9 delivered (`reviews/2026-11-19-v09-review.md`, `decisions/sde/v09-profit-closing-backup.md`, runbook `docs/runbooks/cash-profit-backup.md`).
+
+Next: v0.10 per `specs/2026-11-19-feedback-round-roadmap.md` — first-launch journey (language, store name + business template, payments/QRIS, explanation cards, "Langkah awal" checklist; skipped on devices that already have data) and the help centre (Bantuan page, contextual "?" buttons, replay intro). The help topics must now also cover Kas, tutup kasir, laba and cadangan. Open question for the user: WhatsApp support number (leave the contact button out unless provided). Then v0.11 English.

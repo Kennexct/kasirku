@@ -4,6 +4,7 @@ import { PageHeader } from '../../components/Layout/PageHeader';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { Tabs } from '../../components/ui/Tabs';
 import { useAppData } from '../../hooks/useAppData';
+import { BackupSettings } from './BackupSettings';
 import { PaymentMethodSettings } from './PaymentMethodSettings';
 import { SalesModeSettings } from './SalesModeSettings';
 import { StaffSettings } from './StaffSettings';
@@ -14,6 +15,7 @@ const TABS = [
   { value: 'payments', label: 'Pembayaran' },
   { value: 'modes', label: 'Mode Penjualan' },
   { value: 'staff', label: 'Staf & PIN' },
+  { value: 'backup', label: 'Cadangan' },
 ] as const;
 type TabId = (typeof TABS)[number]['value'];
 
@@ -36,6 +38,7 @@ export function SettingsPage() {
           {tab === 'payments' && <PaymentMethodSettings storeId={store.id} methods={catalog.paymentMethods} />}
           {tab === 'modes' && <SalesModeSettings storeId={store.id} modes={catalog.salesModes} />}
           {tab === 'staff' && <StaffSettings store={store} />}
+          {tab === 'backup' && <BackupSettings />}
         </div>
       </div>
     </section>

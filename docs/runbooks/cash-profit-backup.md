@@ -1,0 +1,20 @@
+# Runbook — Kas, close of day, profit, backup (v0.9)
+
+| Symptom | Cause | Action |
+| --- | --- | --- |
+| "Uang di laci seharusnya" looks too low | Opening cash not typed, or an expense was marked "Dibayar dari uang laci" by mistake | Kas → Modal awal → Ubah. For the expense: delete it (owner) and record it again with the switch off. |
+| Cash from a bon paid today is missing from yesterday's totals | By design since v0.9: a saved order counts on the day it is **paid** | Look at today's Kas and reports. |
+| "Hari ini sudah ditutup." | The day already has a closing | Owner: Kas → Buka kembali, then close again. Both closings are kept in the audit trail. |
+| Warning "Ada transaksi atau pengeluaran setelah kasir ditutup" | A sale, refund or expense happened after closing | Owner reopens and closes again so the record matches. Selling was never blocked. |
+| "Kasir kemarin belum ditutup" | Yesterday has sales and no closing | Press "Tutup kemarin", count, close. |
+| Menu still "Habis" in the morning | The switch "Sediakan lagi … menu yang habis" was turned off at closing, or the day was not closed | Kasir → sold-out list → switch back. |
+| Laba looks too high | Some sold items have no cost price (warning names them), or add-ons carry no cost | Produk → fill "Harga modal". Past sales keep the cost they were sold with. |
+| Belanja bahan not subtracted from Laba bersih | By design when cost prices are used (they already contain ingredients) | Nothing to do. Without any cost prices the report switches to "Sisa setelah pengeluaran" and subtracts everything. |
+| "Ini bukan berkas cadangan KasirKu." / "Berkas rusak…" | Wrong or damaged file | Pick the `kasirku-cadangan-….json` file. Nothing on the device changed. |
+| "Cadangan ini dibuat dengan versi aplikasi yang lebih baru." | The app on this device is older than the one that made the file | Reload/update the app (close and reopen while online), then restore. |
+| "Pemulihan gagal, data di perangkat ini tidak berubah." | Storage full or the browser blocked the write | Free storage, retry. The old data is intact. |
+| After restore the app asks who is selling / the cart is empty | Expected: the seller and cart belonged to the old data | Choose the seller (PINs are the ones in the backup). |
+| Two devices show the same receipt numbers | The same backup was restored on a second device and both are selling | Use one device until sync exists. |
+| Lost phone, no backup | Data is only on the device | Not recoverable. Back up weekly (Settings → Cadangan shows the age). |
+
+Backup file hygiene: it contains customer phone numbers and PIN hashes — keep it in the owner's own Drive/WhatsApp, never in a shared group.

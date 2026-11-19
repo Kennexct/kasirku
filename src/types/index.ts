@@ -95,6 +95,8 @@ export interface Product extends SyncMeta {
   categoryId: Id | null;
   name: string;
   basePrice: Rupiah;
+  /** "Harga modal": optional cost of one unit, copied onto each sold item (ADR-007). */
+  costPrice?: Rupiah;
   photoUrl?: string;
   sku?: string;
   isActive: boolean;
@@ -177,6 +179,8 @@ export interface OrderItem {
   productId: Id;
   nameSnapshot: string;
   unitPrice: Rupiah;
+  /** Cost of one unit when it was added to the cart; absent when the product had no cost price (ADR-007). */
+  unitCost?: Rupiah;
   qty: number;
   options: SelectedOption[];
   discount: AppliedDiscount | null;
@@ -250,6 +254,47 @@ export interface AuditEvent extends SyncMeta {
   payload: Record<string, unknown>;
 }
 
+export type ExpenseCategory = 'ingredients' | 'wages' | 'rent' | 'utilities' | 'transport' | 'supplies' | 'other';
+
+/** Money that left the business (ADR-007). No edit: delete and record again. */
+export interface Expense extends SyncMeta {
+  businessDate: BusinessDate;
+  category: ExpenseCategory;
+  amount: Rupiah;
+  note: string;
+  /** Paid with cash from the drawer — reduces the expected cash at close of day. */
+  isFromDrawer: boolean;
+  actorId: Id;
+}
+
+export interface ClosingMethodTotal {
+  name: string;
+  type: PaymentType;
+  amount: Rupiah;
+}
+
+/** "Tutup kasir": the drawer figures at closing time plus the counted cash. Immutable (ADR-007). */
+export interface DayClosing extends SyncMeta {
+  businessDate: BusinessDate;
+  openingCash: Rupiah;
+  cashSales: Rupiah;
+  cashRefunds: Rupiah;
+  drawerExpenses: Rupiah;
+  expectedCash: Rupiah;
+  countedCash: Rupiah;
+  /** countedCash − expectedCash: negative = short, positive = over. */
+  difference: Rupiah;
+  netSales: Rupiah;
+  transactions: number;
+  expensesTotal: Rupiah;
+  byMethod: ClosingMethodTotal[];
+  openOrderCount: number;
+  openOrderAmount: Rupiah;
+  note: string;
+  closedById: Id;
+  closedAt: IsoDateTime;
+}
+
 /** Local outbox row waiting to be pushed to the server. */
 export interface OutboxEntry {
   seq?: number;
@@ -273,6 +318,8 @@ export const SYNC_TABLES = [
   'refunds',
   'auditEvents',
   'storeMembers',
+  'expenses',
+  'dayClosings',
 ] as const;
 export type SyncTable = (typeof SYNC_TABLES)[number];
 

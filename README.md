@@ -114,7 +114,7 @@ npx supabase db push           # applies supabase/migrations
 
 CI (`.github/workflows/ci.yml`): `npm ci` → `typecheck` → `test` → `build`. Migrations are applied to staging on merge, to prod by manual approval.
 
-## 7. Current status (v0.8 — + custom methods & modes, sold-out, unpaid customers)
+## 7. Current status (v0.9 — + profit, expenses, close of day, backup)
 
 Design rules, tokens and component inventory: [`design-system/MASTER.md`](design-system/MASTER.md). Browser flow checks: [`e2e/`](e2e/README.md).
 
@@ -138,11 +138,15 @@ Design rules, tokens and component inventory: [`design-system/MASTER.md`](design
 | M7 Customers | Done: list + search (name / phone), add / edit / delete (delete erases phone + note), pick or quick-add from the cart, name on receipt / history / exports, WhatsApp receipt straight to the customer, visits / spend / last visit (ADR-005) | `pages/Customers/`, `services/customers.ts` |
 | Sold-out switch (v0.8) | Done: any seller marks a menu item "Habis" from the cashier; tile stays visible but cannot be sold | `pages/POS/components/SoldOutSheet.tsx` |
 | Unpaid customers (v0.8) | Done: "Belum bayar" tab — who owes, how much, since when; WhatsApp reminder; derived from saved orders, no ledger (ADR-006) | `pages/Customers/DebtList.tsx`, `lib/customers.ts` |
+| Cost price & profit (v0.9) | Done: optional "Harga modal" per product, cost snapshot on each sold item, profit statement in Reports + Excel/PDF (cost mode or simple mode, ADR-007) | `lib/profit.ts`, `pages/Reports/ProfitCard.tsx` |
+| Expenses (v0.9) | Done: record by category, from the drawer or not; owner deletes; in reports and exports | `pages/Cash/`, `services/expenses.ts` |
+| Close of day (v0.9) | Done: "Tutup kasir" — expected vs counted cash, difference, WhatsApp summary, sold-out reset, reopen (owner), history | `lib/cashDrawer.ts`, `services/dayClosing.ts` |
+| Backup file (v0.9) | Done: save all device data to one file; replace-all restore with validation (ADR-008) | `lib/backup.ts`, `services/backup.ts`, `pages/Settings/BackupSettings.tsx` |
 | M15 parts 2–3 (owner login, sync) | Not started — needs a Supabase project | — |
 
 First run seeds a "Warung Bakso" starter menu (`services/seedTemplate.ts`) so the seller can sell immediately and edit from there.
 
-Tests: 85 unit/integration tests (incl. a 20k-order performance guard) (`npm test`) cover pricing, variants, receipt numbering, business date, WhatsApp receipt text, and the order service against an in-memory IndexedDB (paid, open → resume → paid, cancel + audit, validation, StrictMode double-seed guard) and void/refund rules (same-day void, refund window, partial → full, permission, reason).
+Tests: 112 unit/integration tests (incl. a 20k-order performance guard) (`npm test`) cover pricing, variants, receipt numbering, business date, WhatsApp receipt text, and the order service against an in-memory IndexedDB (paid, open → resume → paid, cancel + audit, validation, StrictMode double-seed guard) and void/refund rules (same-day void, refund window, partial → full, permission, reason).
 
 ## 8. Build order (maps to PRD release plan)
 

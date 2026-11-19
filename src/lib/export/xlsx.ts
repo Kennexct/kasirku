@@ -1,10 +1,13 @@
 import writeXlsxFile, { type Sheet } from 'write-excel-file/universal';
 import { formatRange } from '../dateRange';
+import { profitLines, type Profit } from '../profit';
 import type { BreakdownRow, Report } from '../reports';
 import {
+  EXPENSE_COLUMNS,
   ITEM_COLUMNS,
   REFUND_COLUMNS,
   TRANSACTION_COLUMNS,
+  expenseRows,
   itemRows,
   refundRows,
   sanitizeText,
@@ -47,7 +50,19 @@ function breakdownRows(title: string, rows: readonly BreakdownRow[]): Row[] {
   ];
 }
 
-function summarySheet(storeName: string, report: Report): Sheet<Blob> {
+/** Profit statement rows (ADR-007); empty when there are neither cost prices nor expenses. */
+function profitRows(profit: Profit | undefined): Row[] {
+  if (!profit || profit.mode === 'none') return [];
+  return [
+    [null],
+    [text(profit.mode === 'cost' ? 'Laba (perkiraan)' : 'Penjualan dan pengeluaran', true)],
+    ...profitLines(profit).map((line): Row => [text(line.label, line.kind !== 'plain'), money(line.amount, line.kind !== 'plain')]),
+    ...(profit.mode === 'cost' && profit.uncostedQty > 0 ? [[text(`${profit.uncostedQty} item terjual belum punya harga modal; laba bisa terlihat lebih besar.`)]] : []),
+    ...(profit.mode === 'cost' && profit.ingredientExpenses > 0 ? [[text('Belanja bahan tidak dikurangkan lagi (sudah terhitung lewat harga modal).'), money(profit.ingredientExpenses)]] : []),
+  ];
+}
+
+function summarySheet(storeName: string, report: Report, profit: Profit | undefined): Sheet<Blob> {
   const s = report.summary;
   const line = (label: string, value: number, isMoney = true): Row => [text(label), isMoney ? money(value) : int(value)];
   return {
@@ -69,6 +84,7 @@ function summarySheet(storeName: string, report: Report): Sheet<Blob> {
       line('Void (nilai)', s.voidAmount),
       line('Service', s.serviceTotal),
       line('Pajak', s.taxTotal),
+      ...profitRows(profit),
       ...breakdownRows('Per metode pembayaran', report.byPaymentMethod),
       ...breakdownRows('Per mode penjualan', report.bySalesMode),
       ...breakdownRows('Per kasir', report.byCashier),
@@ -90,11 +106,13 @@ function productSheet(report: Report): Sheet<Blob> {
 
 export function buildXlsx(storeName: string, report: Report, ctx: ExportContext): Promise<Blob> {
   const sheets: Sheet<Blob>[] = [
-    summarySheet(storeName, report),
+    summarySheet(storeName, report, ctx.profit),
     tableSheet('Transaksi', TRANSACTION_COLUMNS, transactionRows(ctx)),
     tableSheet('Item', ITEM_COLUMNS, itemRows(ctx)),
     tableSheet('Refund', REFUND_COLUMNS, refundRows(ctx)),
     productSheet(report),
+    // Only when there is something to list, so stores that never record expenses keep the familiar five sheets.
+    ...(ctx.expenses && ctx.expenses.length > 0 ? [tableSheet('Pengeluaran', EXPENSE_COLUMNS, expenseRows(ctx))] : []),
   ];
   return writeXlsxFile(sheets).toBlob();
 }

@@ -2,6 +2,7 @@ import { jsPDF } from 'jspdf';
 import { autoTable, type RowInput } from 'jspdf-autotable';
 import { formatRange } from '../dateRange';
 import { formatRupiah } from '../money';
+import { profitLines, type Profit } from '../profit';
 import type { BreakdownRow, Report } from '../reports';
 
 /** A4 summary report (ADR-001). Loaded with `import()` only when exporting. Standard Helvetica (WinAnsi). */
@@ -38,7 +39,10 @@ function section(doc: DocWithTable, title: string, y: number, head: string[], bo
 const breakdownBody = (rows: readonly BreakdownRow[]) =>
   rows.map((r) => [r.label, String(r.transactions), formatRupiah(r.gross), formatRupiah(r.refunds), formatRupiah(r.net)]);
 
-export function buildPdf(storeName: string, report: Report, generatedAt: Date): Blob {
+/** Helvetica (WinAnsi) has no U+2212, so negatives use a plain hyphen. */
+const signedRupiah = (amount: number) => (amount < 0 ? `-${formatRupiah(-amount)}` : formatRupiah(amount));
+
+export function buildPdf(storeName: string, report: Report, generatedAt: Date, profit?: Profit): Blob {
   const doc: DocWithTable = new jsPDF({ unit: 'mm', format: 'a4' });
   const s = report.summary;
 
@@ -73,6 +77,10 @@ export function buildPdf(storeName: string, report: Report, generatedAt: Date): 
   });
 
   let y = nextY(doc, 60);
+  if (profit && profit.mode !== 'none') {
+    const title = profit.mode === 'cost' ? 'Laba (perkiraan)' : 'Penjualan dan pengeluaran';
+    y = section(doc, title, y, ['Keterangan', 'Jumlah'], profitLines(profit).map((line) => [line.label, signedRupiah(line.amount)]), [1]);
+  }
   const head = ['Nama', 'Transaksi', 'Penjualan', 'Refund', 'Bersih'];
   y = section(doc, 'Per metode pembayaran', y, head, breakdownBody(report.byPaymentMethod), [1, 2, 3, 4]);
   y = section(doc, 'Per mode penjualan', y, head, breakdownBody(report.bySalesMode), [1, 2, 3, 4]);

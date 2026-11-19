@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { localDb } from '../db/localDb';
+import { getBusinessDate } from '../lib/businessDate';
 import type { OrderItem, PaymentMethod } from '../types';
 import { ensureLocalStore } from './bootstrap';
 import { cancelOpenOrder, completeOrder, saveOpenOrder, type CartSnapshot } from './orders';
@@ -101,6 +102,17 @@ describe('open orders', () => {
     expect(paid.totals.grandTotal).toBe(45_000);
 
     await expect(completeOrder(cart({ openOrderId: open.id }), ctx, { method: cash, amount: 30_000, cashReceived: 30_000 })).rejects.toThrow(/berstatus Lunas/);
+  });
+
+  it('counts a saved order on the day it is paid, keeping its receipt number', async () => {
+    const { ctx, cash } = await setup();
+    const saved = await saveOpenOrder(cart({ label: 'Bon Bu Sari' }), ctx);
+    await localDb.orders.update(saved.id, { businessDate: '2026-01-05' }); // saved days ago
+
+    const paid = await completeOrder(cart({ openOrderId: saved.id, label: 'Bon Bu Sari' }), ctx, { method: cash, amount: 30_000, cashReceived: 30_000 });
+    expect(paid.receiptNo).toBe(saved.receiptNo);
+    expect(paid.businessDate).not.toBe('2026-01-05');
+    expect(paid.businessDate).toBe(getBusinessDate(new Date(), ctx.store));
   });
 
   it('cancels with a reason and writes an audit event', async () => {

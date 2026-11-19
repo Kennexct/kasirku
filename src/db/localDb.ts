@@ -3,7 +3,9 @@ import type {
   AuditEvent,
   Category,
   Customer,
+  DayClosing,
   Discount,
+  Expense,
   Order,
   OutboxEntry,
   PaymentMethod,
@@ -34,6 +36,8 @@ export class LocalDb extends Dexie {
   outbox!: EntityTable<OutboxEntry, 'seq'>;
   meta!: EntityTable<{ key: string; value: string }, 'key'>;
   stores!: EntityTable<Store, 'id'>;
+  expenses!: EntityTable<Expense, 'id'>;
+  dayClosings!: EntityTable<DayClosing, 'id'>;
 
   constructor() {
     super('kasirku');
@@ -66,6 +70,11 @@ export class LocalDb extends Dexie {
             refund.businessDate ??= refund.createdAt.slice(0, 10);
           }),
       );
+    // ADR-007: expenses and day closings, both read by business day.
+    this.version(4).stores({
+      expenses: 'id, storeId, [storeId+businessDate]',
+      dayClosings: 'id, storeId, [storeId+businessDate]',
+    });
   }
 }
 

@@ -1,6 +1,7 @@
 import readExcelFile from 'read-excel-file/node';
 import { describe, expect, it } from 'vitest';
-import type { Order, Refund } from '../../types';
+import { buildProfit } from '../profit';
+import type { Expense, Order, Refund } from '../../types';
 import { buildReport, type ReportInput } from '../reports';
 import type { ExportContext } from './columns';
 import { csvCell, datasetCsv } from './csv';
@@ -68,6 +69,22 @@ describe('xlsx', () => {
     expect(transactions[2]?.[2]).toBe('INV-20261118-A10002');
     const items = sheets[2]?.data ?? [];
     expect(items[2]?.[3]).toBe('\'=HYPERLINK("http://evil")');
+  });
+});
+
+describe('xlsx with profit and expenses (ADR-007)', () => {
+  it('adds the profit statement to the summary and an expenses sheet with sanitized notes', async () => {
+    const expenses = [
+      { id: 'e1', businessDate: '2026-11-18', createdAt: '2026-11-18T03:00:00Z', category: 'wages', amount: 2_000, note: '=SUM(A1)', isFromDrawer: false, actorId: 'none' },
+    ] as unknown as Expense[];
+    const profit = buildProfit({ sales: ctx.input.sales, summary: report.summary, expenses });
+    const blob = await buildExport({ format: 'xlsx', dataset: 'transactions', storeName: 'Bakso Pak Budi', report, ctx: { ...ctx, profit, expenses } });
+    const sheets = await readExcelFile(Buffer.from(await blob.arrayBuffer()));
+    expect(sheets.map((s) => s.sheet)).toEqual(['Ringkasan', 'Transaksi', 'Item', 'Refund', 'Per Produk', 'Pengeluaran']);
+
+    const summary = sheets[0]?.data ?? [];
+    expect(summary.find((row) => row[0] === 'Sisa setelah pengeluaran')?.[1]).toBe(report.summary.netSales - report.summary.taxTotal - 2_000);
+    expect(sheets[5]?.data[1]).toEqual(['2026-11-18', 'Gaji & upah', "'=SUM(A1)", 'Tidak', 2_000, null]);
   });
 });
 

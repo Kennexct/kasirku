@@ -1,7 +1,8 @@
-import { ORDER_STATUS_LABEL, REFUND_REASON_LABEL } from '../../constants';
+import { EXPENSE_CATEGORY_LABEL, ORDER_STATUS_LABEL, REFUND_REASON_LABEL } from '../../constants';
 import { lineTotal } from '../pricing';
+import type { Profit } from '../profit';
 import type { ReportInput } from '../reports';
-import type { Order, OrderItem, Refund } from '../../types';
+import type { Expense, Order, OrderItem, Refund } from '../../types';
 
 /**
  * Column definitions shared by CSV and XLSX (ADR-001) — one place decides what a dataset contains.
@@ -32,6 +33,9 @@ export const sanitizeText = (value: string): string => (FORMULA_TRIGGER.test(val
 export interface ExportContext {
   input: ReportInput;
   timeZone: string;
+  /** Profit statement and the period's expenses (ADR-007); absent in older callers and tests. */
+  profit?: Profit;
+  expenses?: readonly Expense[];
 }
 
 const timeFormatters = new Map<string, Intl.DateTimeFormat>();
@@ -113,4 +117,20 @@ export function refundRows({ input }: ExportContext): RefundRow[] {
   return [...input.refunds]
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
     .map((refund) => ({ refund, order: input.ordersById.get(refund.orderId), actor: input.memberName.get(refund.actorId) ?? '' }));
+}
+
+export const EXPENSE_COLUMNS: ReadonlyArray<ExportColumn<{ expense: Expense; actor: string }>> = [
+  { header: 'Tanggal', kind: 'text', width: 12, value: ({ expense }) => expense.businessDate },
+  { header: 'Kategori', kind: 'text', width: 24, value: ({ expense }) => EXPENSE_CATEGORY_LABEL[expense.category] },
+  { header: 'Catatan', kind: 'text', width: 32, value: ({ expense }) => expense.note },
+  { header: 'Dari laci', kind: 'text', width: 10, value: ({ expense }) => (expense.isFromDrawer ? 'Ya' : 'Tidak') },
+  { header: 'Jumlah', kind: 'money', width: 14, value: ({ expense }) => expense.amount },
+  { header: 'Dicatat oleh', kind: 'text', width: 18, value: ({ actor }) => actor },
+];
+
+/** Oldest first, like the other ledgers. */
+export function expenseRows({ input, expenses = [] }: ExportContext): Array<{ expense: Expense; actor: string }> {
+  return [...expenses]
+    .sort((a, b) => a.businessDate.localeCompare(b.businessDate) || a.createdAt.localeCompare(b.createdAt))
+    .map((expense) => ({ expense, actor: input.memberName.get(expense.actorId) ?? '' }));
 }

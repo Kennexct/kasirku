@@ -7,6 +7,8 @@ interface AddItemInput {
   productId: Id;
   name: string;
   unitPrice: number;
+  /** Product cost price at this moment, if the product has one (ADR-007). */
+  unitCost?: number;
   options: SelectedOption[];
 }
 
@@ -56,7 +58,7 @@ export const useCartStore = create<CartState>()(
       ...EMPTY_CART,
       items: [],
 
-      addItem: ({ productId, name, unitPrice, options }) =>
+      addItem: ({ productId, name, unitPrice, unitCost, options }) =>
         set((state) => {
           const existing = state.items.find(
             (item) => item.productId === productId && sameOptions(item.options, options) && item.note === '',
@@ -71,6 +73,7 @@ export const useCartStore = create<CartState>()(
             productId,
             nameSnapshot: name,
             unitPrice,
+            ...(unitCost !== undefined ? { unitCost } : {}),
             qty: 1,
             options,
             discount: null,

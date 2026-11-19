@@ -9,6 +9,7 @@ import { LoadingScreen } from './components/ui/LoadingScreen';
 import { ROUTES } from './constants';
 import { useBootstrap } from './hooks/useBootstrap';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
+import { CashPage } from './pages/Cash/CashPage';
 import { CustomersPage } from './pages/Customers/CustomersPage';
 import { HistoryPage } from './pages/History/HistoryPage';
 import { MorePage } from './pages/More/MorePage';
@@ -77,6 +78,7 @@ export default function App() {
           <Route path={ROUTES.products} element={<OwnerGate><ProductsPage /></OwnerGate>} />
           <Route path={ROUTES.settings} element={<OwnerGate><SettingsPage /></OwnerGate>} />
           <Route path={ROUTES.customers} element={<CustomersPage />} />
+          <Route path={ROUTES.cash} element={<CashPage />} />
           <Route path={ROUTES.more} element={<MorePage />} />
         </Route>
         <Route path="*" element={<Navigate to={ROUTES.pos} replace />} />

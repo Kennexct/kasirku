@@ -1,4 +1,4 @@
-import type { OrderStatus, PaymentType, RefundReason, StoreRules } from '../types';
+import type { ExpenseCategory, OrderStatus, PaymentType, RefundReason, StoreRules } from '../types';
 
 export const PAYMENT_TYPE_LABEL: Record<PaymentType, string> = {
   cash: 'Tunai',
@@ -86,6 +86,29 @@ export const ROUTES = {
   reports: '/laporan',
   products: '/produk',
   customers: '/pelanggan',
+  cash: '/kas',
   settings: '/pengaturan',
   more: '/lainnya',
 } as const;
+
+/** Order shown in the expense form. "ingredients" is the only cost-of-goods category (ADR-007). */
+export const EXPENSE_CATEGORIES: readonly ExpenseCategory[] = ['ingredients', 'supplies', 'wages', 'utilities', 'rent', 'transport', 'other'];
+export const EXPENSE_CATEGORY_LABEL: Record<ExpenseCategory, string> = {
+  ingredients: 'Belanja bahan',
+  supplies: 'Kemasan & perlengkapan',
+  wages: 'Gaji & upah',
+  utilities: 'Listrik, gas, air',
+  rent: 'Sewa tempat',
+  transport: 'Transportasi',
+  other: 'Lainnya',
+};
+export const EXPENSE_NOTE_MAX = 120;
+export const MAX_EXPENSE_AMOUNT = 1_000_000_000;
+export const CLOSING_NOTE_MAX = 200;
+export const CLOSING_HISTORY_LIMIT = 60;
+
+export const BACKUP_APP_ID = 'kasirku';
+export const BACKUP_FORMAT_VERSION = 1;
+export const BACKUP_MAX_BYTES = 200 * 1024 * 1024;
+export const LAST_BACKUP_KEY = 'lastBackupAt';
+export const RESTORED_AT_KEY = 'restoredAt';

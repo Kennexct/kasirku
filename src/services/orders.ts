@@ -127,7 +127,15 @@ export async function completeOrder(cart: CartSnapshot, ctx: OrderContext, payme
     change: isCash ? (payment.cashReceived ?? 0) - draft.totals.grandTotal : undefined,
   };
 
-  const order: Order = { ...draft, status: 'paid', payments: [orderPayment], paidAt: nowIso() };
+  // Cash basis (ADR-002, ADR-007): a saved order paid on a later day counts on the day the money came in.
+  // The receipt number keeps the day the order was opened.
+  const order: Order = {
+    ...draft,
+    status: 'paid',
+    payments: [orderPayment],
+    paidAt: nowIso(),
+    businessDate: getBusinessDate(new Date(), ctx.store),
+  };
   await saveAndQueue('orders', order);
   return order;
 }

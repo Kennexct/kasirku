@@ -17,6 +17,8 @@ const REMOTE_TABLE: Record<SyncTable, string> = {
   refunds: 'refunds',
   auditEvents: 'audit_events',
   storeMembers: 'store_members',
+  expenses: 'expenses',
+  dayClosings: 'day_closings',
 };
 
 /**

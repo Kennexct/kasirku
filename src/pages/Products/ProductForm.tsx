@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { ProductThumb } from '../../components/ui/ProductThumb';
 import { RupiahInput } from '../../components/ui/RupiahInput';
 import { Sheet } from '../../components/ui/Sheet';
+import { formatRupiah } from '../../lib/money';
 import { btnGhost, btnPrimary, btnSecondary, helperText, inputBase, labelBase, option, sectionTitle } from '../../components/ui/styles';
 import { Switch } from '../../components/ui/Switch';
 import type { Catalog } from '../../hooks/useCatalog';
@@ -157,6 +158,20 @@ export function ProductForm({ product, catalog, storeId, onClose }: ProductFormP
                   <RupiahInput id={`price-${mode.id}`} value={draft.modePrices[mode.id] ?? null} onChange={(v) => setModePrice(mode.id, v)} placeholder="Ikut harga dasar" />
                 </div>
               ))}
+              <div>
+                <label htmlFor="cost-price" className={labelBase}>Harga modal <span className="font-normal text-muted">(opsional)</span></label>
+                <RupiahInput
+                  id="cost-price"
+                  value={draft.costPrice ?? null}
+                  onChange={(v) => update({ costPrice: v ?? undefined })}
+                  placeholder="Belum diisi"
+                />
+                <p className={helperText}>
+                  {draft.costPrice !== undefined && draft.basePrice > 0
+                    ? `Untung per porsi ${formatRupiah(draft.basePrice - draft.costPrice)} (harga dasar).`
+                    : 'Biaya membuat satu porsi. Dipakai untuk menghitung laba di Laporan.'}
+                </p>
+              </div>
             </div>
             {markupModes.length > 0 && (
               <p className={helperText}>{markupModes.map((m) => `${m.name}: otomatis +${m.markupPct}% dari harga dasar`).join(' · ')}</p>
