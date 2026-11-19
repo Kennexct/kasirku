@@ -1,6 +1,7 @@
 import type { Customer, Id, Order } from '../types';
 import { formatRupiah } from './money';
 import { isCountedSale } from './reports';
+import { DATE_LOCALE, t } from '../i18n';
 
 /** Customer helpers (ADR-005). Phones are stored canonically as `+628…`. */
 const CANONICAL_PHONE = /^\+628\d{7,12}$/;
@@ -81,17 +82,17 @@ export function customerStats(orders: readonly Order[]): Map<Id, CustomerStats> 
 /** WhatsApp text reminding a customer of their unpaid orders. Pure, so the wording is tested. */
 export function buildDebtReminder(input: { storeName: string; customerName: string; orders: readonly Order[]; timeZone: string }): string {
   const open = input.orders.filter((o) => o.status === 'open').sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-  const format = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: input.timeZone });
+  const format = new Intl.DateTimeFormat(DATE_LOCALE, { day: 'numeric', month: 'short', year: 'numeric', timeZone: input.timeZone });
   const lines = open.map((o) => `- ${format.format(new Date(o.createdAt))}${o.label ? ` · ${o.label}` : ''} · ${formatRupiah(o.totals.grandTotal)}`);
   const total = open.reduce((sum, o) => sum + o.totals.grandTotal, 0);
   return [
-    `Halo ${input.customerName}, ini dari ${input.storeName}.`,
+    t('Halo {0}, ini dari {1}.', input.customerName, input.storeName),
     '',
-    open.length === 1 ? 'Kami ingin mengingatkan pesanan yang belum dibayar:' : `Kami ingin mengingatkan ${open.length} pesanan yang belum dibayar:`,
+    open.length === 1 ? t('Kami ingin mengingatkan pesanan yang belum dibayar:') : t('Kami ingin mengingatkan {0} pesanan yang belum dibayar:', open.length),
     ...lines,
     '',
-    `Total: ${formatRupiah(total)}`,
+    t('Total: {0}', formatRupiah(total)),
     '',
-    'Terima kasih.',
+    t('Terima kasih.'),
   ].join('\n');
 }

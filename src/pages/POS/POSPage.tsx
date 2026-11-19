@@ -28,11 +28,12 @@ import { ProductGrid } from './components/ProductGrid';
 import { SaveOrderSheet } from './components/SaveOrderSheet';
 import { SoldOutSheet } from './components/SoldOutSheet';
 import { VariantSheet } from './components/VariantSheet';
+import { t } from '../../i18n';
 
 type Panel = 'none' | 'cart' | 'discount' | 'customer' | 'payment' | 'save' | 'soldOut';
 const ALL_CATEGORIES = 'all';
 
-const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : 'Terjadi kesalahan.');
+const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : t('Terjadi kesalahan.'));
 
 export function POSPage() {
   const { store, catalog, cashierId, cashierName, hasOwnerPowers } = useAppData();
@@ -92,7 +93,7 @@ export function POSPage() {
   );
 
   if (!store || !catalog) return <LoadingScreen />;
-  if (!mode) return <LoadingScreen message="Aktifkan minimal satu mode penjualan di Pengaturan." />;
+  if (!mode) return <LoadingScreen message={t('Aktifkan minimal satu mode penjualan di Pengaturan.')} />;
 
   const groupsFor = (product: Product) =>
     product.variantGroupIds.flatMap((id) => catalog.variantGroups.filter((g) => g.id === id));
@@ -130,7 +131,7 @@ export function POSPage() {
       cart.clear();
       setPanel('none');
       if (store.settings.shouldAutoShowReceipt) setReceiptOrder(order);
-      else toast.success(`Lunas • ${order.receiptNo}`);
+      else toast.success(t('Lunas • {0}', order.receiptNo));
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
@@ -144,7 +145,7 @@ export function POSPage() {
       const order = await saveOpenOrder({ ...snapshot(), label }, ctx);
       cart.clear();
       setPanel('none');
-      toast.success(`Pesanan "${order.label}" disimpan`);
+      toast.success(t('Pesanan "{0}" disimpan', order.label));
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
@@ -193,13 +194,13 @@ export function POSPage() {
 
   return (
     <div className="flex min-h-0 flex-1">
-      <section aria-label="Produk" className="flex min-w-0 flex-1 flex-col">
+      <section aria-label={t('Produk')} className="flex min-w-0 flex-1 flex-col">
         {checklist && <ChecklistBanner checklist={checklist} />}
         <div className="flex flex-col gap-3 border-b border-line bg-surface px-3 pt-3 md:px-5 md:pt-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
             <div className="flex min-w-0 flex-1 gap-2">
-              <SearchInput value={search} onChange={setSearch} placeholder="Cari menu…" label="Cari produk" />
-              <button type="button" aria-label="Tandai stok habis" title="Tandai stok habis" onClick={() => setPanel('soldOut')} className={`${btnIcon} relative`}>
+              <SearchInput value={search} onChange={setSearch} placeholder={t('Cari menu…')} label={t('Cari produk')} />
+              <button type="button" aria-label={t('Tandai stok habis')} title={t('Tandai stok habis')} onClick={() => setPanel('soldOut')} className={`${btnIcon} relative`}>
                 <PackageX aria-hidden size={20} />
                 {soldOutCount > 0 && (
                   <span className="num absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-md bg-ink px-1 text-[11px] font-bold text-white">
@@ -210,7 +211,7 @@ export function POSPage() {
             </div>
             <div className="-mx-3 min-w-0 overflow-x-auto px-3 [scrollbar-width:none] md:mx-0 md:max-w-[55%] md:px-0">
               <SegmentedControl
-                label="Mode penjualan"
+                label={t('Mode penjualan')}
                 options={activeModes.map((m) => ({ value: m.id, label: m.name }))}
                 value={mode.id}
                 onChange={(id) => {
@@ -221,10 +222,10 @@ export function POSPage() {
             </div>
           </div>
           <Tabs
-            label="Kategori"
+            label={t('Kategori')}
             value={categoryId}
             onChange={setCategoryId}
-            items={[{ value: ALL_CATEGORIES, label: 'Semua' }, ...catalog.categories.map((c) => ({ value: c.id, label: c.name }))]}
+            items={[{ value: ALL_CATEGORIES, label: t('Semua') }, ...catalog.categories.map((c) => ({ value: c.id, label: c.name }))]}
           />
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-3 pb-24 md:p-5">
@@ -232,7 +233,7 @@ export function POSPage() {
         </div>
       </section>
 
-      <aside aria-label="Keranjang" className="hidden w-[38%] min-w-[340px] max-w-[420px] border-l border-line md:flex md:flex-col">
+      <aside aria-label={t('Keranjang')} className="hidden w-[38%] min-w-[340px] max-w-[420px] border-l border-line md:flex md:flex-col">
         {cartPanel}
       </aside>
 
@@ -244,13 +245,13 @@ export function POSPage() {
             className="animate-sheet flex h-14 w-full items-center gap-3 rounded-xl bg-ink px-4 text-white shadow-pop active:translate-y-px"
           >
             <span className="num flex h-7 min-w-7 items-center justify-center rounded-md bg-brand-500 px-1.5 text-[13px] font-bold">{itemCount}</span>
-            <span className="text-[15px] font-semibold">Lihat pesanan</span>
+            <span className="text-[15px] font-semibold">{t('Lihat pesanan')}</span>
             <span className="num ml-auto text-[16px] font-bold">{formatRupiah(totals.grandTotal)}</span>
           </button>
         </div>
       )}
 
-      <Sheet title={cart.openOrderId ? cart.label : 'Pesanan baru'} isOpen={panel === 'cart'} onClose={() => setPanel('none')} isFlush>
+      <Sheet title={cart.openOrderId ? cart.label : t('Pesanan baru')} isOpen={panel === 'cart'} onClose={() => setPanel('none')} isFlush>
         <CartPanel
           totals={totals}
           modeName={mode.name}
@@ -281,7 +282,7 @@ export function POSPage() {
           current={cart.orderDiscount}
           maxPercent={hasOwnerPowers ? null : store.settings.cashierMaxDiscountPct}
           baseAmount={totals.subtotal - totals.itemDiscountTotal}
-          onRequestOverride={async () => (await requestOwnerApproval('Diskon di atas batas kasir'))?.ownerId ?? null}
+          onRequestOverride={async () => (await requestOwnerApproval(t('Diskon di atas batas kasir')))?.ownerId ?? null}
           onApply={(discount) => void handleApplyDiscount(discount)}
           onClose={closeSub}
         />

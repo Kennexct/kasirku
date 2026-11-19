@@ -7,13 +7,13 @@ errors = []
 
 def run(p, name, viewport, is_mobile):
     browser = p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox'])
-    ctx = browser.new_context(viewport=viewport, is_mobile=is_mobile, has_touch=is_mobile, device_scale_factor=1)
+    ctx = browser.new_context(locale='id-ID', viewport=viewport, is_mobile=is_mobile, has_touch=is_mobile, device_scale_factor=1)
     page = ctx.new_page()
     page.on('pageerror', lambda e: errors.append(f'{name} pageerror: {e}'))
     page.on('console', lambda m: m.type == 'error' and errors.append(f'{name} console: {m.text}'))
     page.goto(BASE)
     page.get_by_role('button', name='Lewati, pakai contoh toko').click()  # first-time journey: take the example store
-    page.get_by_role('heading', name='Toko Anda').wait_for(state='hidden')  # store is created before moving on
+    page.get_by_role('navigation').first.wait_for()  # the store exists once the app shell is up
     page.get_by_role('button', name='Es Teh').first.wait_for()
     page.wait_for_timeout(400); page.screenshot(path=f'{OUT}/{name}-1-pos.png')
 

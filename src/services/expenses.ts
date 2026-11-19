@@ -5,6 +5,7 @@ import type { BusinessDate, Expense, ExpenseCategory, Id } from '../types';
 import { writeAudit } from './audit';
 import { newMeta } from './catalog';
 import { saveAndQueue } from './sync';
+import { t } from '../i18n';
 
 export interface ExpenseInput {
   businessDate: BusinessDate;
@@ -19,11 +20,11 @@ export interface ExpenseInput {
 /** Record money that left the business (ADR-007). Any seller may do this. */
 export async function addExpense(storeId: Id, input: ExpenseInput): Promise<Expense> {
   const { amount } = input;
-  if (amount === null || !Number.isSafeInteger(amount) || amount <= 0) throw new Error('Isi jumlah pengeluaran.');
-  if (amount > MAX_EXPENSE_AMOUNT) throw new Error('Jumlah terlalu besar.');
-  if (!EXPENSE_CATEGORIES.includes(input.category)) throw new Error('Kategori tidak dikenal.');
+  if (amount === null || !Number.isSafeInteger(amount) || amount <= 0) throw new Error(t('Isi jumlah pengeluaran.'));
+  if (amount > MAX_EXPENSE_AMOUNT) throw new Error(t('Jumlah terlalu besar.'));
+  if (!EXPENSE_CATEGORIES.includes(input.category)) throw new Error(t('Kategori tidak dikenal.'));
   const note = input.note.trim();
-  if (note.length > EXPENSE_NOTE_MAX) throw new Error(`Catatan maksimal ${EXPENSE_NOTE_MAX} karakter.`);
+  if (note.length > EXPENSE_NOTE_MAX) throw new Error(t('Catatan maksimal {0} karakter.', EXPENSE_NOTE_MAX));
 
   const expense: Expense = {
     ...newMeta(storeId),
@@ -41,7 +42,7 @@ export async function addExpense(storeId: Id, input: ExpenseInput): Promise<Expe
 /** Soft delete, audited. The caller checks owner access first (ADR-004). */
 export async function deleteExpense(expenseId: Id, actorId: Id, approvedById: Id | null): Promise<void> {
   const expense = await localDb.expenses.get(expenseId);
-  if (!expense || expense.deletedAt) throw new Error('Pengeluaran tidak ditemukan.');
+  if (!expense || expense.deletedAt) throw new Error(t('Pengeluaran tidak ditemukan.'));
   const now = nowIso();
   await saveAndQueue('expenses', { ...expense, deletedAt: now, updatedAt: now });
   await writeAudit({

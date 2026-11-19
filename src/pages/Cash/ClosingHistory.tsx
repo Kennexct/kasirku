@@ -5,6 +5,7 @@ import { formatBusinessDate } from '../../lib/dateRange';
 import { formatRupiah } from '../../lib/money';
 import type { DayClosing, Id } from '../../types';
 import { DifferenceBadge } from './DifferenceBadge';
+import { t } from '../../i18n';
 
 interface ClosingHistoryProps {
   closings: readonly DayClosing[];
@@ -16,16 +17,16 @@ const COLUMNS = 'md:grid-cols-[1.4fr_1fr_1fr_1fr_auto]';
 /** Past closings, newest first: sales, expected vs counted cash, and the difference. */
 export function ClosingHistory({ closings, memberNames }: ClosingHistoryProps) {
   if (closings.length === 0) {
-    return <EmptyState icon={CalendarCheck} title="Belum pernah tutup kasir" description="Setelah kasir ditutup, hasil hitung uang laci setiap hari tersimpan di sini." />;
+    return <EmptyState icon={CalendarCheck} title={t('Belum pernah tutup kasir')} description={t('Setelah kasir ditutup, hasil hitung uang laci setiap hari tersimpan di sini.')} />;
   }
   return (
     <div className={`${card} overflow-hidden`}>
       <div className={`hidden gap-3 border-b border-line bg-subtle px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.06em] text-muted md:grid ${COLUMNS}`}>
-        <span>Hari</span>
-        <span className="text-right">Penjualan bersih</span>
-        <span className="text-right">Seharusnya</span>
-        <span className="text-right">Dihitung</span>
-        <span className="w-[130px] text-right">Selisih</span>
+        <span>{t('Hari')}</span>
+        <span className="text-right">{t('Penjualan bersih')}</span>
+        <span className="text-right">{t('Seharusnya')}</span>
+        <span className="text-right">{t('Dihitung')}</span>
+        <span className="w-[130px] text-right">{t('Selisih')}</span>
       </div>
       <ul className="divide-y divide-line">
         {closings.map((closing) => (
@@ -33,8 +34,8 @@ export function ClosingHistory({ closings, memberNames }: ClosingHistoryProps) {
             <div className="min-w-0">
               <p className="truncate text-[15px] font-semibold">{formatBusinessDate(closing.businessDate)}</p>
               <p className="truncate text-[13px] text-muted">
-                {memberNames.get(closing.closedById) ?? 'Kasir'}
-                <span className="num md:hidden"> · jual {formatRupiah(closing.netSales)} · laci {formatRupiah(closing.countedCash)}</span>
+                {memberNames.get(closing.closedById) ?? t('Kasir::orang')}
+                <span className="num md:hidden"> {t('· jual')} {formatRupiah(closing.netSales)} {t('· laci')} {formatRupiah(closing.countedCash)}</span>
                 {closing.note ? ` · ${closing.note}` : ''}
               </p>
             </div>

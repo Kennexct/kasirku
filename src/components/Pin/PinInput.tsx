@@ -1,5 +1,6 @@
 import { PIN_MAX_LENGTH } from '../../constants';
 import { inputBase } from '../ui/styles';
+import { t } from '../../i18n';
 
 interface PinInputProps {
   id: string;
@@ -12,7 +13,7 @@ interface PinInputProps {
  * Masked numeric field for PINs inside forms. A text input with disc masking (not type=password)
  * so browsers don't offer to save a counter PIN as a site password.
  */
-export function PinInput({ id, value, onChange, placeholder = '4–6 angka' }: PinInputProps) {
+export function PinInput({ id, value, onChange, placeholder = t('4–6 angka') }: PinInputProps) {
   return (
     <input
       id={id}

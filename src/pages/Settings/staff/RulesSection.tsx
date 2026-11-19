@@ -6,11 +6,12 @@ import { PERCENT_MAX } from '../../../constants';
 import { updateStore } from '../../../services/bootstrap';
 import type { PermissionLevel, Store, StoreRules } from '../../../types';
 import { SettingsSection } from '../SettingsSection';
+import { t } from '../../../i18n';
 
 type RuleChoice = 'free' | 'pin';
 const RULE_OPTIONS = [
-  { value: 'free', label: 'Kasir boleh langsung' },
-  { value: 'pin', label: 'Perlu PIN pemilik' },
+  { value: 'free', label: t('Kasir boleh langsung') },
+  { value: 'pin', label: t('Perlu PIN pemilik') },
 ] as const;
 const MAX_REFUND_WINDOW_DAYS = 90;
 
@@ -28,41 +29,41 @@ export function RulesSection({ store }: { store: Store }) {
   const save = async () => {
     try {
       await updateStore({ ...store, settings: rules });
-      toast.success('Aturan kasir disimpan');
+      toast.success(t('Aturan kasir disimpan'));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan aturan.');
+      toast.error(error instanceof Error ? error.message : t('Gagal menyimpan aturan.'));
     }
   };
 
   return (
     <SettingsSection
-      title="Aturan kasir"
-      description="Berlaku saat mode pemilik terkunci. Tanpa PIN pemilik, semua tindakan terbuka."
+      title={t('Aturan kasir')}
+      description={t('Berlaku saat mode pemilik terkunci. Tanpa PIN pemilik, semua tindakan terbuka.')}
       footer={
         <button type="button" disabled={!isDirty} onClick={() => void save()} className={`${btnPrimary} h-11`}>
-          Simpan aturan
+          {t('Simpan aturan')}
         </button>
       }
     >
       <div className="flex flex-col gap-5">
         <div>
-          <p className={labelBase}>Void (batalkan transaksi hari ini)</p>
-          <SegmentedControl label="Aturan void" options={RULE_OPTIONS} value={toChoice(rules.voidPermission)} onChange={(c) => update({ voidPermission: toLevel(c) })} />
+          <p className={labelBase}>{t('Void (batalkan transaksi hari ini)')}</p>
+          <SegmentedControl label={t('Aturan void')} options={RULE_OPTIONS} value={toChoice(rules.voidPermission)} onChange={(c) => update({ voidPermission: toLevel(c) })} />
         </div>
         <div>
-          <p className={labelBase}>Refund</p>
-          <SegmentedControl label="Aturan refund" options={RULE_OPTIONS} value={toChoice(rules.refundPermission)} onChange={(c) => update({ refundPermission: toLevel(c) })} />
+          <p className={labelBase}>{t('Refund')}</p>
+          <SegmentedControl label={t('Aturan refund')} options={RULE_OPTIONS} value={toChoice(rules.refundPermission)} onChange={(c) => update({ refundPermission: toLevel(c) })} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="rule-discount" className={labelBase}>Batas diskon kasir (%)</label>
+            <label htmlFor="rule-discount" className={labelBase}>{t('Batas diskon kasir (%)')}</label>
             <input id="rule-discount" type="number" inputMode="numeric" min={0} max={PERCENT_MAX} value={rules.cashierMaxDiscountPct} onChange={(e) => update({ cashierMaxDiscountPct: clamp(e.target.value, PERCENT_MAX) })} className={`${inputBase} num`} />
-            <p className={helperText}>Di atas batas ini perlu PIN pemilik.</p>
+            <p className={helperText}>{t('Di atas batas ini perlu PIN pemilik.')}</p>
           </div>
           <div>
-            <label htmlFor="rule-refund-window" className={labelBase}>Batas waktu refund (hari)</label>
+            <label htmlFor="rule-refund-window" className={labelBase}>{t('Batas waktu refund (hari)')}</label>
             <input id="rule-refund-window" type="number" inputMode="numeric" min={0} max={MAX_REFUND_WINDOW_DAYS} value={rules.refundWindowDays} onChange={(e) => update({ refundWindowDays: clamp(e.target.value, MAX_REFUND_WINDOW_DAYS) })} className={`${inputBase} num`} />
-            <p className={helperText}>0 = hanya di hari yang sama.</p>
+            <p className={helperText}>{t('0 = hanya di hari yang sama.')}</p>
           </div>
         </div>
       </div>

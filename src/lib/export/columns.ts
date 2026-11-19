@@ -3,6 +3,7 @@ import { lineTotal } from '../pricing';
 import type { Profit } from '../profit';
 import type { ReportInput } from '../reports';
 import type { Expense, Order, OrderItem, Refund } from '../../types';
+import { t } from '../../i18n';
 
 /**
  * Column definitions shared by CSV and XLSX (ADR-001) — one place decides what a dataset contains.
@@ -21,9 +22,9 @@ export const DATASETS = ['transactions', 'items', 'refunds'] as const;
 export type Dataset = (typeof DATASETS)[number];
 
 export const DATASET_LABEL: Record<Dataset, string> = {
-  transactions: 'Transaksi',
-  items: 'Item',
-  refunds: 'Refund',
+  transactions: t('Transaksi'),
+  items: t('Item'),
+  refunds: t('Refund'),
 };
 
 /** Leading = + - @ TAB CR make spreadsheet apps evaluate text as a formula (CSV/formula injection). */
@@ -58,48 +59,48 @@ export type ItemRow = { order: Order; item: OrderItem };
 export type RefundRow = { refund: Refund; order: Order | undefined; actor: string };
 
 export const TRANSACTION_COLUMNS: ReadonlyArray<ExportColumn<TransactionRow>> = [
-  { header: 'Tanggal', width: 12, kind: 'text', value: (r) => r.order.businessDate },
-  { header: 'Jam', width: 7, kind: 'text', value: (r) => r.time },
-  { header: 'No. Struk', width: 22, kind: 'text', value: (r) => r.order.receiptNo },
-  { header: 'Status', width: 16, kind: 'text', value: (r) => ORDER_STATUS_LABEL[r.order.status] },
-  { header: 'Mode', width: 12, kind: 'text', value: (r) => r.order.salesModeNameSnapshot },
-  { header: 'Label', width: 16, kind: 'text', value: (r) => r.order.label },
+  { header: t('Tanggal'), width: 12, kind: 'text', value: (r) => r.order.businessDate },
+  { header: t('Jam'), width: 7, kind: 'text', value: (r) => r.time },
+  { header: t('No. Struk'), width: 22, kind: 'text', value: (r) => r.order.receiptNo },
+  { header: t('Status'), width: 16, kind: 'text', value: (r) => ORDER_STATUS_LABEL[r.order.status] },
+  { header: t('Mode'), width: 12, kind: 'text', value: (r) => r.order.salesModeNameSnapshot },
+  { header: t('Label'), width: 16, kind: 'text', value: (r) => r.order.label },
   // ADR-005: customer name only — phone numbers are never exported.
-  { header: 'Pelanggan', width: 18, kind: 'text', value: (r) => r.order.customerNameSnapshot ?? '' },
-  { header: 'Kasir', width: 14, kind: 'text', value: (r) => r.cashier },
-  { header: 'Metode', width: 14, kind: 'text', value: (r) => methodOf(r.order) },
-  { header: 'Referensi', width: 14, kind: 'text', value: (r) => r.order.payments[0]?.reference ?? '' },
-  { header: 'Item', width: 7, kind: 'int', value: (r) => r.order.items.reduce((s, i) => s + i.qty, 0) },
-  { header: 'Subtotal', width: 12, kind: 'money', value: (r) => r.order.totals.subtotal },
-  { header: 'Diskon', width: 11, kind: 'money', value: (r) => r.order.totals.itemDiscountTotal + r.order.totals.orderDiscountTotal },
-  { header: 'Service', width: 10, kind: 'money', value: (r) => r.order.totals.serviceTotal },
-  { header: 'Pajak', width: 10, kind: 'money', value: (r) => r.order.totals.taxTotal },
-  { header: 'Total', width: 12, kind: 'money', value: (r) => r.order.totals.grandTotal },
+  { header: t('Pelanggan::satu'), width: 18, kind: 'text', value: (r) => r.order.customerNameSnapshot ?? '' },
+  { header: t('Kasir::orang'), width: 14, kind: 'text', value: (r) => r.cashier },
+  { header: t('Metode'), width: 14, kind: 'text', value: (r) => methodOf(r.order) },
+  { header: t('Referensi'), width: 14, kind: 'text', value: (r) => r.order.payments[0]?.reference ?? '' },
+  { header: t('Item'), width: 7, kind: 'int', value: (r) => r.order.items.reduce((s, i) => s + i.qty, 0) },
+  { header: t('Subtotal'), width: 12, kind: 'money', value: (r) => r.order.totals.subtotal },
+  { header: t('Diskon'), width: 11, kind: 'money', value: (r) => r.order.totals.itemDiscountTotal + r.order.totals.orderDiscountTotal },
+  { header: t('Service'), width: 10, kind: 'money', value: (r) => r.order.totals.serviceTotal },
+  { header: t('Pajak'), width: 10, kind: 'money', value: (r) => r.order.totals.taxTotal },
+  { header: t('Total'), width: 12, kind: 'money', value: (r) => r.order.totals.grandTotal },
 ];
 
 export const ITEM_COLUMNS: ReadonlyArray<ExportColumn<ItemRow>> = [
-  { header: 'Tanggal', width: 12, kind: 'text', value: (r) => r.order.businessDate },
-  { header: 'No. Struk', width: 22, kind: 'text', value: (r) => r.order.receiptNo },
-  { header: 'Status', width: 16, kind: 'text', value: (r) => ORDER_STATUS_LABEL[r.order.status] },
-  { header: 'Produk', width: 22, kind: 'text', value: (r) => r.item.nameSnapshot },
-  { header: 'Varian', width: 22, kind: 'text', value: (r) => r.item.options.map((o) => o.name).join(', ') },
-  { header: 'Catatan', width: 18, kind: 'text', value: (r) => r.item.note },
-  { header: 'Qty', width: 6, kind: 'int', value: (r) => r.item.qty },
-  { header: 'Harga Satuan', width: 13, kind: 'money', value: (r) => r.item.unitPrice },
-  { header: 'Total Baris', width: 13, kind: 'money', value: (r) => lineTotal(r.item) },
+  { header: t('Tanggal'), width: 12, kind: 'text', value: (r) => r.order.businessDate },
+  { header: t('No. Struk'), width: 22, kind: 'text', value: (r) => r.order.receiptNo },
+  { header: t('Status'), width: 16, kind: 'text', value: (r) => ORDER_STATUS_LABEL[r.order.status] },
+  { header: t('Produk'), width: 22, kind: 'text', value: (r) => r.item.nameSnapshot },
+  { header: t('Varian'), width: 22, kind: 'text', value: (r) => r.item.options.map((o) => o.name).join(', ') },
+  { header: t('Catatan'), width: 18, kind: 'text', value: (r) => r.item.note },
+  { header: t('Qty'), width: 6, kind: 'int', value: (r) => r.item.qty },
+  { header: t('Harga Satuan'), width: 13, kind: 'money', value: (r) => r.item.unitPrice },
+  { header: t('Total Baris'), width: 13, kind: 'money', value: (r) => lineTotal(r.item) },
 ];
 
 export const REFUND_COLUMNS: ReadonlyArray<ExportColumn<RefundRow>> = [
-  { header: 'Tanggal Refund', width: 14, kind: 'text', value: (r) => r.refund.businessDate },
-  { header: 'Jenis', width: 8, kind: 'text', value: (r) => (r.refund.kind === 'void' ? 'Void' : 'Refund') },
-  { header: 'No. Struk', width: 22, kind: 'text', value: (r) => r.order?.receiptNo ?? '' },
-  { header: 'Tanggal Penjualan', width: 16, kind: 'text', value: (r) => r.order?.businessDate ?? '' },
-  { header: 'Metode Asal', width: 14, kind: 'text', value: (r) => methodOf(r.order) },
-  { header: 'Item', width: 7, kind: 'int', value: (r) => r.refund.items.reduce((s, i) => s + i.qty, 0) },
-  { header: 'Jumlah', width: 12, kind: 'money', value: (r) => r.refund.amount },
-  { header: 'Alasan', width: 16, kind: 'text', value: (r) => REFUND_REASON_LABEL[r.refund.reasonCode] },
-  { header: 'Catatan', width: 22, kind: 'text', value: (r) => r.refund.reasonNote },
-  { header: 'Oleh', width: 14, kind: 'text', value: (r) => r.actor },
+  { header: t('Tanggal Refund'), width: 14, kind: 'text', value: (r) => r.refund.businessDate },
+  { header: t('Jenis'), width: 8, kind: 'text', value: (r) => (r.refund.kind === 'void' ? t('Void') : t('Refund')) },
+  { header: t('No. Struk'), width: 22, kind: 'text', value: (r) => r.order?.receiptNo ?? '' },
+  { header: t('Tanggal Penjualan'), width: 16, kind: 'text', value: (r) => r.order?.businessDate ?? '' },
+  { header: t('Metode Asal'), width: 14, kind: 'text', value: (r) => methodOf(r.order) },
+  { header: t('Item'), width: 7, kind: 'int', value: (r) => r.refund.items.reduce((s, i) => s + i.qty, 0) },
+  { header: t('Jumlah'), width: 12, kind: 'money', value: (r) => r.refund.amount },
+  { header: t('Alasan'), width: 16, kind: 'text', value: (r) => REFUND_REASON_LABEL[r.refund.reasonCode] },
+  { header: t('Catatan'), width: 22, kind: 'text', value: (r) => r.refund.reasonNote },
+  { header: t('Oleh'), width: 14, kind: 'text', value: (r) => r.actor },
 ];
 
 /** Rows in chronological order (oldest first) — what accountants expect in a ledger. */
@@ -120,12 +121,12 @@ export function refundRows({ input }: ExportContext): RefundRow[] {
 }
 
 export const EXPENSE_COLUMNS: ReadonlyArray<ExportColumn<{ expense: Expense; actor: string }>> = [
-  { header: 'Tanggal', kind: 'text', width: 12, value: ({ expense }) => expense.businessDate },
-  { header: 'Kategori', kind: 'text', width: 24, value: ({ expense }) => EXPENSE_CATEGORY_LABEL[expense.category] },
-  { header: 'Catatan', kind: 'text', width: 32, value: ({ expense }) => expense.note },
-  { header: 'Dari laci', kind: 'text', width: 10, value: ({ expense }) => (expense.isFromDrawer ? 'Ya' : 'Tidak') },
-  { header: 'Jumlah', kind: 'money', width: 14, value: ({ expense }) => expense.amount },
-  { header: 'Dicatat oleh', kind: 'text', width: 18, value: ({ actor }) => actor },
+  { header: t('Tanggal'), kind: 'text', width: 12, value: ({ expense }) => expense.businessDate },
+  { header: t('Kategori'), kind: 'text', width: 24, value: ({ expense }) => EXPENSE_CATEGORY_LABEL[expense.category] },
+  { header: t('Catatan'), kind: 'text', width: 32, value: ({ expense }) => expense.note },
+  { header: t('Dari laci'), kind: 'text', width: 10, value: ({ expense }) => (expense.isFromDrawer ? t('Ya') : t('Tidak')) },
+  { header: t('Jumlah'), kind: 'money', width: 14, value: ({ expense }) => expense.amount },
+  { header: t('Dicatat oleh'), kind: 'text', width: 18, value: ({ actor }) => actor },
 ];
 
 /** Oldest first, like the other ledgers. */

@@ -10,12 +10,13 @@ import { AccountSheet } from '../Pin/AccountSheet';
 import { initialsOf } from '../Pin/SellerSwitcher';
 import { NAV_ITEMS, type NavItem } from './navItems';
 import { SyncBadge } from './SyncBadge';
+import { t } from '../../i18n';
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
     <span
-      aria-label={`${count} pesanan belum dibayar`}
+      aria-label={t('{0} pesanan belum dibayar', count)}
       className="num absolute right-2 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger-600 px-1 text-[11px] font-bold text-white ring-2 ring-surface"
     >
       {count}
@@ -26,7 +27,7 @@ function CountBadge({ count }: { count: number }) {
 function LockMark({ isShown }: { isShown: boolean }) {
   if (!isShown) return null;
   return (
-    <span aria-label="terkunci, butuh PIN pemilik" className="absolute right-2 top-1.5 text-faint">
+    <span aria-label={t('terkunci, butuh PIN pemilik')} className="absolute right-2 top-1.5 text-faint">
       <Lock aria-hidden size={12} strokeWidth={2.5} />
     </span>
   );
@@ -93,7 +94,7 @@ export function AppShell() {
 
   return (
     <div className="flex h-dvh bg-canvas text-ink">
-      <nav aria-label="Navigasi utama" className="hidden w-[84px] shrink-0 flex-col border-r border-line bg-surface px-3 py-3 md:flex">
+      <nav aria-label={t('Navigasi utama')} className="hidden w-[84px] shrink-0 flex-col border-r border-line bg-surface px-3 py-3 md:flex">
         <div className="mb-4 flex justify-center">
           <LogoMark size={36} />
         </div>
@@ -105,15 +106,15 @@ export function AppShell() {
         <div className="mt-2 flex shrink-0 flex-col items-center gap-3 border-t border-line pt-3">
           <SyncBadge />
           {access.kind === 'unlocked' && (
-            <button type="button" onClick={lockOwner} title="Kunci mode pemilik" className="flex h-11 w-full flex-col items-center justify-center rounded-lg text-[11px] font-semibold text-brand-700 hover:bg-brand-50">
+            <button type="button" onClick={lockOwner} title={t('Kunci mode pemilik')} className="flex h-11 w-full flex-col items-center justify-center rounded-lg text-[11px] font-semibold text-brand-700 hover:bg-brand-50">
               <LockOpen aria-hidden size={18} />
-              Kunci
+              {t('Kunci')}
             </button>
           )}
           <button
             type="button"
-            aria-label={`Akun: ${cashier?.displayName ?? ''}. Ganti kasir`}
-            title={`${cashier?.displayName ?? ''} · ${cashier?.role === 'owner' ? 'Pemilik' : 'Kasir'}`}
+            aria-label={t('Akun: {0}. Ganti kasir', cashier?.displayName ?? '')}
+            title={`${cashier?.displayName ?? ''} · ${cashier?.role === 'owner' ? t('Pemilik') : t('Kasir::orang')}`}
             onClick={() => setIsAccountOpen(true)}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-[12px] font-bold text-white hover:bg-ink-soft"
           >
@@ -127,13 +128,13 @@ export function AppShell() {
       </main>
 
       <nav
-        aria-label="Navigasi bawah"
+        aria-label={t('Navigasi bawah')}
         className="fixed inset-x-0 bottom-0 z-30 grid h-[calc(64px+env(safe-area-inset-bottom))] auto-cols-fr grid-flow-col border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
       >
         {NAV_ITEMS.filter((item) => item.isPrimary).map((item) => (
           <TabLink key={item.to} to={item.to} label={item.label} icon={item.icon} badge={badgeFor(item)} isLocked={isLocked(item)} />
         ))}
-        <TabLink to={ROUTES.more} label="Lainnya" icon={MoreHorizontal} badge={0} isLocked={false} />
+        <TabLink to={ROUTES.more} label={t('Lainnya::menu')} icon={MoreHorizontal} badge={0} isLocked={false} />
       </nav>
 
       {isAccountOpen && <AccountSheet onClose={() => setIsAccountOpen(false)} />}

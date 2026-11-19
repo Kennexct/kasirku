@@ -1,4 +1,5 @@
 import type { BusinessDate, Store } from '../types';
+import { t } from '../i18n';
 
 const RECEIPT_SEQ_DIGITS = 4;
 
@@ -16,8 +17,8 @@ export function getBusinessDate(at: Date, store: Pick<Store, 'timezone' | 'dayCu
 /** INV-YYYYMMDD-<device 2 chars><seq 4>, e.g. INV-20261118-A10042. */
 export function formatReceiptNo(businessDate: BusinessDate, deviceCode: string, seq: number): string {
   if (!/^[A-Z0-9]{2}$/.test(deviceCode)) {
-    throw new Error(`Device code must be 2 uppercase alphanumerics, got "${deviceCode}"`);
+    throw new Error(t('Device code must be 2 uppercase alphanumerics, got "{0}"', deviceCode));
   }
   const compactDate = businessDate.replace(/-/g, '');
-  return `INV-${compactDate}-${deviceCode}${String(seq).padStart(RECEIPT_SEQ_DIGITS, '0')}`;
+  return t('INV-{0}-{1}{2}', compactDate, deviceCode, String(seq).padStart(RECEIPT_SEQ_DIGITS, '0'));
 }

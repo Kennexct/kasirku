@@ -4,18 +4,21 @@ import { PageHeader } from '../../components/Layout/PageHeader';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { Tabs } from '../../components/ui/Tabs';
 import { useAppData } from '../../hooks/useAppData';
+import { LanguagePicker } from '../../components/LanguagePicker';
 import { BackupSettings } from './BackupSettings';
 import { PaymentMethodSettings } from './PaymentMethodSettings';
 import { SalesModeSettings } from './SalesModeSettings';
 import { StaffSettings } from './StaffSettings';
+import { SettingsSection } from './SettingsSection';
 import { StoreSettings } from './StoreSettings';
+import { t } from '../../i18n';
 
 const TABS = [
-  { value: 'store', label: 'Toko & Struk', help: 'struk' },
-  { value: 'payments', label: 'Pembayaran', help: 'qris' },
-  { value: 'modes', label: 'Mode Penjualan', help: 'varian' },
-  { value: 'staff', label: 'Staf & PIN', help: 'staf' },
-  { value: 'backup', label: 'Cadangan', help: 'cadangan' },
+  { value: 'store', label: t('Toko & Struk'), help: 'struk' },
+  { value: 'payments', label: t('Pembayaran::tab'), help: 'qris' },
+  { value: 'modes', label: t('Mode Penjualan'), help: 'varian' },
+  { value: 'staff', label: t('Staf & PIN'), help: 'staf' },
+  { value: 'backup', label: t('Cadangan'), help: 'cadangan' },
 ] as const;
 type TabId = (typeof TABS)[number]['value'];
 
@@ -29,12 +32,19 @@ export function SettingsPage() {
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      <PageHeader title="Pengaturan" description="Profil toko, struk, pembayaran, mode penjualan, staf, dan cadangan." helpTopic={TABS.find((t) => t.value === tab)?.help}>
-        <Tabs label="Bagian pengaturan" items={TABS} value={tab} onChange={setTab} />
+      <PageHeader title={t('Pengaturan')} description={t('Profil toko, struk, pembayaran, mode penjualan, staf, dan cadangan.')} helpTopic={TABS.find((t) => t.value === tab)?.help}>
+        <Tabs label={t('Bagian pengaturan')} items={TABS} value={tab} onChange={setTab} />
       </PageHeader>
       <div className="min-h-0 flex-1 overflow-y-auto p-4 md:px-8 md:py-6">
         <div className="max-w-2xl">
-          {tab === 'store' && <StoreSettings store={store} />}
+          {tab === 'store' && (
+            <>
+              <SettingsSection title={t('Bahasa')} description={t('Bahasa aplikasi di perangkat ini. Nama produk dan data toko tidak diterjemahkan. Aplikasi dimuat ulang saat bahasa diganti.')}>
+                <LanguagePicker />
+              </SettingsSection>
+              <StoreSettings store={store} />
+            </>
+          )}
           {tab === 'payments' && <PaymentMethodSettings storeId={store.id} methods={catalog.paymentMethods} />}
           {tab === 'modes' && <SalesModeSettings storeId={store.id} modes={catalog.salesModes} />}
           {tab === 'staff' && <StaffSettings store={store} />}

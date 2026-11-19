@@ -7,6 +7,7 @@ import { Sheet } from '../../../components/ui/Sheet';
 import { Switch } from '../../../components/ui/Switch';
 import { setProductSoldOut } from '../../../services/catalog';
 import type { Product } from '../../../types';
+import { t } from '../../../i18n';
 
 interface SoldOutSheetProps {
   /** Products shown at the cashier (active ones). */
@@ -31,18 +32,18 @@ export function SoldOutSheet({ products, onClose }: SoldOutSheetProps) {
     try {
       await setProductSoldOut(product.id, isSoldOut);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan.');
+      toast.error(error instanceof Error ? error.message : t('Gagal menyimpan.'));
     }
   };
 
   return (
-    <Sheet title="Stok habis" subtitle={soldOutCount > 0 ? `${soldOutCount} menu ditandai habis` : 'Semua menu tersedia'} isOpen onClose={onClose} isFlush>
+    <Sheet title={t('Stok habis')} subtitle={soldOutCount > 0 ? t('{0} menu ditandai habis', soldOutCount) : t('Semua menu tersedia')} isOpen onClose={onClose} isFlush>
       <div className="border-b border-line px-5 py-3">
-        <SearchInput value={query} onChange={setQuery} placeholder="Cari menu…" label="Cari menu untuk ditandai habis" />
+        <SearchInput value={query} onChange={setQuery} placeholder={t('Cari menu…')} label={t('Cari menu untuk ditandai habis')} />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-1">
         {rows.length === 0 ? (
-          <EmptyState icon={SearchX} title="Menu tidak ditemukan" description="Coba kata kunci lain." />
+          <EmptyState icon={SearchX} title={t('Menu tidak ditemukan')} description={t('Coba kata kunci lain.')} />
         ) : (
           <ul className="divide-y divide-line">
             {rows.map((product) => (
@@ -51,7 +52,7 @@ export function SoldOutSheet({ products, onClose }: SoldOutSheetProps) {
                   checked={product.isSoldOut === true}
                   onChange={(isSoldOut) => void toggle(product, isSoldOut)}
                   label={product.name}
-                  description={product.isSoldOut ? 'Habis, tidak bisa dijual' : undefined}
+                  description={product.isSoldOut ? t('Habis, tidak bisa dijual') : undefined}
                 />
               </li>
             ))}

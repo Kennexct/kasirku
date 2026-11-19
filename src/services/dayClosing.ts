@@ -6,6 +6,7 @@ import type { BusinessDate, DayClosing, Id } from '../types';
 import { writeAudit } from './audit';
 import { newMeta } from './catalog';
 import { saveAndQueue } from './sync';
+import { t } from '../i18n';
 
 const openingKey = (storeId: Id, date: BusinessDate) => `openingCash:${storeId}:${date}`;
 
@@ -30,8 +31,8 @@ export async function getOpeningCash(storeId: Id, date: BusinessDate): Promise<n
 }
 
 export async function setOpeningCash(storeId: Id, date: BusinessDate, amount: number): Promise<void> {
-  if (!Number.isSafeInteger(amount) || amount < 0) throw new Error('Modal awal tidak valid.');
-  if (await getClosing(storeId, date)) throw new Error('Hari ini sudah ditutup. Buka kembali untuk mengubah modal awal.');
+  if (!Number.isSafeInteger(amount) || amount < 0) throw new Error(t('Modal awal tidak valid.'));
+  if (await getClosing(storeId, date)) throw new Error(t('Hari ini sudah ditutup. Buka kembali untuk mengubah modal awal.'));
   await localDb.meta.put({ key: openingKey(storeId, date), value: String(amount) });
 }
 
@@ -74,9 +75,9 @@ export interface CloseDayInput {
 /** "Tutup kasir" (ADR-007): stores the drawer figures as they are now, plus the counted cash. One per day. */
 export async function closeDay(input: CloseDayInput): Promise<DayClosing> {
   const { storeId, businessDate, countedCash } = input;
-  if (countedCash === null || !Number.isSafeInteger(countedCash) || countedCash < 0) throw new Error('Isi jumlah uang yang dihitung di laci.');
+  if (countedCash === null || !Number.isSafeInteger(countedCash) || countedCash < 0) throw new Error(t('Isi jumlah uang yang dihitung di laci.'));
   const note = input.note.trim();
-  if (note.length > CLOSING_NOTE_MAX) throw new Error(`Catatan maksimal ${CLOSING_NOTE_MAX} karakter.`);
+  if (note.length > CLOSING_NOTE_MAX) throw new Error(t('Catatan maksimal {0} karakter.', CLOSING_NOTE_MAX));
 
   const drawer = buildDrawer(await loadDrawerInput(storeId, businessDate));
   const now = nowIso();
@@ -93,7 +94,7 @@ export async function closeDay(input: CloseDayInput): Promise<DayClosing> {
 
   // Check + write in one transaction so a double tap or a second tab cannot close the day twice.
   await localDb.transaction('rw', localDb.dayClosings, localDb.outbox, async () => {
-    if (await getClosing(storeId, businessDate)) throw new Error('Hari ini sudah ditutup.');
+    if (await getClosing(storeId, businessDate)) throw new Error(t('Hari ini sudah ditutup.'));
     await saveAndQueue('dayClosings', closing);
   });
 
@@ -112,7 +113,7 @@ export async function closeDay(input: CloseDayInput): Promise<DayClosing> {
 /** Owner only (caller checks, ADR-004): removes the closing so the day can be closed again. Audited. */
 export async function reopenDay(closingId: Id, actorId: Id, approvedById: Id | null): Promise<void> {
   const closing = await localDb.dayClosings.get(closingId);
-  if (!closing || closing.deletedAt) throw new Error('Tutup kasir tidak ditemukan.');
+  if (!closing || closing.deletedAt) throw new Error(t('Tutup kasir tidak ditemukan.'));
   const now = nowIso();
   await saveAndQueue('dayClosings', { ...closing, deletedAt: now, updatedAt: now });
   await writeAudit({

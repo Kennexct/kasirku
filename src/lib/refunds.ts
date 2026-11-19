@@ -1,5 +1,6 @@
 import type { Id, Order, Refund, RefundItem } from '../types';
 import { lineTotal } from './pricing';
+import { t } from '../i18n';
 
 export interface RefundSelection {
   orderItemId: Id;
@@ -46,15 +47,15 @@ export function buildRefundItems(
   for (const selection of selections) {
     if (selection.qty <= 0) continue;
     const line = order.items.find((item) => item.id === selection.orderItemId);
-    if (!line) throw new Error('Item tidak ditemukan di pesanan ini.');
+    if (!line) throw new Error(t('Item tidak ditemukan di pesanan ini.'));
     const available = remaining.get(line.id) ?? 0;
-    if (selection.qty > available) throw new Error(`${line.nameSnapshot}: maksimal ${available} yang bisa direfund.`);
+    if (selection.qty > available) throw new Error(t('{0}: maksimal {1} yang bisa direfund.', line.nameSnapshot, available));
 
     const share = netTotal === 0 ? 0 : (order.totals.grandTotal * lineTotal(line) * selection.qty) / (netTotal * line.qty);
     items.push({ orderItemId: line.id, qty: selection.qty, amount: Math.round(share) });
   }
 
-  if (items.length === 0) throw new Error('Pilih minimal satu item untuk direfund.');
+  if (items.length === 0) throw new Error(t('Pilih minimal satu item untuk direfund.'));
 
   const remainingAfter = order.items.reduce((sum, item) => {
     const selected = items.find((i) => i.orderItemId === item.id)?.qty ?? 0;

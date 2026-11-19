@@ -1,4 +1,5 @@
 import { Search, X } from 'lucide-react';
+import { t } from '../../i18n';
 
 interface SearchInputProps {
   value: string;
@@ -22,7 +23,7 @@ export function SearchInput({ value, onChange, placeholder, label }: SearchInput
       {value && (
         <button
           type="button"
-          aria-label="Hapus pencarian"
+          aria-label={t('Hapus pencarian')}
           onClick={() => onChange('')}
           className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-muted hover:bg-line"
         >

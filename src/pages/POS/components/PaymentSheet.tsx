@@ -9,6 +9,7 @@ import { calculateChange } from '../../../lib/pricing';
 import { validatePayment, type PaymentInput } from '../../../services/orders';
 import type { PaymentMethod } from '../../../types';
 import { QrisDisplay } from './QrisDisplay';
+import { t } from '../../../i18n';
 
 interface PaymentSheetProps {
   total: number;
@@ -30,8 +31,8 @@ export function PaymentSheet({ total, methods, storeName, isSubmitting, onConfir
   const method = activeMethods.find((m) => m.id === methodId);
   if (!method) {
     return (
-      <Sheet title="Pembayaran" isOpen onClose={onClose}>
-        <p className="text-[14px] text-muted">Belum ada metode pembayaran aktif. Aktifkan di Pengaturan.</p>
+      <Sheet title={t('Pembayaran')} isOpen onClose={onClose}>
+        <p className="text-[14px] text-muted">{t('Belum ada metode pembayaran aktif. Aktifkan di Pengaturan.')}</p>
       </Sheet>
     );
   }
@@ -74,21 +75,21 @@ export function PaymentSheet({ total, methods, storeName, isSubmitting, onConfir
 
   return (
     <Sheet
-      title="Pembayaran"
+      title={t('Pembayaran')}
       isOpen
       onClose={onClose}
       footer={
         <button type="button" disabled={isSubmitting} onClick={isQris ? () => setIsQrisOpen(true) : submit} className={`${btnPrimary} w-full`}>
-          {isQris ? 'Tampilkan QRIS' : isSubmitting ? 'Menyimpan…' : 'Selesaikan pembayaran'}
+          {isQris ? t('Tampilkan QRIS') : isSubmitting ? t('Menyimpan…') : t('Selesaikan pembayaran')}
         </button>
       }
     >
       <div className="mb-5 flex items-end justify-between border-b border-line pb-4">
-        <span className="text-[14px] font-medium text-muted">Total tagihan</span>
+        <span className="text-[14px] font-medium text-muted">{t('Total tagihan')}</span>
         <span className="num text-[32px] font-extrabold leading-none tracking-[-0.03em]">{formatRupiah(total)}</span>
       </div>
 
-      <h3 className={`${sectionTitle} mb-2.5`}>Metode pembayaran</h3>
+      <h3 className={`${sectionTitle} mb-2.5`}>{t('Metode pembayaran')}</h3>
       <div className="mb-5 grid grid-cols-3 gap-2">
         {activeMethods.map((m) => {
           const Icon = METHOD_ICON[m.type];
@@ -106,16 +107,16 @@ export function PaymentSheet({ total, methods, storeName, isSubmitting, onConfir
           <div className="grid grid-cols-2 gap-2">
             {quickAmounts.map((amount, index) => (
               <button key={amount} type="button" onClick={() => setCashReceived(amount)} className={`${option(cashReceived === amount)} num`}>
-                {index === 0 ? 'Uang pas' : formatRupiah(amount)}
+                {index === 0 ? t('Uang pas') : formatRupiah(amount)}
               </button>
             ))}
           </div>
           <div>
-            <label htmlFor="cash-received" className={labelBase}>Uang diterima</label>
+            <label htmlFor="cash-received" className={labelBase}>{t('Uang diterima')}</label>
             <RupiahInput id="cash-received" value={cashReceived} onChange={setCashReceived} size="lg" />
           </div>
           <div className={`flex items-center justify-between rounded-lg px-4 py-3 ${shortBy > 0 ? 'bg-danger-50 text-danger-700' : 'bg-brand-50 text-brand-800'}`}>
-            <span className="text-[14px] font-semibold">{shortBy > 0 ? 'Kurang' : 'Kembalian'}</span>
+            <span className="text-[14px] font-semibold">{shortBy > 0 ? t('Kurang') : t('Kembalian')}</span>
             <span className="num text-[24px] font-bold tracking-[-0.02em]">
               {shortBy > 0 ? formatRupiah(shortBy) : change === null ? '—' : formatRupiah(change)}
             </span>
@@ -126,13 +127,13 @@ export function PaymentSheet({ total, methods, storeName, isSubmitting, onConfir
       {!isCash && !isQris && method.referenceMode !== 'off' && (
         <section>
           <label htmlFor="payment-ref" className={labelBase}>
-            {method.referenceLabel || 'No. Ref'} {method.referenceMode === 'optional' && <span className="font-normal text-muted">(opsional)</span>}
+            {method.referenceLabel || t('No. Ref')} {method.referenceMode === 'optional' && <span className="font-normal text-muted">{t('(opsional)')}</span>}
           </label>
           <input id="payment-ref" value={reference} onChange={(event) => setReference(event.target.value)} className={inputBase} />
         </section>
       )}
 
-      {isQris && <p className="text-[14px] text-muted">Tampilkan kode QRIS ke pelanggan, lalu konfirmasi setelah dana masuk.</p>}
+      {isQris && <p className="text-[14px] text-muted">{t('Tampilkan kode QRIS ke pelanggan, lalu konfirmasi setelah dana masuk.')}</p>}
 
       {error && <p role="alert" className="mt-3 rounded-md bg-danger-50 px-3 py-2 text-[13px] text-danger-700">{error}</p>}
     </Sheet>

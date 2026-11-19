@@ -8,6 +8,7 @@ import { setOwnerPin } from '../../../services/staff';
 import { useSessionStore } from '../../../store/useSessionStore';
 import type { Id } from '../../../types';
 import { SettingsSection } from '../SettingsSection';
+import { t } from '../../../i18n';
 
 /** Set or change the owner PIN. The first time, a recovery code is shown once. */
 export function OwnerPinSection({ storeId }: { storeId: Id }) {
@@ -35,9 +36,9 @@ export function OwnerPinSection({ storeId }: { storeId: Id }) {
       setCurrentPin('');
       setNewPin('');
       setConfirmPin('');
-      toast.success(hasOwnerPin ? 'PIN pemilik diganti' : 'PIN pemilik aktif');
+      toast.success(hasOwnerPin ? t('PIN pemilik diganti') : t('PIN pemilik aktif'));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan PIN.');
+      toast.error(error instanceof Error ? error.message : t('Gagal menyimpan PIN.'));
     } finally {
       setIsBusy(false);
     }
@@ -45,39 +46,39 @@ export function OwnerPinSection({ storeId }: { storeId: Id }) {
 
   return (
     <SettingsSection
-      title="PIN pemilik"
-      description="Mengunci Laporan, Produk dan Pengaturan, serta dipakai untuk menyetujui void, refund dan diskon besar."
+      title={t('PIN pemilik')}
+      description={t('Mengunci Laporan, Produk dan Pengaturan, serta dipakai untuk menyetujui void, refund dan diskon besar.')}
     >
       {recoveryCode ? (
         <RecoveryCodeNotice code={recoveryCode} onDone={() => setRecoveryCode(null)} />
       ) : (
         <div className="flex flex-col gap-4">
           <p>
-            <span className={hasOwnerPin ? badgeBrand : badgeNeutral}>{hasOwnerPin ? 'PIN aktif' : 'Belum diatur'}</span>
+            <span className={hasOwnerPin ? badgeBrand : badgeNeutral}>{hasOwnerPin ? t('PIN aktif') : t('Belum diatur')}</span>
           </p>
           <div className="grid gap-4 sm:grid-cols-3">
             {hasOwnerPin && (
               <div>
-                <label htmlFor="owner-pin-current" className={labelBase}>PIN saat ini</label>
+                <label htmlFor="owner-pin-current" className={labelBase}>{t('PIN saat ini')}</label>
                 <PinInput id="owner-pin-current" value={currentPin} onChange={setCurrentPin} />
               </div>
             )}
             <div>
-              <label htmlFor="owner-pin-new" className={labelBase}>{hasOwnerPin ? 'PIN baru' : 'PIN (4–6 angka)'}</label>
+              <label htmlFor="owner-pin-new" className={labelBase}>{hasOwnerPin ? t('PIN baru') : t('PIN (4–6 angka)')}</label>
               <PinInput id="owner-pin-new" value={newPin} onChange={setNewPin} />
             </div>
             <div>
-              <label htmlFor="owner-pin-confirm" className={labelBase}>Ulangi PIN</label>
+              <label htmlFor="owner-pin-confirm" className={labelBase}>{t('Ulangi PIN')}</label>
               <PinInput id="owner-pin-confirm" value={confirmPin} onChange={setConfirmPin} />
-              {isMismatch && <p role="alert" className="mt-1.5 text-[13px] text-danger-700">PIN tidak sama.</p>}
+              {isMismatch && <p role="alert" className="mt-1.5 text-[13px] text-danger-700">{t('PIN tidak sama.')}</p>}
             </div>
           </div>
           <p className={helperText}>
-            PIN mencegah penyalahgunaan di kasir dan mencatat siapa yang menyetujui. Jangan pakai tanggal lahir atau 1234.
+            {t('PIN mencegah penyalahgunaan di kasir dan mencatat siapa yang menyetujui. Jangan pakai tanggal lahir atau 1234.')}
           </p>
           <div>
             <button type="button" disabled={!canSubmit} onClick={() => void submit()} className={`${btnPrimary} h-11`}>
-              {hasOwnerPin ? 'Ganti PIN' : 'Aktifkan PIN'}
+              {hasOwnerPin ? t('Ganti PIN') : t('Aktifkan PIN')}
             </button>
           </div>
         </div>

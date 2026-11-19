@@ -1,27 +1,28 @@
 import type { ExpenseCategory, OrderStatus, PaymentType, RefundReason, StoreRules } from '../types';
+import { t } from '../i18n';
 
 export const PAYMENT_TYPE_LABEL: Record<PaymentType, string> = {
-  cash: 'Tunai',
-  qris: 'QRIS',
-  transfer: 'Transfer',
-  ewallet: 'E-wallet',
-  other: 'Lainnya',
+  cash: t('Tunai'),
+  qris: t('QRIS'),
+  transfer: t('Transfer'),
+  ewallet: t('E-wallet'),
+  other: t('Lainnya'),
 };
 
 export const REFUND_REASON_LABEL: Record<RefundReason, string> = {
-  wrong_input: 'Salah input',
-  customer_cancel: 'Pelanggan batal',
-  out_of_stock: 'Produk habis',
-  other: 'Lainnya',
+  wrong_input: t('Salah input'),
+  customer_cancel: t('Pelanggan batal'),
+  out_of_stock: t('Produk habis'),
+  other: t('Lainnya'),
 };
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-  open: 'Belum dibayar',
-  paid: 'Lunas',
-  void: 'Void',
-  refunded: 'Direfund',
-  partial_refund: 'Refund sebagian',
-  cancelled: 'Dibatalkan',
+  open: t('Belum dibayar'),
+  paid: t('Lunas'),
+  void: t('Void'),
+  refunded: t('Direfund'),
+  partial_refund: t('Refund sebagian'),
+  cancelled: t('Dibatalkan'),
 };
 
 export const APP_NAME = 'KasirKu';
@@ -70,9 +71,9 @@ export const DEFAULT_STORE_RULES: StoreRules = {
 export const DEFAULT_SALES_MODES = ['Dine In', 'Takeaway'] as const;
 
 export const DEFAULT_PAYMENT_METHODS = [
-  { name: 'Tunai', type: 'cash', referenceMode: 'off', referenceLabel: '' },
-  { name: 'QRIS', type: 'qris', referenceMode: 'optional', referenceLabel: 'No. Ref' },
-  { name: 'Transfer Bank', type: 'transfer', referenceMode: 'optional', referenceLabel: '4 digit terakhir' },
+  { name: t('Tunai'), type: 'cash', referenceMode: 'off', referenceLabel: '' },
+  { name: 'QRIS', type: 'qris', referenceMode: 'optional', referenceLabel: t('No. Ref') },
+  { name: t('Transfer Bank'), type: 'transfer', referenceMode: 'optional', referenceLabel: t('4 digit terakhir') },
 ] as const;
 
 /** Quick cash buttons shown on the payment screen. */
@@ -95,13 +96,13 @@ export const ROUTES = {
 /** Order shown in the expense form. "ingredients" is the only cost-of-goods category (ADR-007). */
 export const EXPENSE_CATEGORIES: readonly ExpenseCategory[] = ['ingredients', 'supplies', 'wages', 'utilities', 'rent', 'transport', 'other'];
 export const EXPENSE_CATEGORY_LABEL: Record<ExpenseCategory, string> = {
-  ingredients: 'Belanja bahan',
-  supplies: 'Kemasan & perlengkapan',
-  wages: 'Gaji & upah',
-  utilities: 'Listrik, gas, air',
-  rent: 'Sewa tempat',
-  transport: 'Transportasi',
-  other: 'Lainnya',
+  ingredients: t('Belanja bahan'),
+  supplies: t('Kemasan & perlengkapan'),
+  wages: t('Gaji & upah'),
+  utilities: t('Listrik, gas, air'),
+  rent: t('Sewa tempat'),
+  transport: t('Transportasi'),
+  other: t('Lainnya'),
 };
 export const EXPENSE_NOTE_MAX = 120;
 export const MAX_EXPENSE_AMOUNT = 1_000_000_000;

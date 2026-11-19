@@ -7,6 +7,7 @@ import { APPROVAL_EXPIRED, approverOf, OWNER_PIN_REQUIRED, requiresOwnerPin, typ
 import { buildRefundItems, isFullyRefunded, type RefundSelection } from '../lib/refunds';
 import type { Id, Order, PermissionLevel, Refund, RefundKind, RefundReason, Store } from '../types';
 import { saveAndQueue } from './sync';
+import { t } from '../i18n';
 
 export interface ReasonInput {
   code: RefundReason;
@@ -36,33 +37,33 @@ const REFUNDABLE_STATUSES: ReadonlySet<Order['status']> = new Set(['paid', 'part
 
 /** M11: void = cancel a whole paid sale on the same business day, before any refund. */
 export function canVoid(order: Order, refunds: readonly Refund[], ctx: RefundContext): Eligibility {
-  if (order.status !== 'paid') return { ok: false, reason: 'Hanya transaksi lunas yang bisa di-void.' };
-  if (refunds.length > 0) return { ok: false, reason: 'Transaksi sudah direfund sebagian. Gunakan refund.' };
+  if (order.status !== 'paid') return { ok: false, reason: t('Hanya transaksi lunas yang bisa di-void.') };
+  if (refunds.length > 0) return { ok: false, reason: t('Transaksi sudah direfund sebagian. Gunakan refund.') };
   const today = getBusinessDate(ctx.now ?? new Date(), ctx.store);
-  if (order.businessDate !== today) return { ok: false, reason: 'Void hanya untuk transaksi hari ini. Gunakan refund.' };
+  if (order.businessDate !== today) return { ok: false, reason: t('Void hanya untuk transaksi hari ini. Gunakan refund.') };
   return permissionGate(ctx.store.settings.voidPermission, ctx);
 }
 
 /** M11: refund = return some or all items within the store's refund window. */
 export function canRefund(order: Order, ctx: RefundContext): Eligibility {
-  if (!REFUNDABLE_STATUSES.has(order.status)) return { ok: false, reason: 'Transaksi ini tidak bisa direfund.' };
+  if (!REFUNDABLE_STATUSES.has(order.status)) return { ok: false, reason: t('Transaksi ini tidak bisa direfund.') };
   const today = getBusinessDate(ctx.now ?? new Date(), ctx.store);
   const age = daysBetween(order.businessDate, today);
   if (age > ctx.store.settings.refundWindowDays) {
-    return { ok: false, reason: `Batas refund ${ctx.store.settings.refundWindowDays} hari sudah lewat.` };
+    return { ok: false, reason: t('Batas refund {0} hari sudah lewat.', ctx.store.settings.refundWindowDays) };
   }
   return permissionGate(ctx.store.settings.refundPermission, ctx);
 }
 
 function validateReason(reason: ReasonInput, store: Store): void {
   if (store.settings.isReasonRequired && reason.code === 'other' && reason.note.trim().length === 0) {
-    throw new Error('Tuliskan alasannya.');
+    throw new Error(t('Tuliskan alasannya.'));
   }
 }
 
 async function loadOrder(orderId: Id): Promise<{ order: Order; refunds: Refund[] }> {
   const order = await localDb.orders.get(orderId);
-  if (!order) throw new Error('Transaksi tidak ditemukan.');
+  if (!order) throw new Error(t('Transaksi tidak ditemukan.'));
   const refunds = await localDb.refunds.where('orderId').equals(orderId).toArray();
   return { order, refunds };
 }
@@ -131,7 +132,7 @@ export async function refundOrder(orderId: Id, selections: readonly RefundSelect
   if (!eligibility.ok) throw new Error(eligibility.reason);
 
   const built = buildRefundItems(order, selections, refunds);
-  if (built.amount <= 0) throw new Error('Tidak ada nominal yang bisa direfund.');
+  if (built.amount <= 0) throw new Error(t('Tidak ada nominal yang bisa direfund.'));
   const nextStatus = isFullyRefunded(order, [...refunds, { items: built.items }]) ? 'refunded' : 'partial_refund';
   return commit(order, 'refund', built, reason, ctx, nextStatus);
 }

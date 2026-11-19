@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PIN_MAX_LENGTH, PIN_MIN_LENGTH } from '../../constants';
 import { formatWait } from '../../lib/lockout';
 import type { PinCheck } from '../../services/staff';
+import { t } from '../../i18n';
 
 interface PinPadProps {
   /** Accessible name, e.g. "PIN pemilik" or "PIN Dika". */
@@ -59,7 +60,7 @@ export function PinPad({ label, verify, onSuccess }: PinPadProps) {
       setNow(Date.now());
     } catch {
       setPin('');
-      setError('PIN tidak bisa diperiksa. Coba lagi.');
+      setError(t('PIN tidak bisa diperiksa. Coba lagi.'));
     } finally {
       setIsBusy(false);
     }
@@ -83,9 +84,9 @@ export function PinPad({ label, verify, onSuccess }: PinPadProps) {
           />
         ))}
       </div>
-      <p className="sr-only" aria-live="polite">{pin.length} digit dimasukkan</p>
+      <p className="sr-only" aria-live="polite">{pin.length} {t('digit dimasukkan')}</p>
       <p role="alert" className={`mb-3 min-h-10 text-center text-[13px] ${error ? 'text-danger-700' : 'text-muted'}`}>
-        {isLocked ? `Terlalu banyak percobaan. Coba lagi dalam ${formatWait(lockedMs)}.` : (error ?? `${PIN_MIN_LENGTH}–${PIN_MAX_LENGTH} angka, lalu OK`)}
+        {isLocked ? t('Terlalu banyak percobaan. Coba lagi dalam {0}.', formatWait(lockedMs)) : (error ?? t('{0}–{1} angka, lalu OK', PIN_MIN_LENGTH, PIN_MAX_LENGTH))}
       </p>
       <div className="grid grid-cols-3 gap-2">
         {DIGITS.map((digit) => (
@@ -93,7 +94,7 @@ export function PinPad({ label, verify, onSuccess }: PinPadProps) {
             {digit}
           </button>
         ))}
-        <button type="button" aria-label="Hapus angka" disabled={isDisabled || pin.length === 0} onClick={erase} className={keyClass}>
+        <button type="button" aria-label={t('Hapus angka')} disabled={isDisabled || pin.length === 0} onClick={erase} className={keyClass}>
           <Delete aria-hidden size={22} />
         </button>
         <button type="button" disabled={isDisabled} onClick={() => press('0')} className={keyClass}>
@@ -101,12 +102,12 @@ export function PinPad({ label, verify, onSuccess }: PinPadProps) {
         </button>
         <button
           type="button"
-          aria-label="OK"
+          aria-label={t('OK')}
           disabled={!canSubmit}
           onClick={() => void submit()}
           className="flex h-16 items-center justify-center rounded-lg bg-brand-600 text-[17px] font-bold text-white shadow-xs transition-colors hover:bg-brand-700 disabled:opacity-40"
         >
-          {isBusy ? '…' : 'OK'}
+          {isBusy ? '…' : t('OK')}
         </button>
       </div>
     </div>

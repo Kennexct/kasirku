@@ -26,3 +26,11 @@ Backup file hygiene: it contains customer phone numbers and PIN hashes — keep 
 | Wrong business template chosen | — | Edit or delete the example products in Produk; there is no "re-run" (it would discard sales). |
 | "Langkah awal" banner is gone | It was dismissed or all steps are done | The checklist stays on the Bantuan page until complete. |
 | A checklist step will not tick | It follows the data: e.g. QRIS needs an uploaded image, backup needs "Simpan cadangan" pressed on this device | Do the step; it ticks by itself. |
+
+## Language (v0.11)
+| Symptom | Cause | Action |
+| --- | --- | --- |
+| App opened in English on a new device | The device language is English | Pengaturan/Settings → Toko & Struk/Shop & Receipt → Bahasa/Language, or the picker on the PIN screen. |
+| Categories or payment names stayed Indonesian after switching | They are the shop's own data, created in the language chosen at setup | Rename them in Products / Settings. |
+| The app "blinks" when the language is changed | It reloads to rebuild labels and date formats | Expected. The cart and seller are kept; owner mode locks. |
+| One device in English, another in Indonesian | Language is per device | Expected; receipts and exports follow the device that produced them. |

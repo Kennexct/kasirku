@@ -7,13 +7,14 @@ import type { Id, StoreMember } from '../types';
 import { writeAudit } from './audit';
 import { newMeta } from './catalog';
 import { saveAndQueue } from './sync';
+import { t } from '../i18n';
 
 /** Staff, PINs and recovery (spec: .10x/specs/2026-11-18-staff-pin-design.md, ADR-003). */
 export type PinCheck = { ok: true } | { ok: false; error: string; lockedMs: number };
 
-const PIN_FORMAT_ERROR = `PIN harus ${PIN_MIN_LENGTH}–${PIN_MAX_LENGTH} angka.`;
+const PIN_FORMAT_ERROR = t('PIN harus {0}–{1} angka.', PIN_MIN_LENGTH, PIN_MAX_LENGTH);
 const lockKey = (scope: string) => `pinlock:${scope}`;
-const lockedMessage = (ms: number) => `Terlalu banyak percobaan. Coba lagi dalam ${formatWait(ms)}.`;
+const lockedMessage = (ms: number) => t('Terlalu banyak percobaan. Coba lagi dalam {0}.', formatWait(ms));
 
 async function readLock(scope: string): Promise<LockoutState> {
   const row = await localDb.meta.get(lockKey(scope));
@@ -47,24 +48,24 @@ async function guardedVerify(member: StoreMember, scope: string, secret: string,
     await writeAudit({ storeId: member.storeId, actorId: member.id, entity: 'member', entityId: member.id, action: 'pin_locked', payload: { scope, failures: next.failures } });
     return { ok: false, error: lockedMessage(lockedMs), lockedMs };
   }
-  return { ok: false, error: `${wrongLabel} salah. Sisa ${attemptsLeft(next)} percobaan.`, lockedMs: 0 };
+  return { ok: false, error: t('{0} salah. Sisa {1} percobaan.', wrongLabel, attemptsLeft(next)), lockedMs: 0 };
 }
 
 async function activeMember(memberId: Id): Promise<StoreMember> {
   const member = await localDb.storeMembers.get(memberId);
-  if (!member || member.deletedAt) throw new Error('Akun tidak ditemukan.');
+  if (!member || member.deletedAt) throw new Error(t('Akun tidak ditemukan.'));
   return member;
 }
 
 export async function getOwner(storeId: Id): Promise<StoreMember> {
   const owner = await localDb.storeMembers.where('storeId').equals(storeId).filter((m) => m.role === 'owner' && !m.deletedAt).first();
-  if (!owner) throw new Error('Data pemilik toko tidak ditemukan.');
+  if (!owner) throw new Error(t('Data pemilik toko tidak ditemukan.'));
   return owner;
 }
 
 export async function verifyMemberPin(memberId: Id, pin: string, now: number = Date.now()): Promise<PinCheck> {
   const member = await localDb.storeMembers.get(memberId);
-  if (!member || member.deletedAt) return { ok: false, error: 'Akun tidak ditemukan.', lockedMs: 0 };
+  if (!member || member.deletedAt) return { ok: false, error: t('Akun tidak ditemukan.'), lockedMs: 0 };
   return guardedVerify(member, member.id, pin, member.pinHash, 'PIN', now);
 }
 
@@ -84,7 +85,7 @@ export async function setOwnerPin(storeId: Id, newPin: string, currentPin?: stri
   const isFirstTime = owner.pinHash === '';
   if (!isFirstTime) {
     const check = await verifyMemberPin(owner.id, currentPin ?? '');
-    if (!check.ok) throw new Error(check.error.replace(/^PIN salah/, 'PIN saat ini salah'));
+    if (!check.ok) throw new Error(check.error.replace(/^PIN salah/, t('PIN saat ini salah')));
   }
 
   const recoveryCode = owner.recoveryHash ? null : generateRecoveryCode();
@@ -102,7 +103,7 @@ export async function resetOwnerPinWithRecovery(storeId: Id, code: string, newPi
   requirePin(newPin);
   const owner = await getOwner(storeId);
   const scope = `recovery:${owner.id}`;
-  const check = await guardedVerify(owner, scope, normalizeRecoveryCode(code), owner.recoveryHash, 'Kode pemulihan', now);
+  const check = await guardedVerify(owner, scope, normalizeRecoveryCode(code), owner.recoveryHash, t('Kode pemulihan'), now);
   if (!check.ok) throw new Error(check.error);
 
   const recoveryCode = generateRecoveryCode();
@@ -114,8 +115,8 @@ export async function resetOwnerPinWithRecovery(storeId: Id, code: string, newPi
 
 function cleanName(name: string): string {
   const trimmed = name.trim();
-  if (trimmed.length === 0) throw new Error('Nama kasir wajib diisi.');
-  if (trimmed.length > MEMBER_NAME_MAX) throw new Error(`Nama maksimal ${MEMBER_NAME_MAX} karakter.`);
+  if (trimmed.length === 0) throw new Error(t('Nama kasir wajib diisi.'));
+  if (trimmed.length > MEMBER_NAME_MAX) throw new Error(t('Nama maksimal {0} karakter.', MEMBER_NAME_MAX));
   return trimmed;
 }
 
@@ -123,12 +124,12 @@ export async function addCashier(storeId: Id, name: string, pin: string): Promis
   const displayName = cleanName(name);
   requirePin(pin);
   const owner = await getOwner(storeId);
-  if (owner.pinHash === '') throw new Error('Atur PIN pemilik dulu sebelum menambah kasir.');
-  if (await verifySecret(pin, owner.pinHash)) throw new Error('PIN kasir tidak boleh sama dengan PIN pemilik.');
+  if (owner.pinHash === '') throw new Error(t('Atur PIN pemilik dulu sebelum menambah kasir.'));
+  if (await verifySecret(pin, owner.pinHash)) throw new Error(t('PIN kasir tidak boleh sama dengan PIN pemilik.'));
 
   const members = await localDb.storeMembers.where('storeId').equals(storeId).toArray();
   const isTaken = members.some((m) => !m.deletedAt && m.displayName.toLowerCase() === displayName.toLowerCase());
-  if (isTaken) throw new Error(`Nama "${displayName}" sudah dipakai.`);
+  if (isTaken) throw new Error(t('Nama "{0}" sudah dipakai.', displayName));
 
   const cashier: StoreMember = { ...newMeta(storeId), userId: null, role: 'cashier', displayName, pinHash: await hashSecret(pin) };
   await saveAndQueue('storeMembers', cashier);
@@ -138,7 +139,7 @@ export async function addCashier(storeId: Id, name: string, pin: string): Promis
 
 async function cashierOnly(memberId: Id): Promise<StoreMember> {
   const member = await activeMember(memberId);
-  if (member.role !== 'cashier') throw new Error('Tindakan ini hanya untuk akun kasir.');
+  if (member.role !== 'cashier') throw new Error(t('Tindakan ini hanya untuk akun kasir.'));
   return member;
 }
 
@@ -146,7 +147,7 @@ export async function resetCashierPin(memberId: Id, pin: string): Promise<void> 
   requirePin(pin);
   const cashier = await cashierOnly(memberId);
   const owner = await getOwner(cashier.storeId);
-  if (await verifySecret(pin, owner.pinHash)) throw new Error('PIN kasir tidak boleh sama dengan PIN pemilik.');
+  if (await verifySecret(pin, owner.pinHash)) throw new Error(t('PIN kasir tidak boleh sama dengan PIN pemilik.'));
   await save({ ...cashier, pinHash: await hashSecret(pin) });
   await clearLock(cashier.id);
   await writeAudit({ storeId: cashier.storeId, actorId: owner.id, entity: 'member', entityId: cashier.id, action: 'cashier_pin_reset' });

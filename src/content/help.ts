@@ -1,3 +1,5 @@
+import { lang } from '../i18n';
+import { HELP_EN } from './help.en';
 import { HELP_ID } from './help.id';
 
 /** Help centre content (ADR-009): typed data bundled with the app so it works offline. */
@@ -32,7 +34,7 @@ export interface HelpContent {
   intro: readonly IntroCard[];
 }
 
-const content: HelpContent = HELP_ID;
+const content: HelpContent = lang === 'en' ? HELP_EN : HELP_ID;
 
 export const INTRO_CARDS = content.intro;
 export const HELP_TOPICS: readonly HelpTopic[] = HELP_TOPIC_IDS.map((id) => ({ id, ...content.topics[id] }));

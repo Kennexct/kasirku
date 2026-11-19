@@ -1,6 +1,7 @@
 import { formatRupiah } from '../../lib/money';
 import { REFUND_REASON_LABEL } from '../../constants';
 import type { Order, Refund, Store } from '../../types';
+import { DATE_LOCALE, t } from '../../i18n';
 
 interface ReceiptViewProps {
   order: Order;
@@ -9,7 +10,7 @@ interface ReceiptViewProps {
   refunds?: readonly Refund[];
 }
 
-const dateTime = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+const dateTime = new Intl.DateTimeFormat(DATE_LOCALE, { dateStyle: 'medium', timeStyle: 'short' });
 
 /** M9 receipt layout styled as thermal paper; `.receipt` is what @media print shows (58/80 mm). */
 export function ReceiptView({ order, store, cashierName, refunds = [] }: ReceiptViewProps) {
@@ -30,12 +31,12 @@ export function ReceiptView({ order, store, cashierName, refunds = [] }: Receipt
 
       <Divider />
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 text-ink-soft">
-        <dt>No</dt><dd className="text-right">{order.receiptNo}</dd>
-        <dt>Waktu</dt><dd className="text-right">{dateTime.format(new Date(order.paidAt ?? order.openedAt))}</dd>
-        <dt>Kasir</dt><dd className="text-right">{cashierName}</dd>
-        <dt>Mode</dt><dd className="text-right">{order.salesModeNameSnapshot}</dd>
-        {order.label && (<><dt>Pesanan</dt><dd className="text-right">{order.label}</dd></>)}
-        {order.customerNameSnapshot && (<><dt>Pelanggan</dt><dd className="text-right">{order.customerNameSnapshot}</dd></>)}
+        <dt>{t('No')}</dt><dd className="text-right">{order.receiptNo}</dd>
+        <dt>{t('Waktu')}</dt><dd className="text-right">{dateTime.format(new Date(order.paidAt ?? order.openedAt))}</dd>
+        <dt>{t('Kasir::orang')}</dt><dd className="text-right">{cashierName}</dd>
+        <dt>{t('Mode')}</dt><dd className="text-right">{order.salesModeNameSnapshot}</dd>
+        {order.label && (<><dt>{t('Pesanan::label')}</dt><dd className="text-right">{order.label}</dd></>)}
+        {order.customerNameSnapshot && (<><dt>{t('Pelanggan::satu')}</dt><dd className="text-right">{order.customerNameSnapshot}</dd></>)}
       </dl>
       <Divider />
 
@@ -54,12 +55,12 @@ export function ReceiptView({ order, store, cashierName, refunds = [] }: Receipt
       </ul>
 
       <Divider />
-      <Line label="Subtotal" value={formatRupiah(totals.subtotal)} />
-      {discount > 0 && <Line label={order.orderDiscount?.name ?? 'Diskon'} value={`-${formatRupiah(discount)}`} />}
-      {totals.serviceTotal > 0 && <Line label={`Service ${store.servicePct}%`} value={formatRupiah(totals.serviceTotal)} />}
-      {totals.taxTotal > 0 && <Line label={`Pajak ${store.taxPct}%${store.isTaxInclusive ? ' (termasuk)' : ''}`} value={formatRupiah(totals.taxTotal)} />}
+      <Line label={t('Subtotal')} value={formatRupiah(totals.subtotal)} />
+      {discount > 0 && <Line label={order.orderDiscount?.name ?? t('Diskon')} value={`-${formatRupiah(discount)}`} />}
+      {totals.serviceTotal > 0 && <Line label={t('Service {0}%', store.servicePct)} value={formatRupiah(totals.serviceTotal)} />}
+      {totals.taxTotal > 0 && <Line label={t('Pajak {0}%{1}', store.taxPct, store.isTaxInclusive ? t(' (termasuk)') : '')} value={formatRupiah(totals.taxTotal)} />}
       <p className="mt-1 flex justify-between text-[14px] font-bold">
-        <span>TOTAL</span>
+        <span>{t('TOTAL')}</span>
         <span>{formatRupiah(totals.grandTotal)}</span>
       </p>
 
@@ -67,16 +68,16 @@ export function ReceiptView({ order, store, cashierName, refunds = [] }: Receipt
       {order.payments.map((payment) => (
         <div key={payment.id}>
           <Line label={payment.methodNameSnapshot} value={formatRupiah(payment.cashReceived ?? payment.amount)} />
-          {payment.reference && <Line label="Ref" value={payment.reference} />}
-          {payment.change !== undefined && <Line label="Kembali" value={formatRupiah(payment.change)} />}
+          {payment.reference && <Line label={t('Ref')} value={payment.reference} />}
+          {payment.change !== undefined && <Line label={t('Kembali::uang')} value={formatRupiah(payment.change)} />}
         </div>
       ))}
-      {order.status === 'open' && <p className="mt-2 text-center font-bold">** BELUM DIBAYAR **</p>}
+      {order.status === 'open' && <p className="mt-2 text-center font-bold">{t('** BELUM DIBAYAR **')}</p>}
 
       {refunds.length > 0 && <Divider />}
       {refunds.map((refund) => (
         <div key={refund.id} className="text-danger-700">
-          <Line label={refund.kind === 'void' ? 'VOID' : 'REFUND'} value={`-${formatRupiah(refund.amount)}`} />
+          <Line label={refund.kind === 'void' ? t('VOID') : t('REFUND')} value={`-${formatRupiah(refund.amount)}`} />
           <p className="pl-2 text-[11.5px]">
             {dateTime.format(new Date(refund.createdAt))} · {REFUND_REASON_LABEL[refund.reasonCode]}
             {refund.reasonNote ? ` — ${refund.reasonNote}` : ''}

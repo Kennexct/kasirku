@@ -3,6 +3,7 @@ import { localDb } from '../db/localDb';
 import { nowIso } from '../lib/id';
 import type { Id, OutboxEntry, Result, SyncTable } from '../types';
 import { supabase } from './supabase';
+import { t } from '../i18n';
 
 /** Local Dexie table name -> Postgres table name. */
 const REMOTE_TABLE: Record<SyncTable, string> = {
@@ -38,8 +39,8 @@ export async function saveAndQueue<T extends { id: Id }>(table: SyncTable, recor
  * so retries after a timeout never create duplicates.
  */
 export async function pushOutbox(): Promise<Result<{ pushed: number }>> {
-  if (!supabase) return { ok: false, error: 'Backend not configured' };
-  if (!navigator.onLine) return { ok: false, error: 'Offline' };
+  if (!supabase) return { ok: false, error: t('Backend not configured') };
+  if (!navigator.onLine) return { ok: false, error: t('Offline') };
 
   const entries = await localDb.outbox.orderBy('seq').limit(SYNC_BATCH_SIZE).toArray();
   let pushed = 0;
@@ -53,7 +54,7 @@ export async function pushOutbox(): Promise<Result<{ pushed: number }>> {
 }
 
 async function pushEntry(entry: OutboxEntry): Promise<Result<true>> {
-  if (!supabase || entry.seq === undefined) return { ok: false, error: 'Invalid sync state' };
+  if (!supabase || entry.seq === undefined) return { ok: false, error: t('Invalid sync state') };
 
   const record = await localDb.table(entry.table).get(entry.recordId);
   if (!record) {
@@ -65,7 +66,7 @@ async function pushEntry(entry: OutboxEntry): Promise<Result<true>> {
   if (error) {
     const attempts = entry.attempts + 1;
     await localDb.outbox.update(entry.seq, { attempts, lastError: error.message });
-    const message = attempts >= SYNC_MAX_ATTEMPTS ? `Sync stuck for ${entry.table}: ${error.message}` : error.message;
+    const message = attempts >= SYNC_MAX_ATTEMPTS ? t('Sync stuck for {0}: {1}', entry.table, error.message) : error.message;
     return { ok: false, error: message };
   }
 

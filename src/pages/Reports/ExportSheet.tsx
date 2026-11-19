@@ -10,11 +10,12 @@ import { DATASETS, DATASET_LABEL, type Dataset, type ExportContext } from '../..
 import { canShareFiles, downloadBlob, shareBlob } from '../../lib/export/deliver';
 import { buildExport, exportFileName, type ExportFormat } from '../../lib/export/index';
 import type { Report } from '../../lib/reports';
+import { t } from '../../i18n';
 
 const FORMATS: ReadonlyArray<{ value: ExportFormat; label: string; hint: string; icon: LucideIcon }> = [
-  { value: 'xlsx', label: 'Excel', hint: 'Ringkasan + semua data, angka bisa dijumlah', icon: FileSpreadsheet },
-  { value: 'pdf', label: 'PDF', hint: 'Ringkasan siap kirim / cetak', icon: FileText },
-  { value: 'csv', label: 'CSV', hint: 'Satu tabel data mentah', icon: Table2 },
+  { value: 'xlsx', label: t('Excel'), hint: t('Ringkasan + semua data, angka bisa dijumlah'), icon: FileSpreadsheet },
+  { value: 'pdf', label: t('PDF'), hint: t('Ringkasan siap kirim / cetak'), icon: FileText },
+  { value: 'csv', label: t('CSV'), hint: t('Satu tabel data mentah'), icon: Table2 },
 ];
 
 interface ExportSheetProps {
@@ -36,14 +37,14 @@ export function ExportSheet({ storeName, report, ctx, onClose }: ExportSheetProp
       const blob = await buildExport({ format, dataset, storeName, report, ctx });
       const fileName = exportFileName({ format, dataset, storeName, report });
       if (mode === 'share') {
-        const isShared = await shareBlob(blob, fileName, `Laporan ${storeName}`);
-        if (isShared) toast.success('File dibagikan');
+        const isShared = await shareBlob(blob, fileName, t('Laporan {0}', storeName));
+        if (isShared) toast.success(t('File dibagikan'));
       } else {
         downloadBlob(blob, fileName);
-        toast.success(`${fileName} diunduh`);
+        toast.success(t('{0} diunduh', fileName));
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal membuat file.');
+      toast.error(error instanceof Error ? error.message : t('Gagal membuat file.'));
     } finally {
       setIsBusy(false);
     }
@@ -51,7 +52,7 @@ export function ExportSheet({ storeName, report, ctx, onClose }: ExportSheetProp
 
   return (
     <Sheet
-      title="Ekspor laporan"
+      title={t('Ekspor laporan')}
       subtitle={formatRange(report.range)}
       isOpen
       onClose={onClose}
@@ -59,17 +60,17 @@ export function ExportSheet({ storeName, report, ctx, onClose }: ExportSheetProp
         <div className="flex gap-2">
           {isShareable && (
             <button type="button" disabled={isBusy} onClick={() => void run('share')} className={btnSecondary}>
-              <Share2 aria-hidden size={18} /> Bagikan
+              <Share2 aria-hidden size={18} /> {t('Bagikan')}
             </button>
           )}
           <button type="button" disabled={isBusy} onClick={() => void run('download')} className={`${btnPrimary} flex-1`}>
-            <Download aria-hidden size={18} /> {isBusy ? 'Membuat file…' : 'Unduh'}
+            <Download aria-hidden size={18} /> {isBusy ? t('Membuat file…') : t('Unduh')}
           </button>
         </div>
       }
     >
-      <p className={labelBase}>Format</p>
-      <div className="grid gap-2" role="radiogroup" aria-label="Format file">
+      <p className={labelBase}>{t('Format')}</p>
+      <div className="grid gap-2" role="radiogroup" aria-label={t('Format file')}>
         {FORMATS.map(({ value, label, hint, icon: Icon }) => (
           <button
             key={value}
@@ -90,13 +91,13 @@ export function ExportSheet({ storeName, report, ctx, onClose }: ExportSheetProp
 
       {format === 'csv' && (
         <div className="mt-4">
-          <p className={labelBase}>Data</p>
-          <SegmentedControl label="Data CSV" isFullWidth options={DATASETS.map((d) => ({ value: d, label: DATASET_LABEL[d] }))} value={dataset} onChange={setDataset} />
+          <p className={labelBase}>{t('Data')}</p>
+          <SegmentedControl label={t('Data CSV')} isFullWidth options={DATASETS.map((d) => ({ value: d, label: DATASET_LABEL[d] }))} value={dataset} onChange={setDataset} />
         </div>
       )}
 
       <p className="mt-4 text-[13px] text-muted">
-        Berisi {report.summary.transactions} transaksi dari perangkat ini. Refund dihitung pada tanggal refund dilakukan.
+        {t('Berisi')} {report.summary.transactions} {t('transaksi dari perangkat ini. Refund dihitung pada tanggal refund dilakukan.')}
       </p>
     </Sheet>
   );

@@ -4,6 +4,7 @@ import { nowIso } from '../lib/id';
 import type { Id, PaymentMethod, PaymentType, PriceRule, SalesMode } from '../types';
 import { newMeta } from './catalog';
 import { saveAndQueue } from './sync';
+import { t } from '../i18n';
 
 /**
  * User-managed payment methods and sales modes (ADR-006): create, rename, move, soft-delete.
@@ -22,10 +23,10 @@ async function activeRows(table: ConfigTable, storeId: Id): Promise<ConfigRow[]>
 
 function cleanName(name: string, rows: readonly ConfigRow[], selfId: Id | null): string {
   const trimmed = name.trim();
-  if (trimmed.length === 0) throw new Error('Nama wajib diisi.');
-  if (trimmed.length > CONFIG_NAME_MAX) throw new Error(`Nama maksimal ${CONFIG_NAME_MAX} karakter.`);
+  if (trimmed.length === 0) throw new Error(t('Nama wajib diisi.'));
+  if (trimmed.length > CONFIG_NAME_MAX) throw new Error(t('Nama maksimal {0} karakter.', CONFIG_NAME_MAX));
   const isTaken = rows.some((row) => row.id !== selfId && row.name.toLowerCase() === trimmed.toLowerCase());
-  if (isTaken) throw new Error(`"${trimmed}" sudah ada.`);
+  if (isTaken) throw new Error(t('"{0}" sudah ada.', trimmed));
   return trimmed;
 }
 
@@ -33,20 +34,20 @@ const nextSortOrder = (rows: readonly ConfigRow[]): number => rows.reduce((max, 
 
 async function requireRow(table: ConfigTable, id: Id): Promise<ConfigRow> {
   const row = table === 'paymentMethods' ? await localDb.paymentMethods.get(id) : await localDb.salesModes.get(id);
-  if (!row || row.deletedAt) throw new Error('Data tidak ditemukan.');
+  if (!row || row.deletedAt) throw new Error(t('Data tidak ditemukan.'));
   return row;
 }
 
 export async function createPaymentMethod(storeId: Id, input: { name: string; type: PaymentType }): Promise<PaymentMethod> {
   const rows = await activeRows('paymentMethods', storeId);
-  if (rows.length >= MAX_PAYMENT_METHODS) throw new Error(`Maksimal ${MAX_PAYMENT_METHODS} metode pembayaran.`);
+  if (rows.length >= MAX_PAYMENT_METHODS) throw new Error(t('Maksimal {0} metode pembayaran.', MAX_PAYMENT_METHODS));
   const isCash = input.type === 'cash';
   const method: PaymentMethod = {
     ...newMeta(storeId),
     name: cleanName(input.name, rows, null),
     type: input.type,
     referenceMode: isCash ? 'off' : 'optional',
-    referenceLabel: isCash ? '' : 'No. Ref',
+    referenceLabel: isCash ? '' : t('No. Ref'),
     isActive: true,
     sortOrder: nextSortOrder(rows),
   };
@@ -56,8 +57,8 @@ export async function createPaymentMethod(storeId: Id, input: { name: string; ty
 
 export async function createSalesMode(storeId: Id, input: { name: string; priceRule: PriceRule; markupPct: number }): Promise<SalesMode> {
   const rows = await activeRows('salesModes', storeId);
-  if (rows.length >= MAX_SALES_MODES) throw new Error(`Maksimal ${MAX_SALES_MODES} mode penjualan.`);
-  if (input.markupPct < 0 || input.markupPct > 100) throw new Error('Markup harus 0–100%.');
+  if (rows.length >= MAX_SALES_MODES) throw new Error(t('Maksimal {0} mode penjualan.', MAX_SALES_MODES));
+  if (input.markupPct < 0 || input.markupPct > 100) throw new Error(t('Markup harus 0–100%.'));
   const mode: SalesMode = {
     ...newMeta(storeId),
     name: cleanName(input.name, rows, null),
@@ -84,15 +85,15 @@ export async function renameConfig(table: ConfigTable, id: Id, name: string): Pr
 export async function deleteConfig(table: ConfigTable, id: Id): Promise<void> {
   const row = await requireRow(table, id);
   if (table === 'salesModes' && (row as SalesMode).isDefault) {
-    throw new Error('Mode default tidak bisa dihapus. Jadikan mode lain sebagai default dulu.');
+    throw new Error(t('Mode default tidak bisa dihapus. Jadikan mode lain sebagai default dulu.'));
   }
   if (table === 'salesModes') {
     const unpaid = await localDb.orders.where('[storeId+status]').equals([row.storeId, 'open']).filter((o) => o.salesModeId === id && !o.deletedAt).count();
-    if (unpaid > 0) throw new Error(`Masih ada ${unpaid} pesanan tersimpan dengan mode ini. Selesaikan atau batalkan dulu.`);
+    if (unpaid > 0) throw new Error(t('Masih ada {0} pesanan tersimpan dengan mode ini. Selesaikan atau batalkan dulu.', unpaid));
   }
   if (table === 'paymentMethods') {
     const others = (await activeRows(table, row.storeId)).filter((r) => r.id !== id && r.isActive);
-    if (others.length === 0) throw new Error('Harus ada minimal satu metode pembayaran aktif.');
+    if (others.length === 0) throw new Error(t('Harus ada minimal satu metode pembayaran aktif.'));
   }
   const now = nowIso();
   await saveAndQueue(table, { ...row, isActive: false, deletedAt: now, updatedAt: now });

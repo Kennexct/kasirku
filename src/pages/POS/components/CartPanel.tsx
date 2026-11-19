@@ -6,6 +6,7 @@ import { formatRupiah } from '../../../lib/money';
 import { lineTotal } from '../../../lib/pricing';
 import { useCartStore } from '../../../store/useCartStore';
 import type { OrderTotals } from '../../../types';
+import { t } from '../../../i18n';
 
 interface CartPanelProps {
   totals: OrderTotals;
@@ -37,15 +38,15 @@ export function CartPanel({ totals, modeName, hasTitle = true, customerName, onO
     <div className="flex h-full min-h-0 flex-col bg-surface">
       <div className="flex items-center gap-2 px-5 py-3">
         <div className="min-w-0 flex-1">
-          {hasTitle && <h2 className="truncate text-[17px] font-bold tracking-[-0.01em]">{openOrderId ? label : 'Pesanan baru'}</h2>}
+          {hasTitle && <h2 className="truncate text-[17px] font-bold tracking-[-0.01em]">{openOrderId ? label : t('Pesanan baru')}</h2>}
           <p className="num text-[13px] text-muted">
             {!hasTitle && openOrderId ? `${label} · ` : ''}
-            {modeName} · {itemCount} item
+            {modeName} · {t('{0} item', itemCount)}
           </p>
         </div>
         {!isEmpty && (
           <button type="button" onClick={clear} className={`${btnGhost} text-[14px] text-danger-700! hover:bg-danger-50!`}>
-            <Trash2 aria-hidden size={16} /> Kosongkan
+            <Trash2 aria-hidden size={16} /> {t('Kosongkan')}
           </button>
         )}
       </div>
@@ -59,15 +60,15 @@ export function CartPanel({ totals, modeName, hasTitle = true, customerName, onO
           }`}
         >
           <UserRound aria-hidden size={16} className="shrink-0" />
-          <span className="min-w-0 flex-1 truncate">{customerName ?? 'Tambah pelanggan'}</span>
-          {customerName && <span className="text-[13px] font-medium text-brand-700">Ganti</span>}
+          <span className="min-w-0 flex-1 truncate">{customerName ?? t('Tambah pelanggan')}</span>
+          {customerName && <span className="text-[13px] font-medium text-brand-700">{t('Ganti')}</span>}
         </button>
       </div>
 
       <ul className="min-h-0 flex-1 overflow-y-auto border-y border-line">
         {isEmpty && (
           <li>
-            <EmptyState icon={ShoppingBasket} title="Belum ada item" description="Ketuk produk di sebelah kiri untuk mulai mencatat penjualan." />
+            <EmptyState icon={ShoppingBasket} title={t('Belum ada item')} description={t('Ketuk produk di sebelah kiri untuk mulai mencatat penjualan.')} />
           </li>
         )}
         {items.map((item) => (
@@ -83,9 +84,9 @@ export function CartPanel({ totals, modeName, hasTitle = true, customerName, onO
             {editingNoteId === item.id ? (
               <input
                 autoFocus
-                aria-label="Catatan item"
+                aria-label={t('Catatan item')}
                 defaultValue={item.note}
-                placeholder="Contoh: kuah pisah, tanpa bawang"
+                placeholder={t('Contoh: kuah pisah, tanpa bawang')}
                 onBlur={(event) => {
                   setItemNote(item.id, event.target.value.trim());
                   setEditingNoteId(null);
@@ -101,14 +102,14 @@ export function CartPanel({ totals, modeName, hasTitle = true, customerName, onO
                   className={`flex h-11 min-w-0 flex-1 items-center gap-1.5 rounded-md text-left text-[13px] ${item.note ? 'text-ink-soft' : 'text-muted'} hover:text-ink`}
                 >
                   <StickyNote aria-hidden size={15} className="shrink-0" />
-                  <span className="truncate">{item.note || 'Tambah catatan'}</span>
+                  <span className="truncate">{item.note || t('Tambah catatan')}</span>
                 </button>
                 <div className="flex items-center rounded-lg">
-                  <button type="button" aria-label={`Kurangi ${item.nameSnapshot}`} onClick={() => setQty(item.id, item.qty - 1)} className={btnIcon}>
+                  <button type="button" aria-label={t('Kurangi {0}', item.nameSnapshot)} onClick={() => setQty(item.id, item.qty - 1)} className={btnIcon}>
                     {item.qty === 1 ? <Trash2 aria-hidden size={17} className="text-danger-600" /> : <Minus aria-hidden size={17} />}
                   </button>
                   <span className="num w-9 text-center text-[15px] font-bold">{item.qty}</span>
-                  <button type="button" aria-label={`Tambah ${item.nameSnapshot}`} onClick={() => setQty(item.id, item.qty + 1)} className={btnIcon}>
+                  <button type="button" aria-label={t('Tambah {0}', item.nameSnapshot)} onClick={() => setQty(item.id, item.qty + 1)} className={btnIcon}>
                     <Plus aria-hidden size={17} />
                   </button>
                 </div>
@@ -119,30 +120,30 @@ export function CartPanel({ totals, modeName, hasTitle = true, customerName, onO
       </ul>
 
       <dl className="flex flex-col gap-1 px-5 pt-3 text-[14px]">
-        <SummaryRow label="Subtotal" value={formatRupiah(totals.subtotal)} />
+        <SummaryRow label={t('Subtotal')} value={formatRupiah(totals.subtotal)} />
         <div className="flex h-9 items-center justify-between">
           <dt>
             <button type="button" onClick={onOpenDiscount} disabled={isEmpty} className="-ml-1 inline-flex h-9 items-center gap-1.5 rounded-md px-1 font-semibold text-brand-700 hover:bg-brand-50 disabled:text-faint">
               <Percent aria-hidden size={15} />
-              {orderDiscount ? orderDiscount.name : 'Tambah diskon'}
+              {orderDiscount ? orderDiscount.name : t('Tambah diskon')}
             </button>
           </dt>
           {discountTotal > 0 && <dd className="num font-medium text-brand-700">−{formatRupiah(discountTotal)}</dd>}
         </div>
-        {totals.serviceTotal > 0 && <SummaryRow label="Service" value={formatRupiah(totals.serviceTotal)} />}
-        {totals.taxTotal > 0 && <SummaryRow label="Pajak" value={formatRupiah(totals.taxTotal)} />}
+        {totals.serviceTotal > 0 && <SummaryRow label={t('Service')} value={formatRupiah(totals.serviceTotal)} />}
+        {totals.taxTotal > 0 && <SummaryRow label={t('Pajak')} value={formatRupiah(totals.taxTotal)} />}
         <div className="mt-1 flex items-baseline justify-between border-t border-dashed border-line-strong pt-2.5">
-          <dt className="text-[15px] font-semibold">Total</dt>
+          <dt className="text-[15px] font-semibold">{t('Total')}</dt>
           <dd className="num text-[20px] font-bold tracking-[-0.02em]">{formatRupiah(totals.grandTotal)}</dd>
         </div>
       </dl>
 
       <div className="flex gap-2 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         <button type="button" disabled={isEmpty} onClick={onSave} className={btnSecondary}>
-          Simpan
+          {t('Simpan')}
         </button>
         <button type="button" disabled={isEmpty} onClick={onPay} className={`${btnPrimary} h-12 flex-1 justify-between!`}>
-          <span>Bayar</span>
+          <span>{t('Bayar')}</span>
           <span className="num text-[16px]">{formatRupiah(totals.grandTotal)}</span>
         </button>
       </div>

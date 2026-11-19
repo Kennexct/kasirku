@@ -6,6 +6,7 @@ import type { Order, Store } from '../../types';
 import { Sheet } from '../ui/Sheet';
 import { btnPrimary, btnSecondary } from '../ui/styles';
 import { ReceiptView } from './ReceiptView';
+import { t } from '../../i18n';
 
 interface ReceiptSheetProps {
   order: Order;
@@ -24,20 +25,20 @@ export function ReceiptSheet({ order, store, cashierName, onClose }: ReceiptShee
 
   return (
     <Sheet
-      title={order.status === 'paid' ? 'Pembayaran berhasil' : 'Struk'}
+      title={order.status === 'paid' ? t('Pembayaran berhasil') : t('Struk')}
       subtitle={order.receiptNo}
       isOpen
       onClose={onClose}
       footer={
         <div className="grid grid-cols-2 gap-2">
           <button type="button" onClick={() => window.print()} className={btnSecondary}>
-            <Printer aria-hidden size={18} /> Cetak
+            <Printer aria-hidden size={18} /> {t('Cetak')}
           </button>
-          <a href={shareUrl} target="_blank" rel="noopener noreferrer" title={customerPhone ? 'Kirim struk ke WhatsApp pelanggan' : 'Bagikan struk lewat WhatsApp'} className={btnSecondary}>
-            <MessageCircle aria-hidden size={18} /> WhatsApp
+          <a href={shareUrl} target="_blank" rel="noopener noreferrer" title={customerPhone ? t('Kirim struk ke WhatsApp pelanggan') : t('Bagikan struk lewat WhatsApp')} className={btnSecondary}>
+            <MessageCircle aria-hidden size={18} /> {t('WhatsApp')}
           </a>
           <button type="button" autoFocus onClick={onClose} className={`${btnPrimary} col-span-2`}>
-            Transaksi baru
+            {t('Transaksi baru')}
           </button>
         </div>
       }
@@ -47,10 +48,10 @@ export function ReceiptSheet({ order, store, cashierName, onClose }: ReceiptShee
           <CircleCheck aria-hidden size={28} className="shrink-0 text-brand-600" />
           <div className="min-w-0 flex-1">
             <p className="text-[13px] font-medium text-brand-800">
-              Lunas · {payment?.methodNameSnapshot} · {formatRupiah(order.totals.grandTotal)}
+              {t('Lunas ·')} {payment?.methodNameSnapshot} · {formatRupiah(order.totals.grandTotal)}
             </p>
             {payment?.methodType === 'cash' && (
-              <p className="num text-[22px] font-bold tracking-[-0.02em] text-brand-900">Kembalian {formatRupiah(change)}</p>
+              <p className="num text-[22px] font-bold tracking-[-0.02em] text-brand-900">{t('Kembalian')} {formatRupiah(change)}</p>
             )}
           </div>
         </div>

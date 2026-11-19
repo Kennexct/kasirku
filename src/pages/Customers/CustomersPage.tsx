@@ -20,6 +20,7 @@ import type { Customer, Id } from '../../types';
 import { CustomerDetailSheet, formatVisit } from './CustomerDetailSheet';
 import { CustomerFormSheet } from './CustomerFormSheet';
 import { DebtList } from './DebtList';
+import { t } from '../../i18n';
 
 const MAX_ROWS = 100;
 const COLUMNS = 'lg:grid-cols-[1fr_170px_90px_140px_130px_20px]';
@@ -56,57 +57,57 @@ export function CustomersPage() {
 
   /** Deleting erases contact data, so it needs the owner PIN while owner mode is locked (ADR-005). */
   const confirmDelete = async (customer: Customer) => {
-    if (access.kind === 'locked' && !(await requestOwnerApproval(`Hapus pelanggan ${customer.name}`))) return;
+    if (access.kind === 'locked' && !(await requestOwnerApproval(t('Hapus pelanggan {0}', customer.name)))) return;
     try {
       await deleteCustomer(customer.id);
-      toast.success(`${customer.name} dihapus`);
+      toast.success(t('{0} dihapus', customer.name));
       setDialog(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menghapus pelanggan.');
+      toast.error(error instanceof Error ? error.message : t('Gagal menghapus pelanggan.'));
     }
   };
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
-        title="Pelanggan"
+        title={t('Pelanggan')}
         helpTopic="pelanggan"
-        description={`${customers.length} pelanggan tersimpan`}
+        description={t('{0} pelanggan tersimpan', customers.length)}
         actions={
-          <button type="button" aria-label="Tambah pelanggan" onClick={() => setDialog({ kind: 'form', customer: null })} className={`${btnPrimary} h-11`}>
-            <Plus aria-hidden size={18} /> <span className="hidden sm:inline">Pelanggan</span>
+          <button type="button" aria-label={t('Tambah pelanggan')} onClick={() => setDialog({ kind: 'form', customer: null })} className={`${btnPrimary} h-11`}>
+            <Plus aria-hidden size={18} /> <span className="hidden sm:inline">{t('Pelanggan')}</span>
           </button>
         }
       >
         <Tabs
-          label="Tampilan pelanggan"
+          label={t('Tampilan pelanggan')}
           value={view}
           onChange={setView}
           items={[
-            { value: 'all', label: 'Semua' },
-            { value: 'debt', label: 'Belum bayar', count: debtCount },
+            { value: 'all', label: t('Semua') },
+            { value: 'debt', label: t('Belum bayar'), count: debtCount },
           ]}
         />
       </PageHeader>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4 md:px-8 md:py-6">
         {customers.length === 0 ? (
-          <EmptyState icon={Users} title="Belum ada pelanggan" description="Tambahkan pelanggan di sini, atau langsung dari keranjang saat berjualan." />
+          <EmptyState icon={Users} title={t('Belum ada pelanggan')} description={t('Tambahkan pelanggan di sini, atau langsung dari keranjang saat berjualan.')} />
         ) : (
           <>
             <div className="mb-3 max-w-md">
-              <SearchInput value={query} onChange={setQuery} placeholder="Cari nama atau nomor HP…" label="Cari pelanggan" />
+              <SearchInput value={query} onChange={setQuery} placeholder={t('Cari nama atau nomor HP…')} label={t('Cari pelanggan')} />
             </div>
             {view === 'debt' && <DebtList debtors={debtors} hasQuery={query.trim() !== ''} onOpen={(customerId) => setDialog({ kind: 'detail', customerId })} />}
             {view === 'all' && (
             <>
             <div className={`${card} overflow-hidden`}>
               <div className={`hidden items-center gap-4 border-b border-line bg-subtle px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.05em] text-muted lg:grid ${COLUMNS}`}>
-                <span>Nama</span>
-                <span>No. HP</span>
-                <span className="text-right">Kunjungan</span>
-                <span className="text-right">Total belanja</span>
-                <span>Terakhir</span>
+                <span>{t('Nama')}</span>
+                <span>{t('No. HP')}</span>
+                <span className="text-right">{t('Kunjungan')}</span>
+                <span className="text-right">{t('Total belanja')}</span>
+                <span>{t('Terakhir')}</span>
                 <span />
               </div>
               <ul className="divide-y divide-line">
@@ -118,10 +119,10 @@ export function CustomersPage() {
                         <span className="min-w-0">
                           <span className="flex items-center gap-2">
                             <span className="truncate text-[15px] font-semibold">{customer.name}</span>
-                            {s.openOrders > 0 && <span className={`${badgeWarn} shrink-0`}>Belum bayar</span>}
+                            {s.openOrders > 0 && <span className={`${badgeWarn} shrink-0`}>{t('Belum bayar')}</span>}
                           </span>
                           <span className="num block truncate text-[13px] text-muted lg:hidden">
-                            {customer.phone ? formatPhone(customer.phone) : 'Tanpa nomor HP'} · {s.visits} kunjungan
+                            {customer.phone ? formatPhone(customer.phone) : t('Tanpa nomor HP')} · {t('{0} kunjungan', s.visits)}
                           </span>
                           {customer.note && <span className="hidden truncate text-[13px] text-muted lg:block">{customer.note}</span>}
                         </span>
@@ -135,11 +136,11 @@ export function CustomersPage() {
                   );
                 })}
               </ul>
-              {matches.length === 0 && <EmptyState icon={UserRoundSearch} title="Tidak ditemukan" description="Coba nama atau nomor lain." />}
+              {matches.length === 0 && <EmptyState icon={UserRoundSearch} title={t('Tidak ditemukan')} description={t('Coba nama atau nomor lain.')} />}
             </div>
             {matches.length > MAX_ROWS && (
               <p className="mt-3 text-center text-[13px] text-muted">
-                Menampilkan {MAX_ROWS} dari {matches.length} pelanggan. Persempit pencarian untuk melihat yang lain.
+                {t('Menampilkan')} {MAX_ROWS} {t('dari')} {matches.length} {t('pelanggan. Persempit pencarian untuk melihat yang lain.')}
               </p>
             )}
             </>
@@ -162,18 +163,18 @@ export function CustomersPage() {
       )}
       {dialog?.kind === 'delete' && current && (
         <Sheet
-          title={`Hapus ${current.name}?`}
+          title={t('Hapus {0}?', current.name)}
           isOpen
           onClose={() => setDialog(null)}
           footer={
             <div className="flex gap-2">
-              <button type="button" onClick={() => setDialog(null)} className={btnSecondary}>Batal</button>
-              <button type="button" onClick={() => void confirmDelete(current)} className={`${btnDangerSolid} flex-1`}>Hapus pelanggan</button>
+              <button type="button" onClick={() => setDialog(null)} className={btnSecondary}>{t('Batal')}</button>
+              <button type="button" onClick={() => void confirmDelete(current)} className={`${btnDangerSolid} flex-1`}>{t('Hapus pelanggan')}</button>
             </div>
           }
         >
           <p className="text-[14px] text-ink-soft">
-            Nomor HP dan catatan pelanggan ini dihapus dari aplikasi. Namanya tetap tercetak di struk transaksi yang sudah ada.
+            {t('Nomor HP dan catatan pelanggan ini dihapus dari aplikasi. Namanya tetap tercetak di struk transaksi yang sudah ada.')}
           </p>
         </Sheet>
       )}

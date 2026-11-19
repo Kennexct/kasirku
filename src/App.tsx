@@ -20,6 +20,7 @@ import { POSPage } from './pages/POS/POSPage';
 import { ProductsPage } from './pages/Products/ProductsPage';
 import { SettingsPage } from './pages/Settings/SettingsPage';
 import { useSessionStore } from './store/useSessionStore';
+import { t } from './i18n';
 
 // ADR-001: charts + export code load only when Reports is opened.
 const ReportsPage = lazy(() => import('./pages/Reports/ReportsPage'));
@@ -29,7 +30,7 @@ export default function App() {
   const boot = useBootstrap();
   const hasSeller = useSessionStore((s) => s.cashier !== null);
 
-  if (boot.status === 'loading') return <LoadingScreen message="Menyiapkan kasir…" />;
+  if (boot.status === 'loading') return <LoadingScreen message={t('Menyiapkan kasir…')} />;
   if (boot.status === 'error') {
     return (
       <div role="alert" className="p-6 text-center text-danger-700">
@@ -81,7 +82,7 @@ export default function App() {
             path={ROUTES.reports}
             element={
               <OwnerGate>
-                <Suspense fallback={<LoadingScreen message="Memuat laporan…" />}>
+                <Suspense fallback={<LoadingScreen message={t('Memuat laporan…')} />}>
                   <ReportsPage />
                 </Suspense>
               </OwnerGate>

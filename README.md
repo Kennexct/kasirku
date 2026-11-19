@@ -114,7 +114,7 @@ npx supabase db push           # applies supabase/migrations
 
 CI (`.github/workflows/ci.yml`): `npm ci` → `typecheck` → `test` → `build`. Migrations are applied to staging on merge, to prod by manual approval.
 
-## 7. Current status (v0.10 — + first-time journey, help centre)
+## 7. Current status (v0.11 — + English)
 
 Design rules, tokens and component inventory: [`design-system/MASTER.md`](design-system/MASTER.md). Browser flow checks: [`e2e/`](e2e/README.md).
 
@@ -144,11 +144,12 @@ Design rules, tokens and component inventory: [`design-system/MASTER.md`](design
 | Backup file (v0.9) | Done: save all device data to one file; replace-all restore with validation (ADR-008) | `lib/backup.ts`, `services/backup.ts`, `pages/Settings/BackupSettings.tsx` |
 | First-time journey (v0.10) | Done: store name + business template (5), payment choices, how-it-works cards; "Langkah awal" checklist derived from data (ADR-009) | `pages/Onboarding/`, `services/seedTemplate.ts`, `lib/checklist.ts` |
 | Help centre (v0.10) | Done: 15 offline topics with search, contextual "?" on each page, intro replay | `content/help*.ts`, `pages/Help/`, `components/Help/` |
+| English (v0.11) | Done: Indonesian + English for every screen, receipt, WhatsApp text, export and help topic; per-device language with reload on change; typed source-string dictionary (ADR-010) | `src/i18n/`, `content/help.en.ts`, `scripts/i18n-*.mjs` |
 | M15 parts 2–3 (owner login, sync) | Not started — needs a Supabase project | — |
 
 First run opens a three-step journey; the chosen template (`services/seedTemplate.ts`) seeds a small editable menu so the seller can sell immediately.
 
-Tests: 123 unit/integration tests (incl. a 20k-order performance guard) (`npm test`) cover pricing, variants, receipt numbering, business date, WhatsApp receipt text, and the order service against an in-memory IndexedDB (paid, open → resume → paid, cancel + audit, validation, StrictMode double-seed guard) and void/refund rules (same-day void, refund window, partial → full, permission, reason).
+Tests: 129 unit/integration tests (incl. a 20k-order performance guard) (`npm test`) cover pricing, variants, receipt numbering, business date, WhatsApp receipt text, and the order service against an in-memory IndexedDB (paid, open → resume → paid, cancel + audit, validation, StrictMode double-seed guard) and void/refund rules (same-day void, refund window, partial → full, permission, reason).
 
 ## 8. Build order (maps to PRD release plan)
 
@@ -160,6 +161,10 @@ Tests: 123 unit/integration tests (incl. a 20k-order performance guard) (`npm te
 | Understand | 8–9 | M12, M13, M14 | `daily_sales` and `order_lines` views; add `exceljs` + `jspdf` for export |
 | Harden | 10 | Soak test, perf, security | CI pipeline, bundle budget (POS currently 125 KB gzip of 250 KB) |
 
-## 9. Team process
+## 9. Adding or changing interface text
+
+Write the Indonesian sentence in code as `t('Kalimat {0}', value)` and add the same key with its English to `src/i18n/en.ts` — the type-checker refuses a `t()` call without an English entry. `npm run i18n:check` reports missing and unused entries (also in CI); `npm run i18n:scan` lists literals that still look like untranslated interface text. Long help text lives in `src/content/help.id.ts` and `help.en.ts`.
+
+## 10. Team process
 
 This repo uses the 10x-Team workflow: decisions, ADRs, specs and reviews live in [`.10x/`](.10x/status.md). Runbooks live in `docs/runbooks/`.

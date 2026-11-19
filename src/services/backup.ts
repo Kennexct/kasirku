@@ -2,6 +2,7 @@ import { ACTIVE_MEMBER_STORAGE_KEY, BACKUP_APP_ID, BACKUP_FORMAT_VERSION, BACKUP
 import { localDb } from '../db/localDb';
 import { BackupError, backupFileName, isPortableMetaKey, parseBackup, type BackupFile } from '../lib/backup';
 import { nowIso } from '../lib/id';
+import { t } from '../i18n';
 
 const CART_STORAGE_KEY = 'kasirku-cart';
 /** Everything except the sync queue, which only makes sense on the device that queued it (ADR-008). */
@@ -23,7 +24,7 @@ export async function createBackup(now: Date = new Date()): Promise<BackupResult
       tables[table.name] = table.name === 'meta' ? rows.filter((row) => isPortableMetaKey(String(row.key))) : rows;
     }
   });
-  const storeName = String(tables.stores?.[0]?.name ?? 'Toko');
+  const storeName = String(tables.stores?.[0]?.name ?? t('Toko'));
   const counts = Object.fromEntries(Object.entries(tables).map(([name, rows]) => [name, rows.length]));
   const file: BackupFile = {
     app: BACKUP_APP_ID,
@@ -47,7 +48,7 @@ export async function getLastBackupAt(): Promise<string | null> {
 
 /** Reads and validates a chosen file. Nothing on the device changes here. */
 export async function readBackupFile(file: Blob): Promise<BackupFile> {
-  if (file.size > BACKUP_MAX_BYTES) throw new BackupError('Berkas terlalu besar untuk dipulihkan di perangkat ini.');
+  if (file.size > BACKUP_MAX_BYTES) throw new BackupError(t('Berkas terlalu besar untuk dipulihkan di perangkat ini.'));
   return parseBackup(await file.text(), localDb.verno, tableNames());
 }
 

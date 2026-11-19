@@ -16,6 +16,7 @@ import {
   type ExportColumn,
   type ExportContext,
 } from './columns';
+import { t } from '../../i18n';
 
 /** Loaded with `import()` only when exporting (ADR-001). */
 type Cell = { value: string | number; type: StringConstructor | NumberConstructor; format?: string; fontWeight?: 'bold' } | null;
@@ -45,7 +46,7 @@ function breakdownRows(title: string, rows: readonly BreakdownRow[]): Row[] {
   return [
     [null],
     [text(title, true)],
-    [text('Nama', true), text('Transaksi', true), text('Penjualan', true), text('Refund', true), text('Bersih', true)],
+    [text(t('Nama'), true), text(t('Transaksi'), true), text(t('Penjualan'), true), text(t('Refund'), true), text(t('Bersih'), true)],
     ...rows.map((r) => [text(r.label), int(r.transactions), money(r.gross), money(r.refunds), money(r.net)]),
   ];
 }
@@ -55,10 +56,10 @@ function profitRows(profit: Profit | undefined): Row[] {
   if (!profit || profit.mode === 'none') return [];
   return [
     [null],
-    [text(profit.mode === 'cost' ? 'Laba (perkiraan)' : 'Penjualan dan pengeluaran', true)],
+    [text(profit.mode === 'cost' ? t('Laba (perkiraan)') : t('Penjualan dan pengeluaran'), true)],
     ...profitLines(profit).map((line): Row => [text(line.label, line.kind !== 'plain'), money(line.amount, line.kind !== 'plain')]),
-    ...(profit.mode === 'cost' && profit.uncostedQty > 0 ? [[text(`${profit.uncostedQty} item terjual belum punya harga modal; laba bisa terlihat lebih besar.`)]] : []),
-    ...(profit.mode === 'cost' && profit.ingredientExpenses > 0 ? [[text('Belanja bahan tidak dikurangkan lagi (sudah terhitung lewat harga modal).'), money(profit.ingredientExpenses)]] : []),
+    ...(profit.mode === 'cost' && profit.uncostedQty > 0 ? [[text(t('{0} item terjual belum punya harga modal; laba bisa terlihat lebih besar.', profit.uncostedQty))]] : []),
+    ...(profit.mode === 'cost' && profit.ingredientExpenses > 0 ? [[text(t('Belanja bahan tidak dikurangkan lagi (sudah terhitung lewat harga modal).')), money(profit.ingredientExpenses)]] : []),
   ];
 }
 
@@ -66,39 +67,39 @@ function summarySheet(storeName: string, report: Report, profit: Profit | undefi
   const s = report.summary;
   const line = (label: string, value: number, isMoney = true): Row => [text(label), isMoney ? money(value) : int(value)];
   return {
-    sheet: 'Ringkasan',
+    sheet: t('Ringkasan'),
     columns: [{ width: 28 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 14 }],
     data: [
-      [text(`Laporan Penjualan — ${storeName}`, true)],
+      [text(t('Laporan Penjualan — {0}', storeName), true)],
       [text(formatRange(report.range))],
-      [text('Refund dihitung pada tanggal refund dilakukan (basis kas).')],
+      [text(t('Refund dihitung pada tanggal refund dilakukan (basis kas).'))],
       [null],
-      line('Penjualan kotor', s.grossSales),
-      line('Diskon', s.discounts),
-      line('Refund', s.refunds),
-      [text('Penjualan bersih', true), money(s.netSales, true)],
-      line('Transaksi', s.transactions, false),
-      line('Rata-rata per transaksi', s.averageTicket),
-      line('Item terjual', s.itemsSold, false),
-      line('Void (jumlah)', s.voidCount, false),
-      line('Void (nilai)', s.voidAmount),
-      line('Service', s.serviceTotal),
-      line('Pajak', s.taxTotal),
+      line(t('Penjualan kotor'), s.grossSales),
+      line(t('Diskon'), s.discounts),
+      line(t('Refund'), s.refunds),
+      [text(t('Penjualan bersih'), true), money(s.netSales, true)],
+      line(t('Transaksi'), s.transactions, false),
+      line(t('Rata-rata per transaksi'), s.averageTicket),
+      line(t('Item terjual'), s.itemsSold, false),
+      line(t('Void (jumlah)'), s.voidCount, false),
+      line(t('Void (nilai)'), s.voidAmount),
+      line(t('Service'), s.serviceTotal),
+      line(t('Pajak'), s.taxTotal),
       ...profitRows(profit),
-      ...breakdownRows('Per metode pembayaran', report.byPaymentMethod),
-      ...breakdownRows('Per mode penjualan', report.bySalesMode),
-      ...breakdownRows('Per kasir', report.byCashier),
+      ...breakdownRows(t('Per metode pembayaran'), report.byPaymentMethod),
+      ...breakdownRows(t('Per mode penjualan'), report.bySalesMode),
+      ...breakdownRows(t('Per kasir'), report.byCashier),
     ],
   };
 }
 
 function productSheet(report: Report): Sheet<Blob> {
   return {
-    sheet: 'Per Produk',
+    sheet: t('Per Produk'),
     stickyRowsCount: 1,
     columns: [{ width: 28 }, { width: 8 }, { width: 14 }],
     data: [
-      [text('Produk', true), text('Qty', true), text('Pendapatan', true)],
+      [text(t('Produk'), true), text(t('Qty'), true), text(t('Pendapatan'), true)],
       ...report.products.map((p) => [text(p.name), int(p.qty), money(p.revenue)]),
     ],
   };
@@ -107,12 +108,12 @@ function productSheet(report: Report): Sheet<Blob> {
 export function buildXlsx(storeName: string, report: Report, ctx: ExportContext): Promise<Blob> {
   const sheets: Sheet<Blob>[] = [
     summarySheet(storeName, report, ctx.profit),
-    tableSheet('Transaksi', TRANSACTION_COLUMNS, transactionRows(ctx)),
-    tableSheet('Item', ITEM_COLUMNS, itemRows(ctx)),
-    tableSheet('Refund', REFUND_COLUMNS, refundRows(ctx)),
+    tableSheet(t('Transaksi'), TRANSACTION_COLUMNS, transactionRows(ctx)),
+    tableSheet(t('Item'), ITEM_COLUMNS, itemRows(ctx)),
+    tableSheet(t('Refund'), REFUND_COLUMNS, refundRows(ctx)),
     productSheet(report),
     // Only when there is something to list, so stores that never record expenses keep the familiar five sheets.
-    ...(ctx.expenses && ctx.expenses.length > 0 ? [tableSheet('Pengeluaran', EXPENSE_COLUMNS, expenseRows(ctx))] : []),
+    ...(ctx.expenses && ctx.expenses.length > 0 ? [tableSheet(t('Pengeluaran'), EXPENSE_COLUMNS, expenseRows(ctx))] : []),
   ];
   return writeXlsxFile(sheets).toBlob();
 }

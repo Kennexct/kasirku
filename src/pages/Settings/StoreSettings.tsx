@@ -7,21 +7,22 @@ import { PERCENT_MAX } from '../../constants';
 import { updateStore } from '../../services/bootstrap';
 import type { Store } from '../../types';
 import { SettingsSection } from './SettingsSection';
+import { t } from '../../i18n';
 
 type TextField = 'name' | 'address' | 'phone' | 'receiptHeader' | 'receiptFooter';
 
 const PROFILE_FIELDS: ReadonlyArray<{ key: TextField; label: string; placeholder: string }> = [
-  { key: 'name', label: 'Nama toko', placeholder: 'Bakso Pak Budi' },
-  { key: 'phone', label: 'No. HP / WhatsApp', placeholder: '0812xxxx' },
-  { key: 'address', label: 'Alamat', placeholder: 'Jl. Melati No. 5, Depok' },
+  { key: 'name', label: t('Nama toko'), placeholder: t('Bakso Pak Budi') },
+  { key: 'phone', label: t('No. HP / WhatsApp'), placeholder: t('0812xxxx') },
+  { key: 'address', label: t('Alamat'), placeholder: t('Jl. Melati No. 5, Depok') },
 ];
 const RECEIPT_FIELDS: ReadonlyArray<{ key: TextField; label: string; placeholder: string }> = [
-  { key: 'receiptHeader', label: 'Teks atas struk', placeholder: 'Buka 10.00–22.00' },
-  { key: 'receiptFooter', label: 'Teks bawah struk', placeholder: 'Terima kasih!' },
+  { key: 'receiptHeader', label: t('Teks atas struk'), placeholder: t('Buka 10.00–22.00') },
+  { key: 'receiptFooter', label: t('Teks bawah struk'), placeholder: t('Terima kasih!') },
 ];
 const PAPER_OPTIONS = [
-  { value: '58', label: '58 mm' },
-  { value: '80', label: '80 mm' },
+  { value: '58', label: t('58 mm') },
+  { value: '80', label: t('80 mm') },
 ] as const;
 
 const clampPercent = (value: string): number => Math.min(PERCENT_MAX, Math.max(0, Number(value) || 0));
@@ -33,14 +34,14 @@ export function StoreSettings({ store }: { store: Store }) {
 
   const handleSave = async () => {
     if (!draft.name.trim()) {
-      toast.error('Nama toko wajib diisi.');
+      toast.error(t('Nama toko wajib diisi.'));
       return;
     }
     try {
       await updateStore({ ...draft, name: draft.name.trim() });
-      toast.success('Pengaturan toko disimpan');
+      toast.success(t('Pengaturan toko disimpan'));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan.');
+      toast.error(error instanceof Error ? error.message : t('Gagal menyimpan.'));
     }
   };
 
@@ -55,17 +56,17 @@ export function StoreSettings({ store }: { store: Store }) {
 
   return (
     <>
-      <SettingsSection title="Profil toko" description="Tampil di bagian atas struk.">
+      <SettingsSection title={t('Profil toko')} description={t('Tampil di bagian atas struk.')}>
         <div className="grid gap-4 sm:grid-cols-2">{PROFILE_FIELDS.map(textField)}</div>
       </SettingsSection>
 
-      <SettingsSection title="Struk" description="Teks tambahan dan ukuran kertas printer thermal.">
+      <SettingsSection title={t('Struk')} description={t('Teks tambahan dan ukuran kertas printer thermal.')}>
         <div className="grid gap-4">
           {RECEIPT_FIELDS.map(textField)}
           <div>
-            <p className={labelBase}>Lebar kertas</p>
+            <p className={labelBase}>{t('Lebar kertas')}</p>
             <SegmentedControl
-              label="Lebar kertas"
+              label={t('Lebar kertas')}
               options={PAPER_OPTIONS}
               value={String(draft.receiptPaperMm) as '58' | '80'}
               onChange={(mm) => update({ receiptPaperMm: mm === '80' ? 80 : 58 })}
@@ -74,32 +75,32 @@ export function StoreSettings({ store }: { store: Store }) {
           <Switch
             checked={draft.settings.shouldAutoShowReceipt}
             onChange={(shouldAutoShowReceipt) => update({ settings: { ...draft.settings, shouldAutoShowReceipt } })}
-            label="Tampilkan struk setelah bayar"
-            description="Matikan jika antrean ramai dan struk jarang diminta."
+            label={t('Tampilkan struk setelah bayar')}
+            description={t('Matikan jika antrean ramai dan struk jarang diminta.')}
           />
         </div>
       </SettingsSection>
 
-      <SettingsSection title="Pajak & service" description="Isi 0 jika usaha Anda tidak memungut pajak.">
+      <SettingsSection title={t('Pajak & service')} description={t('Isi 0 jika usaha Anda tidak memungut pajak.')}>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="tax-pct" className={labelBase}>Pajak PB1/PPN (%)</label>
+            <label htmlFor="tax-pct" className={labelBase}>{t('Pajak PB1/PPN (%)')}</label>
             <input id="tax-pct" type="number" inputMode="decimal" min={0} max={100} value={draft.taxPct} onChange={(e) => update({ taxPct: clampPercent(e.target.value) })} className={`${inputBase} num`} />
           </div>
           <div>
-            <label htmlFor="service-pct" className={labelBase}>Service (%)</label>
+            <label htmlFor="service-pct" className={labelBase}>{t('Service (%)')}</label>
             <input id="service-pct" type="number" inputMode="decimal" min={0} max={100} value={draft.servicePct} onChange={(e) => update({ servicePct: clampPercent(e.target.value) })} className={`${inputBase} num`} />
           </div>
           <div className="sm:col-span-2">
-            <Switch checked={draft.isTaxInclusive} onChange={(isTaxInclusive) => update({ isTaxInclusive })} label="Harga sudah termasuk pajak" />
+            <Switch checked={draft.isTaxInclusive} onChange={(isTaxInclusive) => update({ isTaxInclusive })} label={t('Harga sudah termasuk pajak')} />
           </div>
         </div>
       </SettingsSection>
 
       <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-line bg-canvas/95 px-4 py-3 backdrop-blur md:mx-0 md:rounded-lg md:border">
-        {isDirty && <span className="text-[13px] text-muted">Ada perubahan yang belum disimpan</span>}
+        {isDirty && <span className="text-[13px] text-muted">{t('Ada perubahan yang belum disimpan')}</span>}
         <button type="button" disabled={!isDirty} onClick={() => void handleSave()} className={`${btnPrimary} h-11`}>
-          Simpan perubahan
+          {t('Simpan perubahan')}
         </button>
       </div>
     </>

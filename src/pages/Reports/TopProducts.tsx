@@ -3,12 +3,13 @@ import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { card } from '../../components/ui/styles';
 import { formatRupiah } from '../../lib/money';
 import type { ProductRow } from '../../lib/reports';
+import { t } from '../../i18n';
 
 const TOP_N = 10;
 type Metric = 'revenue' | 'qty';
 const METRIC_OPTIONS = [
-  { value: 'revenue', label: 'Pendapatan' },
-  { value: 'qty', label: 'Qty' },
+  { value: 'revenue', label: t('Pendapatan') },
+  { value: 'qty', label: t('Qty') },
 ] as const;
 
 /** Ranked list with thin magnitude bars — a sorted list reads faster than a chart for ≤ 10 names. */
@@ -21,13 +22,13 @@ export function TopProducts({ products }: { products: ProductRow[] }) {
     <section className={`${card} p-4 md:p-5`}>
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-[15px] font-bold tracking-[-0.01em]">Produk terlaris</h2>
-          <p className="text-[13px] text-muted">Top {TOP_N} · pendapatan sebelum diskon pesanan</p>
+          <h2 className="text-[15px] font-bold tracking-[-0.01em]">{t('Produk terlaris')}</h2>
+          <p className="text-[13px] text-muted">{t('Top')} {TOP_N} {t('· pendapatan sebelum diskon pesanan')}</p>
         </div>
-        <SegmentedControl label="Urutkan produk" options={METRIC_OPTIONS} value={metric} onChange={setMetric} />
+        <SegmentedControl label={t('Urutkan produk')} options={METRIC_OPTIONS} value={metric} onChange={setMetric} />
       </div>
       {ranked.length === 0 ? (
-        <p className="text-[14px] text-muted">Belum ada penjualan.</p>
+        <p className="text-[14px] text-muted">{t('Belum ada penjualan.')}</p>
       ) : (
         <ol className="flex flex-col gap-3">
           {ranked.map((p, index) => (

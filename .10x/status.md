@@ -1,7 +1,7 @@
 # Status
 
-**Phase:** Implementation — v0.11 English (design complete: ADR-010)
-**Branch:** `feat/v0.10-onboarding-help` (stacked: … → v0.8-feedback → v0.9 → v0.10)
+**Phase:** Delivery Complete — v0.11. Feedback round (v0.8–v0.11) finished.
+**Branch:** `feat/v0.11-english` (stacked: … → v0.8-feedback → v0.9 → v0.10 → v0.11)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
 | Feature | Phase | Notes |
@@ -14,7 +14,7 @@
 | v0.8 custom methods/modes · sold-out · unpaid customers | **Delivered (v0.8)** on `feat/v0.8-feedback` | 85 unit · 7 e2e · ADR-006 · review PASS |
 | v0.9 cost & profit · expenses · close of day · backup | **Delivered (v0.9)** on `feat/v0.9-profit-closing-backup` | 112 unit · 8 e2e · ADR-007, ADR-008 · review PASS |
 | v0.10 first-time journey · help centre | **Delivered (v0.10)** on `feat/v0.10-onboarding-help` | 123 unit · 9 e2e · ADR-009 · review PASS |
-| v0.11 English | Next | roadmap spec |
+| v0.11 English | **Delivered (v0.11)** on `feat/v0.11-english` | 129 unit · 10 e2e · ADR-010 · review PASS |
 
 ## v0.9 tasks
 - [x] T1 Types, Dexie v4, sync tables, migration

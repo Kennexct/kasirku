@@ -9,6 +9,7 @@ import { useCustomers } from '../../../hooks/useCustomers';
 import { formatPhone, searchCustomers } from '../../../lib/customers';
 import { saveCustomer } from '../../../services/customers';
 import type { Customer, Id } from '../../../types';
+import { t } from '../../../i18n';
 
 const MAX_RESULTS = 30;
 
@@ -40,7 +41,7 @@ export function CustomerPicker({ storeId, selectedId, onSelect, onClose }: Custo
     try {
       onSelect(await saveCustomer(storeId, draft));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan pelanggan.');
+      toast.error(error instanceof Error ? error.message : t('Gagal menyimpan pelanggan.'));
     } finally {
       setIsSaving(false);
     }
@@ -49,14 +50,14 @@ export function CustomerPicker({ storeId, selectedId, onSelect, onClose }: Custo
   if (draft) {
     return (
       <Sheet
-        title="Pelanggan baru"
+        title={t('Pelanggan baru')}
         isOpen
         onClose={onClose}
         footer={
           <div className="flex gap-2">
-            <button type="button" onClick={() => setDraft(null)} className={btnSecondary}>Kembali</button>
+            <button type="button" onClick={() => setDraft(null)} className={btnSecondary}>{t('Kembali')}</button>
             <button type="button" disabled={isSaving || draft.name.trim() === ''} onClick={() => void saveNew()} className={`${btnPrimary} flex-1`}>
-              {isSaving ? 'Menyimpan…' : 'Simpan & pilih'}
+              {isSaving ? t('Menyimpan…') : t('Simpan & pilih')}
             </button>
           </div>
         }
@@ -68,25 +69,25 @@ export function CustomerPicker({ storeId, selectedId, onSelect, onClose }: Custo
 
   return (
     <Sheet
-      title="Pelanggan"
-      subtitle="Pilih untuk pesanan ini"
+      title={t('Pelanggan')}
+      subtitle={t('Pilih untuk pesanan ini')}
       isOpen
       onClose={onClose}
       footer={
         <button type="button" onClick={startNew} className={`${btnSecondary} w-full`}>
-          <UserRoundPlus aria-hidden size={18} /> Pelanggan baru{query.trim() ? `: "${query.trim()}"` : ''}
+          <UserRoundPlus aria-hidden size={18} /> {t('Pelanggan baru')}{query.trim() ? `: "${query.trim()}"` : ''}
         </button>
       }
     >
-      <SearchInput value={query} onChange={setQuery} placeholder="Cari nama atau nomor HP…" label="Cari pelanggan" />
+      <SearchInput value={query} onChange={setQuery} placeholder={t('Cari nama atau nomor HP…')} label={t('Cari pelanggan')} />
       {selectedId && (
         <button type="button" onClick={() => onSelect(null)} className={`${btnGhost} mt-2 text-[14px] text-danger-700!`}>
-          <UserRoundX aria-hidden size={16} /> Lepas pelanggan dari pesanan
+          <UserRoundX aria-hidden size={16} /> {t('Lepas pelanggan dari pesanan')}
         </button>
       )}
       {results.length === 0 ? (
         <p className="py-8 text-center text-[14px] text-muted">
-          {customers && customers.length === 0 ? 'Belum ada pelanggan tersimpan.' : 'Tidak ditemukan.'}
+          {customers && customers.length === 0 ? t('Belum ada pelanggan tersimpan.') : t('Tidak ditemukan.')}
         </p>
       ) : (
         <ul className="mt-3 divide-y divide-line rounded-lg border border-line">
@@ -95,9 +96,9 @@ export function CustomerPicker({ storeId, selectedId, onSelect, onClose }: Custo
               <button type="button" onClick={() => onSelect(customer)} className="flex min-h-14 w-full items-center gap-3 px-3.5 py-2 text-left hover:bg-subtle">
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[15px] font-semibold">{customer.name}</span>
-                  <span className="num block truncate text-[13px] text-muted">{customer.phone ? formatPhone(customer.phone) : 'Tanpa nomor HP'}</span>
+                  <span className="num block truncate text-[13px] text-muted">{customer.phone ? formatPhone(customer.phone) : t('Tanpa nomor HP')}</span>
                 </span>
-                {customer.id === selectedId && <Check aria-label="terpilih" size={18} className="text-brand-600" />}
+                {customer.id === selectedId && <Check aria-label={t('terpilih')} size={18} className="text-brand-600" />}
               </button>
             </li>
           ))}

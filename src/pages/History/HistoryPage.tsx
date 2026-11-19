@@ -18,6 +18,7 @@ import { HistorySummary } from './HistorySummary';
 import { OrderDetailSheet } from './OrderDetailSheet';
 import { RefundSheet } from './RefundSheet';
 import { VoidSheet } from './VoidSheet';
+import { t } from '../../i18n';
 
 type Action = 'detail' | 'void' | 'refund';
 
@@ -44,7 +45,7 @@ function withRemoved(current: readonly NamedOption[], seen: readonly NamedOption
   return [...current, ...removed.values()];
 }
 
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Terjadi kesalahan.');
+const errorMessage = (error: unknown) => (error instanceof Error ? error.message : t('Terjadi kesalahan.'));
 
 /** M10 sales history + M11 void/refund entry point. */
 export function HistoryPage() {
@@ -120,13 +121,13 @@ export function HistoryPage() {
     }
   };
 
-  const handleVoid = (reason: ReasonInput) => order && void run(() => voidOrder(order.id, reason, actionCtx), `${order.receiptNo} di-void`);
+  const handleVoid = (reason: ReasonInput) => order && void run(() => voidOrder(order.id, reason, actionCtx), t('{0} di-void', order.receiptNo));
   const handleRefund = (selections: Array<{ orderItemId: Id; qty: number }>, reason: ReasonInput) =>
-    order && void run(() => refundOrder(order.id, selections, reason, actionCtx), 'Refund berhasil dicatat');
+    order && void run(() => refundOrder(order.id, selections, reason, actionCtx), t('Refund berhasil dicatat'));
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      <PageHeader title="Riwayat penjualan"
+      <PageHeader title={t('Riwayat penjualan')}
         helpTopic="riwayat" description={formatRange(range)}>
         <HistoryFilters
           dateRange={dateRange}
@@ -157,8 +158,8 @@ export function HistoryPage() {
           cashierName={history?.memberName.get(order.cashierId) ?? '—'}
           voidEligibility={voidEligibility}
           refundEligibility={refundEligibility}
-          onVoid={() => void begin('void', voidEligibility, `Void ${order.receiptNo}`)}
-          onRefund={() => void begin('refund', refundEligibility, `Refund ${order.receiptNo}`)}
+          onVoid={() => void begin('void', voidEligibility, t('Void {0}', order.receiptNo))}
+          onRefund={() => void begin('refund', refundEligibility, t('Refund {0}', order.receiptNo))}
           onClose={() => setSelected(null)}
         />
       )}

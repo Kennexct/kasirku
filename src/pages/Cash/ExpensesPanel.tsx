@@ -7,6 +7,7 @@ import type { DateRangeState } from '../../hooks/useDateRange';
 import { formatBusinessDate } from '../../lib/dateRange';
 import { formatRupiah } from '../../lib/money';
 import type { BusinessDate, Expense, Id } from '../../types';
+import { t } from '../../i18n';
 
 interface ExpensesPanelProps {
   dateRange: DateRangeState;
@@ -29,11 +30,11 @@ export function ExpensesPanel({ dateRange, today, expenses, memberNames, onAdd, 
       {expenses.length === 0 ? (
         <EmptyState
           icon={ReceiptText}
-          title="Belum ada pengeluaran"
-          description="Catat belanja bahan, gas, upah, dan biaya lain supaya untung bisa dihitung."
+          title={t('Belum ada pengeluaran')}
+          description={t('Catat belanja bahan, gas, upah, dan biaya lain supaya untung bisa dihitung.')}
           action={
             <button type="button" onClick={onAdd} className={btnSecondary}>
-              <Plus aria-hidden size={18} /> Catat pengeluaran
+              <Plus aria-hidden size={18} /> {t('Catat pengeluaran')}
             </button>
           }
         />
@@ -41,8 +42,8 @@ export function ExpensesPanel({ dateRange, today, expenses, memberNames, onAdd, 
         <>
           <div className={`${card} flex items-end justify-between gap-4 px-4 py-3.5`}>
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold text-ink-soft">Total pengeluaran</p>
-              <p className="num text-[13px] text-muted">{expenses.length} catatan · dari laci {formatRupiah(fromDrawer)}</p>
+              <p className="text-[13px] font-semibold text-ink-soft">{t('Total pengeluaran')}</p>
+              <p className="num text-[13px] text-muted">{expenses.length} {t('catatan · dari laci')} {formatRupiah(fromDrawer)}</p>
             </div>
             <p className="num text-[24px] font-extrabold leading-none tracking-[-0.02em]">{formatRupiah(total)}</p>
           </div>
@@ -52,14 +53,14 @@ export function ExpensesPanel({ dateRange, today, expenses, memberNames, onAdd, 
                 <div className="min-w-0 flex-1">
                   <p className="flex items-center gap-2">
                     <span className="truncate text-[15px] font-semibold">{EXPENSE_CATEGORY_LABEL[expense.category]}</span>
-                    {!expense.isFromDrawer && <span className={`${badgeNeutral} shrink-0`}>Bukan dari laci</span>}
+                    {!expense.isFromDrawer && <span className={`${badgeNeutral} shrink-0`}>{t('Bukan dari laci')}</span>}
                   </p>
                   <p className="truncate text-[13px] text-muted">
                     {[isMultiDay ? formatBusinessDate(expense.businessDate) : null, expense.note || null, memberNames.get(expense.actorId) ?? null].filter(Boolean).join(' · ')}
                   </p>
                 </div>
                 <span className="num text-[15px] font-semibold">{formatRupiah(expense.amount)}</span>
-                <button type="button" aria-label={`Hapus pengeluaran ${EXPENSE_CATEGORY_LABEL[expense.category]} ${formatRupiah(expense.amount)}`} onClick={() => onDelete(expense)} className="flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-danger-50 hover:text-danger-700">
+                <button type="button" aria-label={t('Hapus pengeluaran {0} {1}', EXPENSE_CATEGORY_LABEL[expense.category], formatRupiah(expense.amount))} onClick={() => onDelete(expense)} className="flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-danger-50 hover:text-danger-700">
                   <Trash2 aria-hidden size={18} />
                 </button>
               </li>

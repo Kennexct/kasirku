@@ -7,6 +7,7 @@ import { btnGhost, btnPrimary, inputBase, labelBase } from '../ui/styles';
 import { PinInput } from './PinInput';
 import { PinPad } from './PinPad';
 import { RecoveryCodeNotice } from './RecoveryCodeNotice';
+import { t } from '../../i18n';
 
 type Step = 'pin' | 'recovery' | { newCode: string };
 
@@ -24,9 +25,9 @@ export function OwnerPinForm({ onVerified }: { onVerified: () => void }) {
   if (step === 'pin') {
     return (
       <div className="flex flex-col items-center gap-2">
-        <PinPad label="PIN pemilik" verify={(pin) => verifyMemberPin(ownerId, pin)} onSuccess={onVerified} />
+        <PinPad label={t('PIN pemilik')} verify={(pin) => verifyMemberPin(ownerId, pin)} onSuccess={onVerified} />
         <button type="button" onClick={() => setStep('recovery')} className={`${btnGhost} text-[14px] text-brand-700!`}>
-          Lupa PIN?
+          {t('Lupa PIN?')}
         </button>
       </div>
     );
@@ -40,7 +41,7 @@ export function OwnerPinForm({ onVerified }: { onVerified: () => void }) {
       const result = await resetOwnerPinWithRecovery(storeId, code, newPin);
       setStep({ newCode: result.recoveryCode });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal mengatur ulang PIN.');
+      toast.error(error instanceof Error ? error.message : t('Gagal mengatur ulang PIN.'));
     } finally {
       setIsBusy(false);
     }
@@ -49,18 +50,18 @@ export function OwnerPinForm({ onVerified }: { onVerified: () => void }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <label htmlFor="recovery-code" className={labelBase}>Kode pemulihan</label>
-        <input id="recovery-code" value={code} autoComplete="off" autoCapitalize="characters" placeholder="ABCD-EFGH" onChange={(e) => setCode(e.target.value)} className={`${inputBase} font-mono uppercase tracking-[0.1em]`} />
+        <label htmlFor="recovery-code" className={labelBase}>{t('Kode pemulihan')}</label>
+        <input id="recovery-code" value={code} autoComplete="off" autoCapitalize="characters" placeholder={t('ABCD-EFGH')} onChange={(e) => setCode(e.target.value)} className={`${inputBase} font-mono uppercase tracking-[0.1em]`} />
       </div>
       <div>
-        <label htmlFor="recovery-new-pin" className={labelBase}>PIN pemilik baru</label>
+        <label htmlFor="recovery-new-pin" className={labelBase}>{t('PIN pemilik baru')}</label>
         <PinInput id="recovery-new-pin" value={newPin} onChange={setNewPin} />
       </div>
       <button type="button" disabled={isBusy || code.trim() === '' || !isValidPin(newPin)} onClick={() => void recover()} className={btnPrimary}>
-        {isBusy ? 'Memeriksa…' : 'Atur ulang PIN'}
+        {isBusy ? t('Memeriksa…') : t('Atur ulang PIN')}
       </button>
       <button type="button" onClick={() => setStep('pin')} className={`${btnGhost} text-[14px]`}>
-        Kembali ke PIN
+        {t('Kembali ke PIN')}
       </button>
     </div>
   );

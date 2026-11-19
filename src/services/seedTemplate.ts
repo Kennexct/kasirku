@@ -1,6 +1,7 @@
 import { DEFAULT_PAYMENT_METHODS, DEFAULT_STORE_RULES } from '../constants';
 import { nowIso, uuidv7 } from '../lib/id';
 import type { Category, Discount, PaymentMethod, Product, SalesMode, Store, StoreMember, SyncMeta, VariantGroup } from '../types';
+import { t } from '../i18n';
 
 /**
  * Starter menus (ADR-009). A template is data: categories, variant groups and products that reference them by key.
@@ -28,7 +29,7 @@ export interface SeedSetup {
   qrisImageUrl?: string;
 }
 
-export const DEFAULT_SETUP: SeedSetup = { storeName: 'Warung Saya', template: 'bakso', hasQris: true, hasTransfer: true };
+export const DEFAULT_SETUP: SeedSetup = { storeName: t('Warung Saya'), template: 'bakso', hasQris: true, hasTransfer: true };
 export const STORE_NAME_MAX = 60;
 
 type GroupDef = { name: string; isRequired: boolean; max: number; options: ReadonlyArray<readonly [name: string, priceDelta: number]> };
@@ -44,17 +45,17 @@ interface TemplateDef {
 }
 
 const single = (name: string, options: GroupDef['options']): GroupDef => ({ name, isRequired: true, max: 1, options });
-const PEDAS = single('Level Pedas', [['Tidak pedas', 0], ['Sedang', 0], ['Pedas', 0]]);
+const PEDAS = single(t('Level Pedas'), [[t('Tidak pedas'), 0], [t('Sedang'), 0], [t('Pedas'), 0]]);
 
 export const TEMPLATES: Record<TemplateId, TemplateDef> = {
   bakso: {
-    label: 'Bakso & mie',
-    description: 'Bakso, mie ayam, minuman',
-    categories: { makanan: 'Makanan', minuman: 'Minuman' },
+    label: t('Bakso & mie'),
+    description: t('Bakso, mie ayam, minuman'),
+    categories: { makanan: t('Makanan'), minuman: t('Minuman') },
     groups: {
       pedas: PEDAS,
-      topping: { name: 'Topping', isRequired: false, max: 3, options: [['Telur', 3_000], ['Tahu', 2_000], ['Pangsit', 2_000]] },
-      ukuran: single('Ukuran', [['Reguler', 0], ['Jumbo', 3_000]]),
+      topping: { name: t('Topping'), isRequired: false, max: 3, options: [[t('Telur'), 3_000], [t('Tahu'), 2_000], [t('Pangsit'), 2_000]] },
+      ukuran: single(t('Ukuran'), [[t('Reguler'), 0], [t('Jumbo'), 3_000]]),
     },
     products: [
       ['Bakso Urat', 'makanan', 15_000, 16_000, ['pedas', 'topping']],
@@ -67,13 +68,13 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     ],
   },
   kopi: {
-    label: 'Kopi & minuman',
-    description: 'Kedai kopi, es, camilan',
-    categories: { kopi: 'Kopi', nonkopi: 'Non-kopi', camilan: 'Camilan' },
+    label: t('Kopi & minuman'),
+    description: t('Kedai kopi, es, camilan'),
+    categories: { kopi: t('Kopi'), nonkopi: t('Non-kopi'), camilan: t('Camilan') },
     groups: {
-      sajian: single('Sajian', [['Es', 0], ['Panas', 0]]),
-      ukuran: single('Ukuran', [['Reguler', 0], ['Besar', 4_000]]),
-      gula: single('Gula', [['Normal', 0], ['Sedikit', 0], ['Tanpa gula', 0]]),
+      sajian: single(t('Sajian'), [[t('Es'), 0], [t('Panas'), 0]]),
+      ukuran: single(t('Ukuran'), [[t('Reguler'), 0], [t('Besar'), 4_000]]),
+      gula: single(t('Gula'), [[t('Normal'), 0], [t('Sedikit'), 0], [t('Tanpa gula'), 0]]),
     },
     products: [
       ['Kopi Susu Gula Aren', 'kopi', 18_000, 19_000, ['ukuran', 'gula']],
@@ -87,9 +88,9 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     ],
   },
   gorengan: {
-    label: 'Gorengan & jajanan',
-    description: 'Gorengan, kue, minuman',
-    categories: { gorengan: 'Gorengan', minuman: 'Minuman' },
+    label: t('Gorengan & jajanan'),
+    description: t('Gorengan, kue, minuman'),
+    categories: { gorengan: t('Gorengan'), minuman: t('Minuman') },
     groups: {},
     products: [
       ['Tahu Isi', 'gorengan', 2_000, null, []],
@@ -103,12 +104,12 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     ],
   },
   warung: {
-    label: 'Warung makan',
-    description: 'Nasi, lauk, minuman',
-    categories: { nasi: 'Nasi & lauk', minuman: 'Minuman' },
+    label: t('Warung makan'),
+    description: t('Nasi, lauk, minuman'),
+    categories: { nasi: t('Nasi & lauk'), minuman: t('Minuman') },
     groups: {
       pedas: PEDAS,
-      nasi: single('Porsi nasi', [['Biasa', 0], ['Setengah', 0], ['Tambah', 3_000]]),
+      nasi: single(t('Porsi nasi'), [[t('Biasa'), 0], [t('Setengah'), 0], [t('Tambah nasi'), 3_000]]),
     },
     products: [
       ['Nasi Ayam Goreng', 'nasi', 18_000, 19_000, ['nasi', 'pedas']],
@@ -121,7 +122,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       ['Teh Hangat', 'minuman', 3_000, null, []],
     ],
   },
-  kosong: { label: 'Mulai kosong', description: 'Isi menu sendiri dari awal', categories: {}, groups: {}, products: [] },
+  kosong: { label: t('Mulai kosong'), description: t('Isi menu sendiri dari awal'), categories: {}, groups: {}, products: [] },
 };
 
 export function buildSeedBundle(setup: SeedSetup = DEFAULT_SETUP): SeedBundle {
@@ -138,14 +139,14 @@ export function buildSeedBundle(setup: SeedSetup = DEFAULT_SETUP): SeedBundle {
     timezone: 'Asia/Jakarta',
     dayCutoff: '04:00',
     receiptHeader: '',
-    receiptFooter: 'Terima kasih, sampai jumpa lagi!',
+    receiptFooter: t('Terima kasih, sampai jumpa lagi!'),
     receiptPaperMm: 58,
     taxPct: 0,
     servicePct: 0,
     isTaxInclusive: false,
     settings: { ...DEFAULT_STORE_RULES },
   };
-  const owner: StoreMember = { ...meta(), userId: null, role: 'owner', displayName: 'Pemilik', pinHash: '' };
+  const owner: StoreMember = { ...meta(), userId: null, role: 'owner', displayName: t('Pemilik'), pinHash: '' };
 
   const mode = (name: string, sortOrder: number, rest: Pick<SalesMode, 'isDefault' | 'isActive' | 'priceRule' | 'markupPct'>): SalesMode => ({ ...meta(), name, sortOrder, ...rest });
   const dineIn = mode('Dine In', 0, { isDefault: true, isActive: true, priceRule: 'none', markupPct: 0 });
@@ -200,8 +201,8 @@ export function buildSeedBundle(setup: SeedSetup = DEFAULT_SETUP): SeedBundle {
     paymentMethods,
     products,
     discounts: [
-      { ...meta(), name: 'Promo Jumat', scope: 'order', type: 'percent', value: 10, isActive: true },
-      { ...meta(), name: 'Potongan Langganan', scope: 'order', type: 'fixed', value: 2_000, isActive: true },
+      { ...meta(), name: t('Promo Jumat'), scope: 'order', type: 'percent', value: 10, isActive: true },
+      { ...meta(), name: t('Potongan Langganan'), scope: 'order', type: 'fixed', value: 2_000, isActive: true },
     ],
   };
 }

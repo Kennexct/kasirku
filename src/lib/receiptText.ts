@@ -1,5 +1,6 @@
 import type { Order, Store } from '../types';
 import { formatRupiah } from './money';
+import { t } from '../i18n';
 
 const DIVIDER = '--------------------------------';
 
@@ -8,29 +9,29 @@ export function buildReceiptText(order: Order, store: Pick<Store, 'name' | 'addr
   const lines: string[] = [`*${store.name}*`];
   if (store.address) lines.push(store.address);
   if (store.phone) lines.push(store.phone);
-  lines.push(DIVIDER, `No: ${order.receiptNo}`, `Mode: ${order.salesModeNameSnapshot}`);
-  if (order.label) lines.push(`Pesanan: ${order.label}`);
-  if (order.customerNameSnapshot) lines.push(`Pelanggan: ${order.customerNameSnapshot}`);
+  lines.push(DIVIDER, t('No: {0}', order.receiptNo), t('Mode: {0}', order.salesModeNameSnapshot));
+  if (order.label) lines.push(t('Pesanan: {0}', order.label));
+  if (order.customerNameSnapshot) lines.push(t('Pelanggan: {0}', order.customerNameSnapshot));
   lines.push(DIVIDER);
 
   for (const item of order.items) {
     lines.push(`${item.qty}x ${item.nameSnapshot}  ${formatRupiah(item.unitPrice * item.qty)}`);
     if (item.options.length > 0) lines.push(`   ${item.options.map((o) => o.name).join(', ')}`);
-    if (item.note) lines.push(`   Catatan: ${item.note}`);
+    if (item.note) lines.push(t('   Catatan: {0}', item.note));
   }
 
   const { totals } = order;
-  lines.push(DIVIDER, `Subtotal  ${formatRupiah(totals.subtotal)}`);
+  lines.push(DIVIDER, t('Subtotal  {0}', formatRupiah(totals.subtotal)));
   const discount = totals.itemDiscountTotal + totals.orderDiscountTotal;
-  if (discount > 0) lines.push(`Diskon  -${formatRupiah(discount)}`);
-  if (totals.serviceTotal > 0) lines.push(`Service  ${formatRupiah(totals.serviceTotal)}`);
-  if (totals.taxTotal > 0) lines.push(`Pajak  ${formatRupiah(totals.taxTotal)}`);
-  lines.push(`*Total  ${formatRupiah(totals.grandTotal)}*`);
+  if (discount > 0) lines.push(t('Diskon  -{0}', formatRupiah(discount)));
+  if (totals.serviceTotal > 0) lines.push(t('Service  {0}', formatRupiah(totals.serviceTotal)));
+  if (totals.taxTotal > 0) lines.push(t('Pajak  {0}', formatRupiah(totals.taxTotal)));
+  lines.push(t('*Total  {0}*', formatRupiah(totals.grandTotal)));
 
   for (const payment of order.payments) {
     lines.push(`${payment.methodNameSnapshot}  ${formatRupiah(payment.cashReceived ?? payment.amount)}`);
-    if (payment.reference) lines.push(`Ref: ${payment.reference}`);
-    if (payment.change !== undefined && payment.change > 0) lines.push(`Kembali  ${formatRupiah(payment.change)}`);
+    if (payment.reference) lines.push(t('Ref: {0}', payment.reference));
+    if (payment.change !== undefined && payment.change > 0) lines.push(t('Kembali  {0}', formatRupiah(payment.change)));
   }
   if (store.receiptFooter) lines.push(DIVIDER, store.receiptFooter);
   return lines.join('\n');

@@ -7,6 +7,7 @@ import { btnPrimary, btnSecondary, inputBase, labelBase, option, sectionTitle } 
 import { PERCENT_MAX } from '../../../constants';
 import { formatRupiah } from '../../../lib/money';
 import type { AppliedDiscount, Discount, DiscountType, Id } from '../../../types';
+import { t } from '../../../i18n';
 
 interface DiscountSheetProps {
   presets: Discount[];
@@ -21,8 +22,8 @@ interface DiscountSheetProps {
 }
 
 const TYPE_OPTIONS = [
-  { value: 'percent', label: 'Persen (%)' },
-  { value: 'fixed', label: 'Nominal (Rp)' },
+  { value: 'percent', label: t('Persen (%)') },
+  { value: 'fixed', label: t('Nominal (Rp)') },
 ] as const;
 
 /** M6 order-level discount: pick a preset or enter an ad-hoc % / Rp amount. */
@@ -41,7 +42,7 @@ export function DiscountSheet({ presets, current, maxPercent, baseAmount, onRequ
 
   const applyCustom = (approvedById: Id | null = null) => {
     if (isBadValue || value === null) return;
-    const name = type === 'percent' ? `Diskon ${value}%` : `Diskon ${formatRupiah(value)}`;
+    const name = type === 'percent' ? t('Diskon {0}%', value) : t('Diskon {0}', formatRupiah(value));
     onApply({ discountId: null, name, type, value, approvedById });
   };
 
@@ -52,26 +53,26 @@ export function DiscountSheet({ presets, current, maxPercent, baseAmount, onRequ
 
   return (
     <Sheet
-      title="Diskon pesanan"
-      subtitle={`Dari ${formatRupiah(baseAmount)}`}
+      title={t('Diskon pesanan')}
+      subtitle={t('Dari {0}', formatRupiah(baseAmount))}
       isOpen
       onClose={onClose}
       footer={
         <div className="flex gap-2">
           {current && (
             <button type="button" onClick={() => onApply(null)} className={btnSecondary}>
-              Hapus diskon
+              {t('Hapus diskon')}
             </button>
           )}
           <button type="button" disabled={isInvalid} onClick={() => applyCustom()} className={`${btnPrimary} flex-1`}>
-            Terapkan
+            {t('Terapkan')}
           </button>
         </div>
       }
     >
       {presets.length > 0 && (
         <section className="mb-6">
-          <h3 className={`${sectionTitle} mb-2.5`}>Promo tersimpan</h3>
+          <h3 className={`${sectionTitle} mb-2.5`}>{t('Promo tersimpan')}</h3>
           <div className="grid grid-cols-2 gap-2">
             {presets.map((preset) => (
               <button
@@ -89,10 +90,10 @@ export function DiscountSheet({ presets, current, maxPercent, baseAmount, onRequ
       )}
 
       <section>
-        <h3 className={`${sectionTitle} mb-2.5`}>Diskon manual</h3>
-        <SegmentedControl label="Jenis diskon" options={TYPE_OPTIONS} value={type} onChange={setType} isFullWidth />
+        <h3 className={`${sectionTitle} mb-2.5`}>{t('Diskon manual')}</h3>
+        <SegmentedControl label={t('Jenis diskon')} options={TYPE_OPTIONS} value={type} onChange={setType} isFullWidth />
         <div className="mt-3">
-          <label htmlFor="discount-value" className={labelBase}>{type === 'percent' ? 'Besar diskon (%)' : 'Besar diskon'}</label>
+          <label htmlFor="discount-value" className={labelBase}>{type === 'percent' ? t('Besar diskon (%)') : t('Besar diskon')}</label>
           {type === 'percent' ? (
             <input
               id="discount-value"
@@ -111,9 +112,9 @@ export function DiscountSheet({ presets, current, maxPercent, baseAmount, onRequ
         </div>
         {isOverLimit && !isBadValue && (
           <div role="alert" className="mt-3 rounded-lg border border-warn-200 bg-warn-50 p-3">
-            <p className="text-[13px] text-warn-700">Melebihi batas diskon kasir ({maxPercent}%).</p>
+            <p className="text-[13px] text-warn-700">{t('Melebihi batas diskon kasir (')}{maxPercent}%).</p>
             <button type="button" onClick={() => void applyWithOwnerPin()} className={`${btnSecondary} mt-2 h-11 w-full text-[14px]`}>
-              <Lock aria-hidden size={16} /> Setujui dengan PIN pemilik
+              <Lock aria-hidden size={16} /> {t('Setujui dengan PIN pemilik')}
             </button>
           </div>
         )}

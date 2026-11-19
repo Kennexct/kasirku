@@ -1,5 +1,6 @@
 import { CURRENCY, LOCALE } from '../constants';
 import type { Rupiah } from '../types';
+import { t } from '../i18n';
 
 const formatter = new Intl.NumberFormat(LOCALE, {
   style: 'currency',
@@ -16,7 +17,7 @@ export function formatRupiah(amount: Rupiah): string {
 /** Rounds to whole Rupiah; all stored money must pass through this. */
 export function toRupiah(value: number): Rupiah {
   if (!Number.isFinite(value)) {
-    throw new Error(`Invalid money value: ${value}`);
+    throw new Error(t('Invalid money value: {0}', value));
   }
   return Math.round(value);
 }

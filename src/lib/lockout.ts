@@ -1,4 +1,5 @@
 import { PIN_FREE_ATTEMPTS, PIN_LOCK_STEPS_MS } from '../constants';
+import { t } from '../i18n';
 
 /** Wrong-PIN lockout schedule (ADR-003). Pure: the caller stores the state. */
 export interface LockoutState {
@@ -26,5 +27,5 @@ export function registerFailure(state: LockoutState, now: number): LockoutState 
 
 export function formatWait(ms: number): string {
   const seconds = Math.ceil(ms / 1000);
-  return seconds < 60 ? `${seconds} detik` : `${Math.ceil(seconds / 60)} menit`;
+  return seconds < 60 ? t('{0} detik', seconds) : t('{0} menit', Math.ceil(seconds / 60));
 }

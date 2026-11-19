@@ -1,4 +1,5 @@
 import type { Id, SelectedOption, VariantGroup } from '../types';
+import { t } from '../i18n';
 
 /** groupId -> selected optionIds */
 export type VariantSelection = Readonly<Record<Id, readonly Id[]>>;
@@ -16,8 +17,8 @@ export function validateSelection(groups: readonly VariantGroup[], selection: Va
   for (const group of groups) {
     const count = selection[group.id]?.length ?? 0;
     const min = group.isRequired ? Math.max(1, group.min) : group.min;
-    if (count < min) return `Pilih ${group.name}`;
-    if (count > group.max) return `${group.name} maksimal ${group.max} pilihan`;
+    if (count < min) return t('Pilih {0}', group.name);
+    if (count > group.max) return t('{0} maksimal {1} pilihan', group.name, group.max);
   }
   return null;
 }

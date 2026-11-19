@@ -6,15 +6,16 @@ import { CONFIG_NAME_MAX, PAYMENT_TYPE_LABEL } from '../../constants';
 import { createPaymentMethod } from '../../services/checkoutConfig';
 import type { Id, PaymentType } from '../../types';
 import { METHOD_ICON } from '../../components/ui/paymentIcon';
+import { t } from '../../i18n';
 
 const TYPES: readonly PaymentType[] = ['ewallet', 'transfer', 'qris', 'cash', 'other'];
 
 const TYPE_HELP: Record<PaymentType, string> = {
-  ewallet: 'GoPay, OVO, DANA, ShopeePay, dan sejenisnya. Nomor referensi bisa dicatat.',
-  transfer: 'Transfer ke rekening bank. Nomor referensi bisa dicatat.',
-  qris: 'Anda bisa mengunggah gambar QRIS statis untuk ditampilkan ke pembeli.',
-  cash: 'Uang tunai: kasir memasukkan uang diterima dan melihat kembalian.',
-  other: 'Cara bayar lain, misalnya voucher atau kupon makan.',
+  ewallet: t('GoPay, OVO, DANA, ShopeePay, dan sejenisnya. Nomor referensi bisa dicatat.'),
+  transfer: t('Transfer ke rekening bank. Nomor referensi bisa dicatat.'),
+  qris: t('Anda bisa mengunggah gambar QRIS statis untuk ditampilkan ke pembeli.'),
+  cash: t('Uang tunai: kasir memasukkan uang diterima dan melihat kembalian.'),
+  other: t('Cara bayar lain, misalnya voucher atau kupon makan.'),
 };
 
 export function AddMethodSheet({ storeId, onClose }: { storeId: Id; onClose: () => void }) {
@@ -26,33 +27,33 @@ export function AddMethodSheet({ storeId, onClose }: { storeId: Id; onClose: () 
     setIsSaving(true);
     try {
       const method = await createPaymentMethod(storeId, { name, type });
-      toast.success(`${method.name} ditambahkan`);
+      toast.success(t('{0} ditambahkan', method.name));
       onClose();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menambah metode.');
+      toast.error(error instanceof Error ? error.message : t('Gagal menambah metode.'));
       setIsSaving(false);
     }
   };
 
   return (
     <Sheet
-      title="Tambah metode pembayaran"
+      title={t('Tambah metode pembayaran')}
       isOpen
       onClose={onClose}
       footer={
         <button type="button" disabled={isSaving || name.trim() === ''} onClick={() => void submit()} className={`${btnPrimary} w-full`}>
-          Tambah metode
+          {t('Tambah metode')}
         </button>
       }
     >
       <div className="flex flex-col gap-5">
         <div>
-          <label htmlFor="method-name" className={labelBase}>Nama metode</label>
-          <input id="method-name" autoFocus value={name} maxLength={CONFIG_NAME_MAX} placeholder="mis. GoPay, Transfer BCA" onChange={(e) => setName(e.target.value)} className={inputBase} />
+          <label htmlFor="method-name" className={labelBase}>{t('Nama metode')}</label>
+          <input id="method-name" autoFocus value={name} maxLength={CONFIG_NAME_MAX} placeholder={t('mis. GoPay, Transfer BCA')} onChange={(e) => setName(e.target.value)} className={inputBase} />
         </div>
         <div>
-          <p className={labelBase}>Jenis</p>
-          <div role="radiogroup" aria-label="Jenis metode" className="grid grid-cols-3 gap-2">
+          <p className={labelBase}>{t('Jenis')}</p>
+          <div role="radiogroup" aria-label={t('Jenis metode')} className="grid grid-cols-3 gap-2">
             {TYPES.map((value) => {
               const Icon = METHOD_ICON[value];
               return (

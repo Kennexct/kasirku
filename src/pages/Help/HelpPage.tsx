@@ -12,6 +12,7 @@ import { btnPrimary, btnSecondary, card } from '../../components/ui/styles';
 import { HELP_TOPIC_IDS, searchHelp, type HelpTopicId } from '../../content/help';
 import { useChecklist } from '../../hooks/useChecklist';
 import { useSessionStore } from '../../store/useSessionStore';
+import { t } from '../../i18n';
 
 const isTopicId = (value: string | null): value is HelpTopicId => HELP_TOPIC_IDS.includes(value as HelpTopicId);
 
@@ -29,21 +30,21 @@ export function HelpPage() {
   return (
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
-        title="Bantuan"
-        description="Cara memakai KasirKu. Bisa dibuka tanpa internet."
+        title={t('Bantuan')}
+        description={t('Cara memakai KasirKu. Bisa dibuka tanpa internet.')}
         actions={
           <button type="button" onClick={() => setIsIntroOpen(true)} className={`${btnSecondary} h-11 text-[14px]`}>
-            <PlayCircle aria-hidden size={18} /> <span className="hidden sm:inline">Lihat lagi pengenalan</span>
-            <span className="sm:hidden">Pengenalan</span>
+            <PlayCircle aria-hidden size={18} /> <span className="hidden sm:inline">{t('Lihat lagi pengenalan')}</span>
+            <span className="sm:hidden">{t('Pengenalan')}</span>
           </button>
         }
       />
       <div className="min-h-0 flex-1 overflow-y-auto p-4 md:px-8 md:py-6">
         <div className="mx-auto flex max-w-3xl flex-col gap-4">
           {checklist && !checklist.isComplete && <ChecklistCard checklist={checklist} />}
-          <SearchInput value={query} onChange={setQuery} placeholder="Cari bantuan, mis. refund, QRIS, tutup kasir…" label="Cari topik bantuan" />
+          <SearchInput value={query} onChange={setQuery} placeholder={t('Cari bantuan, mis. refund, QRIS, tutup kasir…')} label={t('Cari topik bantuan')} />
           {topics.length === 0 ? (
-            <EmptyState icon={SearchX} title="Topik tidak ditemukan" description="Coba kata lain, misalnya: bayar, struk, laporan." />
+            <EmptyState icon={SearchX} title={t('Topik tidak ditemukan')} description={t('Coba kata lain, misalnya: bayar, struk, laporan.')} />
           ) : (
             <ul className={`${card} divide-y divide-line overflow-hidden`}>
               {topics.map((topic) => {
@@ -71,7 +72,7 @@ export function HelpPage() {
       </div>
 
       {isIntroOpen && (
-        <Sheet title="Cara kerja KasirKu" isOpen onClose={() => setIsIntroOpen(false)} footer={<button type="button" onClick={() => setIsIntroOpen(false)} className={`${btnPrimary} w-full`}>Mengerti</button>}>
+        <Sheet title={t('Cara kerja KasirKu')} isOpen onClose={() => setIsIntroOpen(false)} footer={<button type="button" onClick={() => setIsIntroOpen(false)} className={`${btnPrimary} w-full`}>{t('Mengerti')}</button>}>
           <IntroCards />
         </Sheet>
       )}

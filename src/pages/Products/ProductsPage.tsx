@@ -12,6 +12,7 @@ import { formatRupiah } from '../../lib/money';
 import type { Product, VariantGroup } from '../../types';
 import { ProductForm } from './ProductForm';
 import { VariantGroupForm } from './VariantGroupForm';
+import { t } from '../../i18n';
 
 type Tab = 'products' | 'variants';
 type Editing<T> = { item: T | null } | null;
@@ -35,26 +36,26 @@ export function ProductsPage() {
   return (
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
-        title="Produk"
+        title={t('Produk')}
         helpTopic="produk"
-        description="Menu, harga per mode penjualan, dan varian."
+        description={t('Menu, harga per mode penjualan, dan varian.')}
         actions={
           <button
             type="button"
             onClick={() => (tab === 'products' ? setEditingProduct({ item: null }) : setEditingGroup({ item: null }))}
             className={`${btnPrimary} h-11`}
           >
-            <Plus aria-hidden size={18} /> {tab === 'products' ? 'Produk' : 'Grup varian'}
+            <Plus aria-hidden size={18} /> {tab === 'products' ? t('Produk') : t('Grup varian')}
           </button>
         }
       >
         <Tabs
-          label="Jenis data"
+          label={t('Jenis data')}
           value={tab}
           onChange={setTab}
           items={[
-            { value: 'products', label: 'Produk', count: catalog.products.length },
-            { value: 'variants', label: 'Varian', count: catalog.variantGroups.length },
+            { value: 'products', label: t('Produk'), count: catalog.products.length },
+            { value: 'variants', label: t('Varian'), count: catalog.variantGroups.length },
           ]}
         />
       </PageHeader>
@@ -63,15 +64,15 @@ export function ProductsPage() {
         {tab === 'products' ? (
           <>
             <div className="mb-3 max-w-md">
-              <SearchInput value={search} onChange={setSearch} placeholder="Cari produk…" label="Cari produk" />
+              <SearchInput value={search} onChange={setSearch} placeholder={t('Cari produk…')} label={t('Cari produk')} />
             </div>
             <div className={`${card} overflow-hidden`}>
               <div className="hidden grid-cols-[1fr_160px_120px_120px_96px_24px] items-center gap-4 border-b border-line bg-subtle px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.05em] text-muted lg:grid">
-                <span>Produk</span>
-                <span>Varian</span>
-                <span className="text-right">Dine In</span>
+                <span>{t('Produk')}</span>
+                <span>{t('Varian')}</span>
+                <span className="text-right">{'Dine In'}</span>
                 <span className="text-right">{takeawayMode?.name ?? 'Takeaway'}</span>
-                <span>Status</span>
+                <span>{t('Status')}</span>
                 <span />
               </div>
               <ul className="divide-y divide-line">
@@ -87,10 +88,10 @@ export function ProductsPage() {
                         <span className="min-w-0">
                           <span className={`block truncate text-[15px] font-semibold ${p.isActive ? '' : 'text-muted'}`}>{p.name}</span>
                           <span className="block truncate text-[13px] text-muted">
-                            {(p.categoryId && categoryName.get(p.categoryId)) || 'Tanpa kategori'}
+                            {(p.categoryId && categoryName.get(p.categoryId)) || t('Tanpa kategori')}
                             <span className="lg:hidden">
-                              {p.variantGroupIds.length > 0 && ` · ${p.variantGroupIds.length} varian`}
-                              {p.isActive && p.isSoldOut && ' · Habis'}
+                              {p.variantGroupIds.length > 0 && t(' · {0} varian', p.variantGroupIds.length)}
+                              {p.isActive && p.isSoldOut && t(' · Habis')}
                             </span>
                           </span>
                         </span>
@@ -103,14 +104,14 @@ export function ProductsPage() {
                         {takeawayMode && p.modePrices[takeawayMode.id] !== undefined ? formatRupiah(p.modePrices[takeawayMode.id] ?? 0) : '—'}
                       </span>
                       <span className="hidden lg:block">
-                        <span className={!p.isActive ? badgeNeutral : p.isSoldOut ? badgeWarn : badgeBrand}>{!p.isActive ? 'Nonaktif' : p.isSoldOut ? 'Habis' : 'Aktif'}</span>
+                        <span className={!p.isActive ? badgeNeutral : p.isSoldOut ? badgeWarn : badgeBrand}>{!p.isActive ? t('Nonaktif') : p.isSoldOut ? t('Habis') : t('Aktif')}</span>
                       </span>
                       <ChevronRight aria-hidden size={18} className="text-faint" />
                     </button>
                   </li>
                 ))}
               </ul>
-              {products.length === 0 && <EmptyState icon={PackageOpen} title="Belum ada produk" description="Tambahkan menu pertama Anda." />}
+              {products.length === 0 && <EmptyState icon={PackageOpen} title={t('Belum ada produk')} description={t('Tambahkan menu pertama Anda.')} />}
             </div>
           </>
         ) : (
@@ -121,8 +122,8 @@ export function ProductsPage() {
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
                       <span className="text-[15px] font-semibold">{g.name}</span>
-                      <span className={badgeNeutral}>{g.isRequired ? 'Wajib' : 'Opsional'}</span>
-                      <span className={badgeNeutral}>{g.selectType === 'single' ? 'Pilih satu' : `Maks ${g.max}`}</span>
+                      <span className={badgeNeutral}>{g.isRequired ? t('Wajib') : t('Opsional')}</span>
+                      <span className={badgeNeutral}>{g.selectType === 'single' ? t('Pilih satu') : t('Maks {0}', g.max)}</span>
                     </span>
                     <span className="num mt-0.5 block truncate text-[13px] text-muted">
                       {g.options.map((o) => (o.priceDelta ? `${o.name} +${formatRupiah(o.priceDelta)}` : o.name)).join(' · ')}

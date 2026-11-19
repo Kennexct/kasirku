@@ -3,6 +3,7 @@ import { localDb } from '../db/localDb';
 import { createLocalStore, findLocalStore, type BootstrapResult } from '../services/bootstrap';
 import type { SeedSetup } from '../services/seedTemplate';
 import { rememberedMemberId, useSessionStore } from '../store/useSessionStore';
+import { t } from '../i18n';
 
 type BootStatus = { status: 'loading' } | { status: 'onboarding' } | { status: 'ready' } | { status: 'error'; message: string };
 export type BootState = BootStatus & {
@@ -43,7 +44,7 @@ export function useBootstrap(): BootState {
     };
     boot().catch((error: unknown) => {
       if (!isActive) return;
-      setState({ status: 'error', message: error instanceof Error ? error.message : 'Gagal memuat data toko.' });
+      setState({ status: 'error', message: error instanceof Error ? error.message : t('Gagal memuat data toko.') });
     });
     return () => {
       isActive = false;

@@ -30,13 +30,16 @@ def shot(page, name):
 
 def run(p, name, viewport, is_mobile):
     browser = p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox'])
-    page = browser.new_context(viewport=viewport, is_mobile=is_mobile, has_touch=is_mobile).new_page()
+    page = browser.new_context(locale='id-ID', viewport=viewport, is_mobile=is_mobile, has_touch=is_mobile).new_page()
     page.on('pageerror', lambda e: errors.append(f'{name}: {e}'))
     page.on('response', lambda r: r.status >= 400 and errors.append(f'{name}: {r.status} {r.url}'))
     dialog = page.get_by_role('dialog')
 
     # 1. Journey: nothing exists until it is finished.
     page.goto(BASE + '/')
+    page.get_by_role('heading', name='Bahasa / Language').wait_for()
+    shot(page, f'{name}-x0-language')
+    page.get_by_role('button', name='Lanjut').click()
     page.get_by_role('heading', name='Toko Anda').wait_for()
     stores_before = page.evaluate(READ_DB)['stores'] if page.evaluate("async () => (await indexedDB.databases()).some((d) => d.name === 'kasirku')") else []
     page.locator('#store-name').fill('Kopi Senja')

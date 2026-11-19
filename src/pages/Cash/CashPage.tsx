@@ -25,11 +25,12 @@ import { ClosingHistory } from './ClosingHistory';
 import { ExpenseSheet } from './ExpenseSheet';
 import { ExpensesPanel } from './ExpensesPanel';
 import { TodayPanel } from './TodayPanel';
+import { t } from '../../i18n';
 
 type View = 'day' | 'expenses' | 'closings';
 type Dialog = { kind: 'expense' | 'close' | 'opening' | 'reopen' } | { kind: 'deleteExpense'; expense: Expense } | null;
 
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Terjadi kesalahan.');
+const errorMessage = (error: unknown) => (error instanceof Error ? error.message : t('Terjadi kesalahan.'));
 
 /** "Kas": the day's cash drawer, expenses, and close of day (ADR-007). Open to every seller. */
 export function CashPage() {
@@ -72,11 +73,11 @@ export function CashPage() {
 
   const confirmReopen = async () => {
     if (!day.closing) return;
-    const approver = await ownerApproval(`Buka kembali kasir ${formatBusinessDate(date)}`);
+    const approver = await ownerApproval(t('Buka kembali kasir {0}', formatBusinessDate(date)));
     if (approver === undefined) return;
     try {
       await reopenDay(day.closing.id, cashierId, approver);
-      toast.success('Kasir dibuka kembali');
+      toast.success(t('Kasir dibuka kembali'));
       setDialog(null);
     } catch (error) {
       toast.error(errorMessage(error));
@@ -84,11 +85,11 @@ export function CashPage() {
   };
 
   const confirmDeleteExpense = async (expense: Expense) => {
-    const approver = await ownerApproval(`Hapus pengeluaran ${formatRupiah(expense.amount)}`);
+    const approver = await ownerApproval(t('Hapus pengeluaran {0}', formatRupiah(expense.amount)));
     if (approver === undefined) return;
     try {
       await deleteExpense(expense.id, cashierId, approver);
-      toast.success('Pengeluaran dihapus');
+      toast.success(t('Pengeluaran dihapus'));
       setDialog(null);
     } catch (error) {
       toast.error(errorMessage(error));
@@ -98,23 +99,23 @@ export function CashPage() {
   return (
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
-        title="Kas"
+        title={t('Kas')}
         helpTopic="kas"
-        description={view === 'day' ? formatBusinessDate(date) : 'Pengeluaran dan tutup kasir'}
+        description={view === 'day' ? formatBusinessDate(date) : t('Pengeluaran dan tutup kasir')}
         actions={
-          <button type="button" aria-label="Catat pengeluaran" onClick={() => setDialog({ kind: 'expense' })} className={`${btnPrimary} h-11`}>
-            <Plus aria-hidden size={18} /> <span className="hidden sm:inline">Catat pengeluaran</span>
+          <button type="button" aria-label={t('Catat pengeluaran')} onClick={() => setDialog({ kind: 'expense' })} className={`${btnPrimary} h-11`}>
+            <Plus aria-hidden size={18} /> <span className="hidden sm:inline">{t('Catat pengeluaran')}</span>
           </button>
         }
       >
         <Tabs
-          label="Bagian kas"
+          label={t('Bagian kas')}
           value={view}
           onChange={setView}
           items={[
-            { value: 'day', label: isToday ? 'Hari ini' : 'Kemarin' },
-            { value: 'expenses', label: 'Pengeluaran' },
-            { value: 'closings', label: 'Riwayat tutup' },
+            { value: 'day', label: isToday ? t('Hari ini') : t('Kemarin') },
+            { value: 'expenses', label: t('Pengeluaran') },
+            { value: 'closings', label: t('Riwayat tutup') },
           ]}
         />
       </PageHeader>
@@ -125,14 +126,14 @@ export function CashPage() {
             {isToday && isYesterdayUnclosed && (
               <div className="flex flex-wrap items-center gap-3 rounded-lg border border-warn-200 bg-warn-50 px-4 py-3 text-[14px] text-warn-700">
                 <TriangleAlert aria-hidden size={18} className="shrink-0" />
-                <span className="min-w-0 flex-1">Kasir kemarin ({formatBusinessDate(yesterday)}) belum ditutup.</span>
-                <button type="button" onClick={() => setDate(yesterday)} className={`${btnSecondary} h-10 text-[14px]`}>Tutup kemarin</button>
+                <span className="min-w-0 flex-1">{t('Kasir kemarin (')}{formatBusinessDate(yesterday)}{t(') belum ditutup.')}</span>
+                <button type="button" onClick={() => setDate(yesterday)} className={`${btnSecondary} h-10 text-[14px]`}>{t('Tutup kemarin')}</button>
               </div>
             )}
             {!isToday && (
               <div className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-subtle px-4 py-3 text-[14px] text-ink-soft">
-                <span className="min-w-0 flex-1">Menampilkan kasir kemarin, {formatBusinessDate(date)}.</span>
-                <button type="button" onClick={() => setDate(today)} className={`${btnSecondary} h-10 text-[14px]`}>Kembali ke hari ini</button>
+                <span className="min-w-0 flex-1">{t('Menampilkan kasir kemarin,')} {formatBusinessDate(date)}.</span>
+                <button type="button" onClick={() => setDate(today)} className={`${btnSecondary} h-10 text-[14px]`}>{t('Kembali ke hari ini')}</button>
               </div>
             )}
             <TodayPanel
@@ -140,7 +141,7 @@ export function CashPage() {
               timeZone={store.timezone}
               drawer={drawer}
               closing={day.closing}
-              closedByName={day.closing ? (memberNames.get(day.closing.closedById) ?? 'Kasir') : ''}
+              closedByName={day.closing ? (memberNames.get(day.closing.closedById) ?? t('Kasir::orang')) : ''}
               onEditOpening={() => {
                 setOpeningDraft(drawer.openingCash || null);
                 setDialog({ kind: 'opening' });
@@ -170,47 +171,47 @@ export function CashPage() {
       )}
       {dialog?.kind === 'opening' && (
         <Sheet
-          title="Modal awal"
+          title={t('Modal awal')}
           subtitle={formatBusinessDate(date)}
           isOpen
           onClose={() => setDialog(null)}
-          footer={<button type="button" onClick={() => void saveOpening()} className={`${btnPrimary} w-full`}>Simpan modal awal</button>}
+          footer={<button type="button" onClick={() => void saveOpening()} className={`${btnPrimary} w-full`}>{t('Simpan modal awal')}</button>}
         >
-          <label htmlFor="opening-cash" className={labelBase}>Uang di laci saat mulai jualan</label>
+          <label htmlFor="opening-cash" className={labelBase}>{t('Uang di laci saat mulai jualan')}</label>
           <RupiahInput id="opening-cash" value={openingDraft} onChange={setOpeningDraft} autoFocus size="lg" />
-          <p className={helperText}>Uang kembalian yang sudah ada di laci sebelum penjualan pertama.</p>
+          <p className={helperText}>{t('Uang kembalian yang sudah ada di laci sebelum penjualan pertama.')}</p>
         </Sheet>
       )}
       {dialog?.kind === 'reopen' && (
         <Sheet
-          title="Buka kembali kasir?"
+          title={t('Buka kembali kasir?')}
           subtitle={formatBusinessDate(date)}
           isOpen
           onClose={() => setDialog(null)}
           footer={
             <div className="flex gap-2">
-              <button type="button" onClick={() => setDialog(null)} className={btnSecondary}>Batal</button>
-              <button type="button" onClick={() => void confirmReopen()} className={`${btnDangerSolid} flex-1`}>Buka kembali</button>
+              <button type="button" onClick={() => setDialog(null)} className={btnSecondary}>{t('Batal')}</button>
+              <button type="button" onClick={() => void confirmReopen()} className={`${btnDangerSolid} flex-1`}>{t('Buka kembali')}</button>
             </div>
           }
         >
-          <p className="text-[14px] text-ink-soft">Hasil tutup kasir hari ini dihapus dan harus dihitung ulang. Tindakan ini tercatat dan butuh izin pemilik.</p>
+          <p className="text-[14px] text-ink-soft">{t('Hasil tutup kasir hari ini dihapus dan harus dihitung ulang. Tindakan ini tercatat dan butuh izin pemilik.')}</p>
         </Sheet>
       )}
       {dialog?.kind === 'deleteExpense' && (
         <Sheet
-          title="Hapus pengeluaran?"
+          title={t('Hapus pengeluaran?')}
           subtitle={`${EXPENSE_CATEGORY_LABEL[dialog.expense.category]} · ${formatRupiah(dialog.expense.amount)}`}
           isOpen
           onClose={() => setDialog(null)}
           footer={
             <div className="flex gap-2">
-              <button type="button" onClick={() => setDialog(null)} className={btnSecondary}>Batal</button>
-              <button type="button" onClick={() => void confirmDeleteExpense(dialog.expense)} className={`${btnDangerSolid} flex-1`}>Hapus pengeluaran</button>
+              <button type="button" onClick={() => setDialog(null)} className={btnSecondary}>{t('Batal')}</button>
+              <button type="button" onClick={() => void confirmDeleteExpense(dialog.expense)} className={`${btnDangerSolid} flex-1`}>{t('Hapus pengeluaran')}</button>
             </div>
           }
         >
-          <p className="text-[14px] text-ink-soft">Pengeluaran ini tidak lagi dihitung di kas dan laporan. Tindakan ini tercatat dan butuh izin pemilik.</p>
+          <p className="text-[14px] text-ink-soft">{t('Pengeluaran ini tidak lagi dihitung di kas dan laporan. Tindakan ini tercatat dan butuh izin pemilik.')}</p>
         </Sheet>
       )}
     </section>

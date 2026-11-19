@@ -1,6 +1,7 @@
 import type { BusinessDate, Id, Order, Refund, Store } from '../types';
 import { datesInRange, type DateRange } from './dateRange';
 import { lineTotal } from './pricing';
+import { t } from '../i18n';
 
 /**
  * The ONLY place report metrics are defined (spec: .10x/specs/2026-11-18-reports-export-design.md).
@@ -59,7 +60,7 @@ export interface Report {
 }
 
 const COUNTED: ReadonlySet<Order['status']> = new Set(['paid', 'partial_refund', 'refunded']);
-const UNKNOWN = { key: 'unknown', label: 'Tidak diketahui' } as const;
+const UNKNOWN = { key: 'unknown', label: t('Tidak diketahui') } as const;
 const HOURS_IN_DAY = 24;
 
 export const isCountedSale = (order: Order): boolean => COUNTED.has(order.status);

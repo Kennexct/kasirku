@@ -13,6 +13,7 @@ import { addCashier, deactivateCashier, getOwner, resetCashierPin } from '../../
 import { useSessionStore } from '../../../store/useSessionStore';
 import type { Id, StoreMember } from '../../../types';
 import { SettingsSection } from '../SettingsSection';
+import { t } from '../../../i18n';
 
 type Dialog = { kind: 'reset' | 'deactivate'; member: StoreMember } | null;
 const message = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback);
@@ -51,8 +52,8 @@ export function CashierSection({ storeId }: { storeId: Id }) {
         setName('');
         setPin('');
       },
-      `${name.trim()} ditambahkan`,
-      'Gagal menambah kasir.',
+      t('{0} ditambahkan', name.trim()),
+      t('Gagal menambah kasir.'),
     );
 
   const handleDeactivate = (member: StoreMember) =>
@@ -65,18 +66,18 @@ export function CashierSection({ storeId }: { storeId: Id }) {
         signInCashier({ memberId: owner.id, displayName: owner.displayName, role: owner.role });
         unlockOwner();
       },
-      `${member.displayName} dinonaktifkan`,
-      'Gagal menonaktifkan kasir.',
+      t('{0} dinonaktifkan', member.displayName),
+      t('Gagal menonaktifkan kasir.'),
     );
 
   return (
-    <SettingsSection title="Kasir" description="Setiap kasir punya PIN sendiri, sehingga penjualan tercatat atas namanya.">
+    <SettingsSection title={t('Kasir::orang')} description={t('Setiap kasir punya PIN sendiri, sehingga penjualan tercatat atas namanya.')}>
       {!hasOwnerPin ? (
-        <p className="text-[14px] text-muted">Atur PIN pemilik dulu untuk menambah kasir.</p>
+        <p className="text-[14px] text-muted">{t('Atur PIN pemilik dulu untuk menambah kasir.')}</p>
       ) : (
         <div className="flex flex-col gap-4">
           {cashiers.length === 0 ? (
-            <EmptyState icon={Users} title="Belum ada kasir" description="Tambahkan kasir pertama di bawah ini." />
+            <EmptyState icon={Users} title={t('Belum ada kasir')} description={t('Tambahkan kasir pertama di bawah ini.')} />
           ) : (
             <ul className="divide-y divide-line rounded-lg border border-line">
               {cashiers.map((member) => (
@@ -84,10 +85,10 @@ export function CashierSection({ storeId }: { storeId: Id }) {
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-bold text-white">{initialsOf(member.displayName)}</span>
                   <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{member.displayName}</span>
                   <button type="button" onClick={() => setDialog({ kind: 'reset', member })} className={`${btnGhost} text-[14px]`}>
-                    <KeyRound aria-hidden size={16} /> Reset PIN
+                    <KeyRound aria-hidden size={16} /> {t('Reset PIN')}
                   </button>
-                  <button type="button" aria-label={`Nonaktifkan ${member.displayName}`} onClick={() => setDialog({ kind: 'deactivate', member })} className={`${btnGhost} text-[14px] text-danger-700!`}>
-                    <UserMinus aria-hidden size={16} /> Nonaktifkan
+                  <button type="button" aria-label={t('Nonaktifkan {0}', member.displayName)} onClick={() => setDialog({ kind: 'deactivate', member })} className={`${btnGhost} text-[14px] text-danger-700!`}>
+                    <UserMinus aria-hidden size={16} /> {t('Nonaktifkan')}
                   </button>
                 </li>
               ))}
@@ -95,17 +96,17 @@ export function CashierSection({ storeId }: { storeId: Id }) {
           )}
 
           <fieldset className="grid items-end gap-3 rounded-lg border border-dashed border-line-strong p-4 sm:grid-cols-[1fr_150px_auto]">
-            <legend className="px-1 text-[13px] font-semibold text-ink-soft">Tambah kasir</legend>
+            <legend className="px-1 text-[13px] font-semibold text-ink-soft">{t('Tambah kasir')}</legend>
             <div>
-              <label htmlFor="cashier-name" className={labelBase}>Nama</label>
-              <input id="cashier-name" value={name} maxLength={MEMBER_NAME_MAX} placeholder="Contoh: Dika" onChange={(e) => setName(e.target.value)} className={inputBase} />
+              <label htmlFor="cashier-name" className={labelBase}>{t('Nama')}</label>
+              <input id="cashier-name" value={name} maxLength={MEMBER_NAME_MAX} placeholder={t('Contoh: Dika')} onChange={(e) => setName(e.target.value)} className={inputBase} />
             </div>
             <div>
-              <label htmlFor="cashier-pin" className={labelBase}>PIN kasir</label>
+              <label htmlFor="cashier-pin" className={labelBase}>{t('PIN kasir')}</label>
               <PinInput id="cashier-pin" value={pin} onChange={setPin} />
             </div>
             <button type="button" disabled={isBusy || name.trim() === '' || !isValidPin(pin)} onClick={() => void handleAdd()} className={btnPrimary}>
-              <UserPlus aria-hidden size={18} /> Tambah
+              <UserPlus aria-hidden size={18} /> {t('Tambah')}
             </button>
           </fieldset>
         </div>
@@ -113,36 +114,36 @@ export function CashierSection({ storeId }: { storeId: Id }) {
 
       {dialog?.kind === 'reset' && (
         <Sheet
-          title="Reset PIN kasir"
+          title={t('Reset PIN kasir')}
           subtitle={dialog.member.displayName}
           isOpen
           onClose={() => setDialog(null)}
           footer={
-            <button type="button" disabled={isBusy || !isValidPin(resetPin)} onClick={() => void run(() => resetCashierPin(dialog.member.id, resetPin), 'PIN kasir diganti', 'Gagal mengganti PIN.')} className={`${btnPrimary} w-full`}>
-              Simpan PIN baru
+            <button type="button" disabled={isBusy || !isValidPin(resetPin)} onClick={() => void run(() => resetCashierPin(dialog.member.id, resetPin), t('PIN kasir diganti'), t('Gagal mengganti PIN.'))} className={`${btnPrimary} w-full`}>
+              {t('Simpan PIN baru')}
             </button>
           }
         >
-          <label htmlFor="cashier-reset-pin" className={labelBase}>PIN baru (4–6 angka)</label>
+          <label htmlFor="cashier-reset-pin" className={labelBase}>{t('PIN baru (4–6 angka)')}</label>
           <PinInput id="cashier-reset-pin" value={resetPin} onChange={setResetPin} />
         </Sheet>
       )}
 
       {dialog?.kind === 'deactivate' && (
         <Sheet
-          title={`Nonaktifkan ${dialog.member.displayName}?`}
+          title={t('Nonaktifkan {0}?', dialog.member.displayName)}
           isOpen
           onClose={() => setDialog(null)}
           footer={
             <div className="flex gap-2">
-              <button type="button" onClick={() => setDialog(null)} className={btnSecondary}>Batal</button>
+              <button type="button" onClick={() => setDialog(null)} className={btnSecondary}>{t('Batal')}</button>
               <button type="button" disabled={isBusy} onClick={() => void handleDeactivate(dialog.member)} className={`${btnDangerSolid} flex-1`}>
-                Nonaktifkan
+                {t('Nonaktifkan')}
               </button>
             </div>
           }
         >
-          <p className="text-[14px] text-ink-soft">Kasir ini tidak bisa masuk lagi. Namanya tetap tampil di riwayat dan laporan penjualan yang sudah ada.</p>
+          <p className="text-[14px] text-ink-soft">{t('Kasir ini tidak bisa masuk lagi. Namanya tetap tampil di riwayat dan laporan penjualan yang sudah ada.')}</p>
         </Sheet>
       )}
     </SettingsSection>

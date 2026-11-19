@@ -1,5 +1,6 @@
 import { PHOTO_MAX_DIMENSION_PX, PHOTO_MAX_INPUT_BYTES, PHOTO_MAX_OUTPUT_BYTES } from '../constants';
 import type { Result } from '../types';
+import { t } from '../i18n';
 
 interface CompressOptions {
   maxDimension: number;
@@ -28,14 +29,14 @@ function approxBytes(dataUrl: string): number {
 }
 
 async function compress(file: File, options: CompressOptions): Promise<Result<string>> {
-  if (!file.type.startsWith('image/')) return { ok: false, error: 'File harus berupa gambar.' };
-  if (file.size > PHOTO_MAX_INPUT_BYTES) return { ok: false, error: 'Ukuran foto maksimal 10 MB.' };
+  if (!file.type.startsWith('image/')) return { ok: false, error: t('File harus berupa gambar.') };
+  if (file.size > PHOTO_MAX_INPUT_BYTES) return { ok: false, error: t('Ukuran foto maksimal 10 MB.') };
 
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(file);
   } catch {
-    return { ok: false, error: 'Format foto tidak didukung. Coba JPG atau PNG.' };
+    return { ok: false, error: t('Format foto tidak didukung. Coba JPG atau PNG.') };
   }
 
   const scale = Math.min(1, options.maxDimension / Math.max(bitmap.width, bitmap.height));
@@ -43,7 +44,7 @@ async function compress(file: File, options: CompressOptions): Promise<Result<st
   canvas.width = Math.round(bitmap.width * scale);
   canvas.height = Math.round(bitmap.height * scale);
   const ctx = canvas.getContext('2d');
-  if (!ctx) return { ok: false, error: 'Browser tidak mendukung pengolahan foto.' };
+  if (!ctx) return { ok: false, error: t('Browser tidak mendukung pengolahan foto.') };
   ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
 
@@ -51,7 +52,7 @@ async function compress(file: File, options: CompressOptions): Promise<Result<st
     const dataUrl = canvas.toDataURL('image/webp', quality);
     if (approxBytes(dataUrl) <= options.maxBytes) return { ok: true, value: dataUrl };
   }
-  return { ok: false, error: 'Foto terlalu besar setelah dikompres. Coba foto lain.' };
+  return { ok: false, error: t('Foto terlalu besar setelah dikompres. Coba foto lain.') };
 }
 
 /**

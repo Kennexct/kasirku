@@ -9,8 +9,10 @@ python3 -I e2e/staff.py   http://localhost:4173 ./shots              # owner PIN
 python3 -I e2e/customers.py http://localhost:4173 ./shots            # add customer, attach + quick-add at POS, receipt/WhatsApp, stats, delete
 python3 -I e2e/v08.py     http://localhost:4173 ./shots              # add/rename/move/delete method + mode, sold-out, unpaid customers + reminder, history after removals
 python3 -I e2e/v10.py     http://localhost:4173 ./shots              # first-time journey with a template, Langkah awal, help page + contextual help
+python3    e2e/v11.py     http://localhost:4173 ./shots              # English device: whole app in English, leftover-Indonesian scan, Excel, switch language (needs openpyxl)
 python3    e2e/v09.py     http://localhost:4173 ./shots              # cost price -> profit + Excel, expenses, close of day (short, reopen, exact), backup -> restore (needs openpyxl)
 python3    e2e/reports.py http://localhost:4173 ./shots              # sales + refund -> Reports -> download XLSX/PDF/CSV and verify (needs openpyxl)
 ```
 Both print `ERRORS: none` when no page errors, console errors or failed requests occurred. Screenshots land in `./shots`.
 Since v0.10 a fresh browser profile opens the first-time journey; every older flow presses "Lewati, pakai contoh toko" first.
+Since v0.11 every Indonesian flow sets `locale='id-ID'` on the browser context; a default headless browser reports English and would open the app in English.

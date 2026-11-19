@@ -4,6 +4,7 @@ import { Select } from '../../components/ui/Select';
 import { ORDER_STATUS_LABEL } from '../../constants';
 import type { DateRangeState } from '../../hooks/useDateRange';
 import type { Id, OrderStatus, PaymentMethod, SalesMode } from '../../types';
+import { t } from '../../i18n';
 
 export interface HistoryFilter {
   status: 'all' | OrderStatus;
@@ -40,33 +41,33 @@ export function HistoryFilters(props: HistoryFiltersProps) {
 
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
         <div className="lg:max-w-xs lg:flex-1">
-          <SearchInput value={filter.query} onChange={(query) => set({ query })} placeholder="No. struk, label, pelanggan…" label="Cari transaksi" />
+          <SearchInput value={filter.query} onChange={(query) => set({ query })} placeholder={t('No. struk, label, pelanggan…')} label={t('Cari transaksi')} />
         </div>
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
           <Select
-            label="Status"
+            label={t('Status')}
             value={filter.status}
             isActive={filter.status !== 'all'}
             onChange={(status) => set({ status: status as HistoryFilter['status'] })}
-            options={[{ value: 'all', label: 'Semua status' }, ...STATUS_FILTERS.map((s) => ({ value: s, label: ORDER_STATUS_LABEL[s] }))]}
+            options={[{ value: 'all', label: t('Semua status') }, ...STATUS_FILTERS.map((s) => ({ value: s, label: ORDER_STATUS_LABEL[s] }))]}
           />
           <Select
-            label="Metode pembayaran"
+            label={t('Metode pembayaran')}
             value={filter.paymentMethodId}
             isActive={filter.paymentMethodId !== 'all'}
             onChange={(paymentMethodId) => set({ paymentMethodId })}
-            options={[{ value: 'all', label: 'Semua metode' }, ...paymentMethods.map((m) => ({ value: m.id, label: m.name }))]}
+            options={[{ value: 'all', label: t('Semua metode') }, ...paymentMethods.map((m) => ({ value: m.id, label: m.name }))]}
           />
           <Select
-            label="Mode penjualan"
+            label={t('Mode penjualan')}
             value={filter.salesModeId}
             isActive={filter.salesModeId !== 'all'}
             onChange={(salesModeId) => set({ salesModeId })}
-            options={[{ value: 'all', label: 'Semua mode' }, ...salesModes.map((m) => ({ value: m.id, label: m.name }))]}
+            options={[{ value: 'all', label: t('Semua mode') }, ...salesModes.map((m) => ({ value: m.id, label: m.name }))]}
           />
           {hasFilters && (
             <button type="button" onClick={() => onFilterChange(EMPTY_FILTER)} className="h-11 shrink-0 rounded-lg px-3 text-[14px] font-semibold text-brand-700 hover:bg-brand-50">
-              Reset
+              {t('Reset')}
             </button>
           )}
         </div>

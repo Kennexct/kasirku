@@ -34,7 +34,7 @@ def shot(page, name):
 
 def run(p, name, viewport, is_mobile):
     browser = p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox'])
-    page = browser.new_context(viewport=viewport, is_mobile=is_mobile, has_touch=is_mobile).new_page()
+    page = browser.new_context(locale='id-ID', viewport=viewport, is_mobile=is_mobile, has_touch=is_mobile).new_page()
     page.on('pageerror', lambda e: errors.append(f'{name}: {e}'))
     page.on('response', lambda r: r.status >= 400 and errors.append(f'{name}: {r.status} {r.url}'))
     dialog = page.get_by_role('dialog')
@@ -42,7 +42,7 @@ def run(p, name, viewport, is_mobile):
     # 1. Payment methods: add, refuse a duplicate, move up, rename, delete another one.
     page.goto(BASE + '/pengaturan?tab=payments')
     page.get_by_role('button', name='Lewati, pakai contoh toko').click()  # first-time journey: take the example store
-    page.get_by_role('heading', name='Toko Anda').wait_for(state='hidden')  # store is created before moving on
+    page.get_by_role('navigation').first.wait_for()  # the store exists once the app shell is up
     page.get_by_role('button', name='Tambah metode').click()
     page.locator('#method-name').fill('GoPay')
     shot(page, f'{name}-v1-add-method')

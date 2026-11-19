@@ -1,6 +1,7 @@
 import { card } from '../../components/ui/styles';
 import { formatRupiah } from '../../lib/money';
 import type { BreakdownRow } from '../../lib/reports';
+import { t } from '../../i18n';
 
 interface BreakdownTableProps {
   title: string;
@@ -19,15 +20,15 @@ export function BreakdownTable({ title, description, rows }: BreakdownTableProps
         {description && <p className="text-[13px] text-muted">{description}</p>}
       </header>
       {rows.length === 0 ? (
-        <p className="px-5 pb-5 text-[14px] text-muted">Belum ada data.</p>
+        <p className="px-5 pb-5 text-[14px] text-muted">{t('Belum ada data.')}</p>
       ) : (
         <table className="w-full text-[14px]">
           <thead>
             <tr className="border-y border-line bg-subtle text-[12px] font-semibold uppercase tracking-[0.05em] text-muted">
-              <th scope="col" className="px-4 py-2 text-left md:px-5">Nama</th>
-              <th scope="col" className="hidden px-2 py-2 text-right sm:table-cell">Trx</th>
-              <th scope="col" className="hidden px-2 py-2 text-right sm:table-cell">Refund</th>
-              <th scope="col" className="px-4 py-2 text-right md:px-5">Bersih</th>
+              <th scope="col" className="px-4 py-2 text-left md:px-5">{t('Nama')}</th>
+              <th scope="col" className="hidden px-2 py-2 text-right sm:table-cell">{t('Trx')}</th>
+              <th scope="col" className="hidden px-2 py-2 text-right sm:table-cell">{t('Refund')}</th>
+              <th scope="col" className="px-4 py-2 text-right md:px-5">{t('Bersih')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">

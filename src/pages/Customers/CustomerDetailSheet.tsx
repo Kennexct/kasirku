@@ -9,12 +9,13 @@ import { buildDebtReminder, formatPhone, toWhatsAppNumber, type CustomerStats } 
 import { formatRupiah } from '../../lib/money';
 import { whatsAppShareUrl } from '../../lib/receiptText';
 import type { Customer } from '../../types';
+import { DATE_LOCALE, t } from '../../i18n';
 
 const RECENT_ORDERS = 5;
-const dateFormat = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+const dateFormat = new Intl.DateTimeFormat(DATE_LOCALE, { day: 'numeric', month: 'short', year: 'numeric' });
 export const formatVisit = (iso: string | null): string => (iso ? dateFormat.format(new Date(iso)) : '—');
 /** Fits a third-width stat tile on a phone ("18 Nov 26"). */
-const shortDate = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: '2-digit' });
+const shortDate = new Intl.DateTimeFormat(DATE_LOCALE, { day: 'numeric', month: 'short', year: '2-digit' });
 
 interface CustomerDetailSheetProps {
   customer: Customer;
@@ -45,38 +46,38 @@ export function CustomerDetailSheet({ customer, stats, storeName, timeZone, onEd
   return (
     <Sheet
       title={customer.name}
-      subtitle={customer.phone ? formatPhone(customer.phone) : 'Tanpa nomor HP'}
+      subtitle={customer.phone ? formatPhone(customer.phone) : t('Tanpa nomor HP')}
       isOpen
       onClose={onClose}
       footer={
         <div className="grid grid-cols-2 gap-2">
           <button type="button" onClick={onDelete} className={btnDanger}>
-            <Trash2 aria-hidden size={18} /> Hapus
+            <Trash2 aria-hidden size={18} /> {t('Hapus')}
           </button>
           <button type="button" onClick={onEdit} className={btnSecondary}>
-            <Pencil aria-hidden size={18} /> Ubah
+            <Pencil aria-hidden size={18} /> {t('Ubah')}
           </button>
         </div>
       }
     >
       <dl className="mb-4 grid grid-cols-3 gap-2">
-        <Stat label="Kunjungan" value={String(stats.visits)} />
-        <Stat label="Total belanja" value={formatRupiah(stats.totalSpend)} />
-        <Stat label="Terakhir" value={stats.lastVisitAt ? shortDate.format(new Date(stats.lastVisitAt)) : '—'} />
+        <Stat label={t('Kunjungan')} value={String(stats.visits)} />
+        <Stat label={t('Total belanja')} value={formatRupiah(stats.totalSpend)} />
+        <Stat label={t('Terakhir')} value={stats.lastVisitAt ? shortDate.format(new Date(stats.lastVisitAt)) : '—'} />
       </dl>
 
       {customer.phone && unpaid.length === 0 && (
         <a href={`https://wa.me/${toWhatsAppNumber(customer.phone)}`} target="_blank" rel="noopener noreferrer" className={`${btnSecondary} mb-4 w-full`}>
-          <MessageCircle aria-hidden size={18} /> Chat WhatsApp
+          <MessageCircle aria-hidden size={18} /> {t('Chat WhatsApp')}
         </a>
       )}
       {customer.note && <p className="mb-4 rounded-lg bg-subtle px-3.5 py-2.5 text-[14px] text-ink-soft">{customer.note}</p>}
       {unpaid.length > 0 && (
-        <section aria-label="Belum dibayar" className="mb-4 overflow-hidden rounded-lg border border-warn-200">
+        <section aria-label={t('Belum dibayar')} className="mb-4 overflow-hidden rounded-lg border border-warn-200">
           <header className="flex items-end justify-between gap-3 bg-warn-50 px-3.5 py-2.5">
             <div>
-              <h3 className="text-[13px] font-semibold text-warn-700">Belum dibayar</h3>
-              <p className="num text-[13px] text-warn-700">{unpaid.length} pesanan</p>
+              <h3 className="text-[13px] font-semibold text-warn-700">{t('Belum dibayar')}</h3>
+              <p className="num text-[13px] text-warn-700">{t('{0} pesanan', unpaid.length)}</p>
             </div>
             <p className="num text-[20px] font-extrabold leading-none tracking-[-0.02em] text-ink">{formatRupiah(stats.openAmount)}</p>
           </header>
@@ -84,7 +85,7 @@ export function CustomerDetailSheet({ customer, stats, storeName, timeZone, onEd
             {unpaid.map((order) => (
               <li key={order.id} className="flex items-center gap-3 px-3.5 py-2.5">
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px] font-semibold">{order.label || 'Pesanan tersimpan'}</span>
+                  <span className="block truncate text-[14px] font-semibold">{order.label || t('Pesanan tersimpan')}</span>
                   <span className="block truncate text-[13px] text-muted">
                     {formatVisit(order.createdAt)} · {order.items.map((i) => `${i.qty}× ${i.nameSnapshot}`).join(', ')}
                   </span>
@@ -96,19 +97,19 @@ export function CustomerDetailSheet({ customer, stats, storeName, timeZone, onEd
           <div className="flex flex-col gap-1 border-t border-line px-3.5 py-2.5 sm:flex-row sm:items-center sm:gap-2">
             {customer.phone ? (
               <a href={whatsAppShareUrl(reminder, customer.phone)} target="_blank" rel="noopener noreferrer" className={`${btnSecondary} h-11 text-[14px] sm:flex-1`}>
-                <MessageCircle aria-hidden size={17} /> Ingatkan via WhatsApp
+                <MessageCircle aria-hidden size={17} /> {t('Ingatkan via WhatsApp')}
               </a>
             ) : (
-              <p className="flex-1 text-[13px] text-muted">Tambahkan nomor HP untuk mengirim pengingat.</p>
+              <p className="flex-1 text-[13px] text-muted">{t('Tambahkan nomor HP untuk mengirim pengingat.')}</p>
             )}
-            <Link to={ROUTES.openOrders} className={`${btnGhost} text-[14px]`}>Terima bayaran</Link>
+            <Link to={ROUTES.openOrders} className={`${btnGhost} text-[14px]`}>{t('Terima bayaran')}</Link>
           </div>
         </section>
       )}
 
-      <h3 className={`${sectionTitle} mb-2`}>Transaksi terakhir</h3>
+      <h3 className={`${sectionTitle} mb-2`}>{t('Transaksi terakhir')}</h3>
       {orders && settled.length === 0 ? (
-        <p className="text-[14px] text-muted">Belum ada transaksi.</p>
+        <p className="text-[14px] text-muted">{t('Belum ada transaksi.')}</p>
       ) : (
         <ul className="divide-y divide-line rounded-lg border border-line">
           {settled.slice(0, RECENT_ORDERS).map((order) => (

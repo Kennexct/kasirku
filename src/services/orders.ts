@@ -5,6 +5,7 @@ import { nowIso, uuidv7 } from '../lib/id';
 import { calculateTotals } from '../lib/pricing';
 import type { AppliedDiscount, Id, Order, OrderItem, OrderPayment, PaymentMethod, SalesMode, Store } from '../types';
 import { saveAndQueue } from './sync';
+import { t } from '../i18n';
 
 const DEVICE_CODE_KEY = 'deviceCode';
 const DEVICE_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -55,12 +56,12 @@ async function nextReceiptNo(businessDate: string): Promise<string> {
 }
 
 async function buildOrder(cart: CartSnapshot, ctx: OrderContext): Promise<Order> {
-  if (cart.items.length === 0) throw new Error('Keranjang masih kosong.');
+  if (cart.items.length === 0) throw new Error(t('Keranjang masih kosong.'));
 
   const now = nowIso();
   const existing = cart.openOrderId ? await localDb.orders.get(cart.openOrderId) : undefined;
   if (existing && existing.status !== 'open') {
-    throw new Error(`Pesanan ${existing.receiptNo} berstatus ${ORDER_STATUS_LABEL[existing.status]}, tidak bisa diubah.`);
+    throw new Error(t('Pesanan {0} berstatus {1}, tidak bisa diubah.', existing.receiptNo, ORDER_STATUS_LABEL[existing.status]));
   }
   const businessDate = existing?.businessDate ?? getBusinessDate(new Date(), ctx.store);
   // A customer deleted while the cart was open is dropped instead of leaving a dangling id.
@@ -92,7 +93,7 @@ async function buildOrder(cart: CartSnapshot, ctx: OrderContext): Promise<Order>
 
 /** M8: save an unpaid order ("bayar nanti"). A label is required so it can be found later. */
 export async function saveOpenOrder(cart: CartSnapshot, ctx: OrderContext): Promise<Order> {
-  if (cart.label.trim().length === 0) throw new Error('Isi label pesanan (contoh: Meja 5).');
+  if (cart.label.trim().length === 0) throw new Error(t('Isi label pesanan (contoh: Meja 5).'));
   const order = await buildOrder(cart, ctx);
   await saveAndQueue('orders', order);
   return order;
@@ -101,10 +102,10 @@ export async function saveOpenOrder(cart: CartSnapshot, ctx: OrderContext): Prom
 export function validatePayment(payment: PaymentInput, grandTotal: number): string | null {
   const { method, reference, cashReceived } = payment;
   if (method.referenceMode === 'required' && !reference?.trim()) {
-    return `${method.referenceLabel || 'Referensi'} wajib diisi untuk ${method.name}.`;
+    return t('{0} wajib diisi untuk {1}.', method.referenceLabel || t('Referensi'), method.name);
   }
   if (method.type === 'cash' && (cashReceived ?? 0) < grandTotal) {
-    return 'Uang diterima kurang dari total.';
+    return t('Uang diterima kurang dari total.');
   }
   return null;
 }
@@ -142,10 +143,10 @@ export async function completeOrder(cart: CartSnapshot, ctx: OrderContext, payme
 
 /** M8: cancel an unpaid order with a reason. Kept as a record (never deleted) and audited. */
 export async function cancelOpenOrder(orderId: Id, reason: string, actorId: Id): Promise<void> {
-  if (reason.trim().length === 0) throw new Error('Alasan pembatalan wajib diisi.');
+  if (reason.trim().length === 0) throw new Error(t('Alasan pembatalan wajib diisi.'));
   const order = await localDb.orders.get(orderId);
-  if (!order) throw new Error('Pesanan tidak ditemukan.');
-  if (order.status !== 'open') throw new Error('Hanya pesanan terbuka yang bisa dibatalkan.');
+  if (!order) throw new Error(t('Pesanan tidak ditemukan.'));
+  if (order.status !== 'open') throw new Error(t('Hanya pesanan terbuka yang bisa dibatalkan.'));
 
   const now = nowIso();
   await saveAndQueue('orders', { ...order, status: 'cancelled', updatedAt: now });

@@ -6,6 +6,7 @@ import { btnPrimary } from '../../components/ui/styles';
 import { formatPhone } from '../../lib/customers';
 import { saveCustomer } from '../../services/customers';
 import type { Customer, Id } from '../../types';
+import { t } from '../../i18n';
 
 interface CustomerFormSheetProps {
   storeId: Id;
@@ -25,10 +26,10 @@ export function CustomerFormSheet({ storeId, customer, onClose }: CustomerFormSh
     setIsSaving(true);
     try {
       const saved = await saveCustomer(storeId, { id: customer?.id, ...draft });
-      toast.success(`${saved.name} disimpan`);
+      toast.success(t('{0} disimpan', saved.name));
       onClose();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan pelanggan.');
+      toast.error(error instanceof Error ? error.message : t('Gagal menyimpan pelanggan.'));
     } finally {
       setIsSaving(false);
     }
@@ -36,12 +37,12 @@ export function CustomerFormSheet({ storeId, customer, onClose }: CustomerFormSh
 
   return (
     <Sheet
-      title={customer ? 'Ubah pelanggan' : 'Pelanggan baru'}
+      title={customer ? t('Ubah pelanggan') : t('Pelanggan baru')}
       isOpen
       onClose={onClose}
       footer={
         <button type="button" disabled={isSaving || draft.name.trim() === ''} onClick={() => void save()} className={`${btnPrimary} w-full`}>
-          {isSaving ? 'Menyimpan…' : 'Simpan pelanggan'}
+          {isSaving ? t('Menyimpan…') : t('Simpan pelanggan')}
         </button>
       }
     >

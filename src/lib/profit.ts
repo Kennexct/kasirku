@@ -1,5 +1,6 @@
 import type { Expense, Order } from '../types';
 import { isCountedSale, type ReportSummary } from './reports';
+import { t } from '../i18n';
 
 /**
  * The ONLY place profit is defined (ADR-007).
@@ -98,15 +99,15 @@ export interface ProfitLine {
 /** The statement, top to bottom — one wording for the screen, Excel and PDF. */
 export function profitLines(profit: Profit): ProfitLine[] {
   if (profit.mode === 'none') return [];
-  const sales: ProfitLine = { label: profit.taxTotal > 0 ? 'Penjualan bersih (tanpa pajak)' : 'Penjualan bersih', amount: profit.salesBasis, kind: 'plain' };
+  const sales: ProfitLine = { label: profit.taxTotal > 0 ? t('Penjualan bersih (tanpa pajak)') : t('Penjualan bersih'), amount: profit.salesBasis, kind: 'plain' };
   if (profit.mode === 'simple') {
-    return [sales, { label: 'Pengeluaran', amount: -profit.expensesTotal, kind: 'plain' }, { label: 'Sisa setelah pengeluaran', amount: profit.balance, kind: 'total' }];
+    return [sales, { label: t('Pengeluaran'), amount: -profit.expensesTotal, kind: 'plain' }, { label: t('Sisa setelah pengeluaran'), amount: profit.balance, kind: 'total' }];
   }
   return [
     sales,
-    { label: 'Harga modal (HPP)', amount: -profit.cogs, kind: 'plain' },
-    { label: 'Laba kotor', amount: profit.grossProfit, kind: 'subtotal' },
-    { label: 'Biaya operasional', amount: -profit.operatingExpenses, kind: 'plain' },
-    { label: 'Laba bersih', amount: profit.netProfit, kind: 'total' },
+    { label: t('Harga modal (HPP)'), amount: -profit.cogs, kind: 'plain' },
+    { label: t('Laba kotor'), amount: profit.grossProfit, kind: 'subtotal' },
+    { label: t('Biaya operasional'), amount: -profit.operatingExpenses, kind: 'plain' },
+    { label: t('Laba bersih'), amount: profit.netProfit, kind: 'total' },
   ];
 }

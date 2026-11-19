@@ -1,5 +1,6 @@
 import { OWNER_UNLOCK_MS } from '../constants';
 import type { Id, PermissionLevel } from '../types';
+import { t } from '../i18n';
 
 /**
  * Who currently holds owner powers on this device (ADR-004).
@@ -14,8 +15,8 @@ export type OwnerAccess =
   | { kind: 'approved'; ownerId: Id; grantedAt: number }
   | { kind: 'locked' };
 
-export const OWNER_PIN_REQUIRED = 'Butuh PIN pemilik.';
-export const APPROVAL_EXPIRED = 'Persetujuan kedaluwarsa. Minta PIN pemilik lagi.';
+export const OWNER_PIN_REQUIRED = t('Butuh PIN pemilik.');
+export const APPROVAL_EXPIRED = t('Persetujuan kedaluwarsa. Minta PIN pemilik lagi.');
 
 const isExpired = (grantedAt: number, now: number): boolean => now - grantedAt > OWNER_UNLOCK_MS;
 

@@ -1,6 +1,7 @@
 import type { ClosingMethodTotal, DayClosing, Expense, Id, Order, Refund } from '../types';
 import { formatRupiah } from './money';
 import { isCountedSale, summarize } from './reports';
+import { DATE_LOCALE, t } from '../i18n';
 
 /**
  * Drawer maths for one business day (ADR-007). Used by the live Kas screen AND stored by "Tutup kasir",
@@ -82,8 +83,8 @@ export function buildDrawer(input: DrawerInput): Drawer {
 
 /** "pas" / "lebih Rp…" / "kurang Rp…" */
 export function describeDifference(difference: number): string {
-  if (difference === 0) return 'pas';
-  return `${difference > 0 ? 'lebih' : 'kurang'} ${formatRupiah(Math.abs(difference))}`;
+  if (difference === 0) return t('pas');
+  return `${difference > 0 ? t('lebih') : t('kurang')} ${formatRupiah(Math.abs(difference))}`;
 }
 
 /** True when the day changed after it was closed (late sale, refund or expense). */
@@ -100,29 +101,29 @@ export function isClosingStale(closing: DayClosing, live: Drawer): boolean {
 /** Plain-text closing summary for WhatsApp. Pure, so the wording is tested. */
 export function buildClosingText(input: { storeName: string; closing: DayClosing; closedByName: string; timeZone: string }): string {
   const { closing } = input;
-  const day = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
+  const day = new Intl.DateTimeFormat(DATE_LOCALE, { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
     new Date(`${closing.businessDate}T00:00:00Z`),
   );
-  const time = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: input.timeZone }).format(new Date(closing.closedAt));
+  const time = new Intl.DateTimeFormat(DATE_LOCALE, { hour: '2-digit', minute: '2-digit', timeZone: input.timeZone }).format(new Date(closing.closedAt));
   const minus = (amount: number) => (amount === 0 ? formatRupiah(0) : `-${formatRupiah(amount)}`);
 
   return [
-    `Tutup kasir ${input.storeName}`,
-    `${day}, ditutup ${time} oleh ${input.closedByName}`,
+    t('Tutup kasir {0}', input.storeName),
+    t('{0}, ditutup {1} oleh {2}', day, time, input.closedByName),
     '',
-    `Penjualan bersih: ${formatRupiah(closing.netSales)} (${closing.transactions} transaksi)`,
+    t('Penjualan bersih: {0} ({1} transaksi)', formatRupiah(closing.netSales), closing.transactions),
     ...closing.byMethod.map((m) => `- ${m.name}: ${formatRupiah(m.amount)}`),
-    `Pengeluaran: ${formatRupiah(closing.expensesTotal)}`,
+    t('Pengeluaran: {0}', formatRupiah(closing.expensesTotal)),
     '',
-    'Kas laci',
-    `Modal awal: ${formatRupiah(closing.openingCash)}`,
-    `Penjualan tunai: ${formatRupiah(closing.cashSales)}`,
-    `Refund tunai: ${minus(closing.cashRefunds)}`,
-    `Pengeluaran dari laci: ${minus(closing.drawerExpenses)}`,
-    `Seharusnya: ${formatRupiah(closing.expectedCash)}`,
-    `Dihitung: ${formatRupiah(closing.countedCash)}`,
-    `Selisih: ${describeDifference(closing.difference)}`,
-    ...(closing.openOrderCount > 0 ? ['', `Belum dibayar: ${closing.openOrderCount} pesanan (${formatRupiah(closing.openOrderAmount)})`] : []),
-    ...(closing.note ? ['', `Catatan: ${closing.note}`] : []),
+    t('Kas laci'),
+    t('Modal awal: {0}', formatRupiah(closing.openingCash)),
+    t('Penjualan tunai: {0}', formatRupiah(closing.cashSales)),
+    t('Refund tunai: {0}', minus(closing.cashRefunds)),
+    t('Pengeluaran dari laci: {0}', minus(closing.drawerExpenses)),
+    t('Seharusnya: {0}', formatRupiah(closing.expectedCash)),
+    t('Dihitung: {0}', formatRupiah(closing.countedCash)),
+    t('Selisih: {0}', describeDifference(closing.difference)),
+    ...(closing.openOrderCount > 0 ? ['', t('Belum dibayar: {0} pesanan ({1})', closing.openOrderCount, formatRupiah(closing.openOrderAmount))] : []),
+    ...(closing.note ? ['', t('Catatan: {0}', closing.note)] : []),
   ].join('\n');
 }

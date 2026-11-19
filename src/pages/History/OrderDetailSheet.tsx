@@ -9,6 +9,7 @@ import { buildReceiptText, whatsAppShareUrl } from '../../lib/receiptText';
 import { totalRefunded } from '../../lib/refunds';
 import type { Eligibility } from '../../services/refunds';
 import type { Order, Refund, Store } from '../../types';
+import { DATE_LOCALE, t } from '../../i18n';
 
 interface OrderDetailSheetProps {
   order: Order;
@@ -22,7 +23,7 @@ interface OrderDetailSheetProps {
   onClose: () => void;
 }
 
-const dateTime = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+const dateTime = new Intl.DateTimeFormat(DATE_LOCALE, { dateStyle: 'medium', timeStyle: 'short' });
 
 /** M10 detail: status, money summary, receipt (with refund lines), and allowed actions with reasons when not allowed. */
 export function OrderDetailSheet(props: OrderDetailSheetProps) {
@@ -46,21 +47,21 @@ export function OrderDetailSheet(props: OrderDetailSheetProps) {
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-2 gap-2">
             <button type="button" onClick={() => window.print()} className={btnSecondary}>
-              <Printer aria-hidden size={18} /> Cetak ulang
+              <Printer aria-hidden size={18} /> {t('Cetak ulang')}
             </button>
             <a href={whatsAppShareUrl(buildReceiptText(order, store), customerPhone)} target="_blank" rel="noopener noreferrer" className={btnSecondary}>
-              <MessageCircle aria-hidden size={18} /> WhatsApp
+              <MessageCircle aria-hidden size={18} /> {t('WhatsApp')}
             </a>
           </div>
           {isAnyActionable && (
             <div className="grid grid-cols-2 gap-2">
               <button type="button" disabled={!canAct(refundEligibility)} onClick={onRefund} className={btnSecondary}>
-                <Undo2 aria-hidden size={18} /> Refund
-                {needsPin(refundEligibility) && <Lock aria-label="butuh PIN pemilik" size={14} className="text-faint" />}
+                <Undo2 aria-hidden size={18} /> {t('Refund')}
+                {needsPin(refundEligibility) && <Lock aria-label={t('butuh PIN pemilik')} size={14} className="text-faint" />}
               </button>
               <button type="button" disabled={!canAct(voidEligibility)} onClick={onVoid} className={btnDanger}>
-                <Ban aria-hidden size={18} /> Void
-                {needsPin(voidEligibility) && <Lock aria-label="butuh PIN pemilik" size={14} />}
+                <Ban aria-hidden size={18} /> {t('Void')}
+                {needsPin(voidEligibility) && <Lock aria-label={t('butuh PIN pemilik')} size={14} />}
               </button>
             </div>
           )}
@@ -71,24 +72,24 @@ export function OrderDetailSheet(props: OrderDetailSheetProps) {
     >
       <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-3 rounded-lg border border-line p-4 text-[14px]">
         <div>
-          <dt className="text-[13px] text-muted">Status</dt>
+          <dt className="text-[13px] text-muted">{t('Status')}</dt>
           <dd className="mt-0.5"><StatusBadge status={order.status} /></dd>
         </div>
         <div className="text-right">
-          <dt className="text-[13px] text-muted">Total</dt>
+          <dt className="text-[13px] text-muted">{t('Total')}</dt>
           <dd className={`num text-[20px] font-bold tracking-[-0.02em] ${order.status === 'void' ? 'text-muted line-through' : ''}`}>
             {formatRupiah(order.totals.grandTotal)}
           </dd>
         </div>
         <div>
-          <dt className="text-[13px] text-muted">Pembayaran</dt>
+          <dt className="text-[13px] text-muted">{t('Pembayaran')}</dt>
           <dd className="font-medium">
             {order.payments[0]?.methodNameSnapshot ?? '—'}
-            {order.payments[0]?.reference && <span className="num block text-[13px] text-muted">Ref {order.payments[0].reference}</span>}
+            {order.payments[0]?.reference && <span className="num block text-[13px] text-muted">{t('Ref')} {order.payments[0].reference}</span>}
           </dd>
         </div>
         <div className="text-right">
-          <dt className="text-[13px] text-muted">{refunded > 0 ? 'Sudah direfund' : 'Mode'}</dt>
+          <dt className="text-[13px] text-muted">{refunded > 0 ? t('Sudah direfund') : t('Mode')}</dt>
           <dd className={`num font-medium ${refunded > 0 ? 'text-warn-700' : ''}`}>
             {refunded > 0 ? `−${formatRupiah(refunded)}` : order.salesModeNameSnapshot}
           </dd>

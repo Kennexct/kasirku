@@ -4,12 +4,12 @@ BASE, OUT, FIX = sys.argv[1], sys.argv[2], sys.argv[3]
 errors = []
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox'])
-    page = b.new_context(viewport={'width': 1024, 'height': 768}).new_page()
+    page = b.new_context(locale='id-ID', viewport={'width': 1024, 'height': 768}).new_page()
     page.on('pageerror', lambda e: errors.append(str(e)))
     page.on('response', lambda r: r.status >= 400 and errors.append(f'{r.status} {r.url}'))
     page.goto(BASE + '/pengaturan')
     page.get_by_role('button', name='Lewati, pakai contoh toko').click()  # first-time journey: take the example store
-    page.get_by_role('heading', name='Toko Anda').wait_for(state='hidden')  # store is created before moving on
+    page.get_by_role('navigation').first.wait_for()  # the store exists once the app shell is up
     page.get_by_role('tab', name='Pembayaran').click()
     page.locator('input[type=file]').first.set_input_files(f'{FIX}/qris.png')
     page.get_by_alt_text('QRIS statis').wait_for()

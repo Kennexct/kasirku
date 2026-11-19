@@ -2,6 +2,7 @@ import { useSessionStore } from '../../store/useSessionStore';
 import { usePinPromptStore } from '../../store/usePinPromptStore';
 import { Sheet } from '../ui/Sheet';
 import { OwnerPinForm } from './OwnerPinForm';
+import { t } from '../../i18n';
 
 /** Mount once at the app root: renders the prompt opened by `requestOwnerApproval()`. */
 export function OwnerPinHost() {
@@ -11,7 +12,7 @@ export function OwnerPinHost() {
 
   if (!request) return null;
   return (
-    <Sheet title="Persetujuan pemilik" subtitle={request.reason} isOpen onClose={() => settle(null)}>
+    <Sheet title={t('Persetujuan pemilik')} subtitle={request.reason} isOpen onClose={() => settle(null)}>
       <OwnerPinForm onVerified={() => settle(ownerId)} />
     </Sheet>
   );

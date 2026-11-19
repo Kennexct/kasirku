@@ -5,8 +5,9 @@ import { card } from '../../components/ui/styles';
 import { formatBusinessDate } from '../../lib/dateRange';
 import { formatRupiah } from '../../lib/money';
 import type { BusinessDate, Id, Order } from '../../types';
+import { DATE_LOCALE, t } from '../../i18n';
 
-const timeFormat = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' });
+const timeFormat = new Intl.DateTimeFormat(DATE_LOCALE, { hour: '2-digit', minute: '2-digit' });
 const COLUMNS = 'lg:grid-cols-[64px_minmax(150px,190px)_1fr_120px_130px_120px_20px]';
 
 interface HistoryListProps {
@@ -24,25 +25,25 @@ const isStruckThrough = (order: Order) => order.status === 'void' || order.statu
 
 export function HistoryList({ orders, onSelect }: HistoryListProps) {
   if (orders.length === 0) {
-    return <EmptyState icon={ReceiptText} title="Belum ada transaksi" description="Tidak ada transaksi pada periode dan filter ini." />;
+    return <EmptyState icon={ReceiptText} title={t('Belum ada transaksi')} description={t('Tidak ada transaksi pada periode dan filter ini.')} />;
   }
 
   return (
     <div className={`${card} overflow-hidden`}>
       <div className={`hidden items-center gap-4 border-b border-line bg-subtle px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.05em] text-muted lg:grid ${COLUMNS}`}>
-        <span>Jam</span>
-        <span>No. struk</span>
-        <span>Pesanan</span>
-        <span>Pembayaran</span>
-        <span>Status</span>
-        <span className="text-right">Total</span>
+        <span>{t('Jam')}</span>
+        <span>{t('No. struk')}</span>
+        <span>{t('Pesanan::label')}</span>
+        <span>{t('Pembayaran')}</span>
+        <span>{t('Status')}</span>
+        <span className="text-right">{t('Total')}</span>
         <span />
       </div>
       {groupByDate(orders).map(([date, group]) => (
         <section key={date}>
           <h3 className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-surface/95 px-4 py-2 text-[13px] font-semibold text-ink-soft backdrop-blur">
             <span>{formatBusinessDate(date)}</span>
-            <span className="num text-muted">{group.length} transaksi</span>
+            <span className="num text-muted">{t('{0} transaksi', group.length)}</span>
           </h3>
           <ul className="divide-y divide-line">
             {group.map((order) => (

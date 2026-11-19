@@ -1,6 +1,7 @@
 import type { Report } from '../reports';
 import type { Dataset, ExportContext } from './columns';
 import { csvBlob } from './csv';
+import { t } from '../../i18n';
 
 export const EXPORT_FORMATS = ['xlsx', 'pdf', 'csv'] as const;
 export type ExportFormat = (typeof EXPORT_FORMATS)[number];
@@ -39,7 +40,7 @@ export async function buildExport(request: ExportRequest): Promise<Blob> {
     return buildPdf(storeName, report, new Date(), ctx.profit);
   } catch (error) {
     if (error instanceof TypeError && /dynamically imported module|Failed to fetch|Importing a module/i.test(error.message)) {
-      throw new Error('Gagal memuat modul ekspor. Coba lagi saat online.');
+      throw new Error(t('Gagal memuat modul ekspor. Coba lagi saat online.'));
     }
     throw error;
   }

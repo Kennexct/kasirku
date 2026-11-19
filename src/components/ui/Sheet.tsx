@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { useEffect, type ReactNode } from 'react';
+import { t } from '../../i18n';
 
 interface SheetProps {
   title: string;
@@ -51,7 +52,7 @@ export function Sheet({ title, subtitle, isOpen, onClose, children, footer, isWi
           </div>
           <button
             type="button"
-            aria-label="Tutup"
+            aria-label={t('Tutup')}
             onClick={onClose}
             className="-mr-2 -mt-1 flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-subtle hover:text-ink"
           >

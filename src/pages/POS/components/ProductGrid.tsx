@@ -4,6 +4,7 @@ import { ProductThumb } from '../../../components/ui/ProductThumb';
 import { formatRupiah } from '../../../lib/money';
 import { isUsingFallbackPrice, resolveModePrice } from '../../../lib/pricing';
 import type { Id, Product, SalesMode } from '../../../types';
+import { t } from '../../../i18n';
 
 interface ProductGridProps {
   products: Product[];
@@ -15,7 +16,7 @@ interface ProductGridProps {
 
 export function ProductGrid({ products, salesMode, qtyByProduct, onSelect }: ProductGridProps) {
   if (products.length === 0) {
-    return <EmptyState icon={SearchX} title="Produk tidak ditemukan" description="Coba kata kunci lain atau pilih kategori Semua." />;
+    return <EmptyState icon={SearchX} title={t('Produk tidak ditemukan')} description={t('Coba kata kunci lain atau pilih kategori Semua.')} />;
   }
 
   return (
@@ -30,7 +31,7 @@ export function ProductGrid({ products, salesMode, qtyByProduct, onSelect }: Pro
             <button
               type="button"
               onClick={() => onSelect(product)}
-              aria-label={isSoldOut ? `${product.name}, habis` : undefined}
+              aria-label={isSoldOut ? t('{0}, habis', product.name) : undefined}
               className={`relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-surface text-left shadow-xs transition-[border-color,box-shadow,transform] duration-150 active:scale-[0.985] ${
                 isSelected ? 'border-brand-600 ring-1 ring-brand-600' : 'border-line hover:border-line-strong'
               } ${isSoldOut ? 'bg-subtle! shadow-none!' : ''}`}
@@ -42,16 +43,16 @@ export function ProductGrid({ products, salesMode, qtyByProduct, onSelect }: Pro
                   <span className={`num text-[13px] font-semibold md:text-[14px] ${isSoldOut ? 'text-faint' : 'text-ink-soft'}`}>
                     {formatRupiah(resolveModePrice(product, salesMode))}
                   </span>
-                  {hasVariants && <Layers aria-label="Ada varian" size={14} className="text-faint" />}
+                  {hasVariants && <Layers aria-label={t('Ada varian')} size={14} className="text-faint" />}
                   {isUsingFallbackPrice(product, salesMode) && (
-                    <span title="Harga mode ini belum diatur — memakai harga dasar" className="h-[18px] rounded bg-warn-50 px-1 text-[10px] font-semibold leading-[18px] text-warn-700">
-                      Dasar
+                    <span title={t('Harga mode ini belum diatur — memakai harga dasar')} className="h-[18px] rounded bg-warn-50 px-1 text-[10px] font-semibold leading-[18px] text-warn-700">
+                      {t('Dasar')}
                     </span>
                   )}
                 </span>
               </span>
               {isSoldOut && (
-                <span className="absolute left-1.5 top-1.5 flex h-6 items-center rounded-md bg-ink px-2 text-[12px] font-semibold text-white">Habis</span>
+                <span className="absolute left-1.5 top-1.5 flex h-6 items-center rounded-md bg-ink px-2 text-[12px] font-semibold text-white">{t('Habis')}</span>
               )}
               {isSelected && (
                 <span className="num absolute right-1.5 top-1.5 flex h-6 min-w-6 items-center justify-center rounded-md bg-brand-600 px-1.5 text-[13px] font-bold text-white shadow-xs">

@@ -6,6 +6,7 @@ import { formatRupiah } from '../../lib/money';
 import type { ReasonInput } from '../../services/refunds';
 import type { Order } from '../../types';
 import { ReasonPicker } from './ReasonPicker';
+import { t } from '../../i18n';
 
 interface VoidSheetProps {
   order: Order;
@@ -16,19 +17,19 @@ interface VoidSheetProps {
 
 export function VoidSheet({ order, isSubmitting, onConfirm, onClose }: VoidSheetProps) {
   const [reason, setReason] = useState<ReasonInput>({ code: 'wrong_input', note: '' });
-  const method = order.payments[0]?.methodNameSnapshot ?? 'pembayaran awal';
+  const method = order.payments[0]?.methodNameSnapshot ?? t('pembayaran awal');
 
   return (
     <Sheet
-      title="Void transaksi"
+      title={t('Void transaksi')}
       subtitle={order.receiptNo}
       isOpen
       onClose={onClose}
       footer={
         <div className="flex gap-2">
-          <button type="button" onClick={onClose} className={btnSecondary}>Kembali</button>
+          <button type="button" onClick={onClose} className={btnSecondary}>{t('Kembali')}</button>
           <button type="button" disabled={isSubmitting} onClick={() => onConfirm(reason)} className={`${btnDangerSolid} flex-1`}>
-            {isSubmitting ? 'Memproses…' : `Void ${formatRupiah(order.totals.grandTotal)}`}
+            {isSubmitting ? t('Memproses…') : t('Void {0}', formatRupiah(order.totals.grandTotal))}
           </button>
         </div>
       }
@@ -36,8 +37,7 @@ export function VoidSheet({ order, isSubmitting, onConfirm, onClose }: VoidSheet
       <div className="mb-5 flex gap-3 rounded-lg border border-danger-200 bg-danger-50 p-3.5 text-[14px] text-danger-700">
         <TriangleAlert aria-hidden size={20} className="mt-0.5 shrink-0" />
         <p>
-          Seluruh transaksi dibatalkan dan <b className="num">{formatRupiah(order.totals.grandTotal)}</b> dikembalikan via {method}. Tindakan ini
-          tidak bisa dibatalkan dan tercatat di log.
+          {t('Seluruh transaksi dibatalkan dan')} <b className="num">{formatRupiah(order.totals.grandTotal)}</b> {t('dikembalikan via')} {method}{t('. Tindakan ini tidak bisa dibatalkan dan tercatat di log.')}
         </p>
       </div>
       <ReasonPicker value={reason} onChange={setReason} />

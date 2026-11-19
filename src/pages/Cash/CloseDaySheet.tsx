@@ -10,6 +10,7 @@ import { formatBusinessDate } from '../../lib/dateRange';
 import { formatRupiah } from '../../lib/money';
 import { closeDay } from '../../services/dayClosing';
 import type { BusinessDate, Id } from '../../types';
+import { t } from '../../i18n';
 
 interface CloseDaySheetProps {
   storeId: Id;
@@ -32,53 +33,53 @@ export function CloseDaySheet({ storeId, actorId, businessDate, drawer, soldOutC
     setIsSaving(true);
     try {
       const closing = await closeDay({ storeId, businessDate, countedCash: counted, note, actorId, shouldResetSoldOut: soldOutCount > 0 && shouldResetSoldOut });
-      toast.success(closing.difference === 0 ? 'Kasir ditutup, uang laci pas' : `Kasir ditutup, selisih ${describeDifference(closing.difference)}`);
+      toast.success(closing.difference === 0 ? t('Kasir ditutup, uang laci pas') : t('Kasir ditutup, selisih {0}', describeDifference(closing.difference)));
       onClose();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menutup kasir.');
+      toast.error(error instanceof Error ? error.message : t('Gagal menutup kasir.'));
       setIsSaving(false);
     }
   };
 
   return (
     <Sheet
-      title="Tutup kasir"
+      title={t('Tutup kasir')}
       subtitle={formatBusinessDate(businessDate)}
       isOpen
       onClose={onClose}
       footer={
         <button type="button" disabled={isSaving || counted === null} onClick={() => void submit()} className={`${btnPrimary} w-full`}>
-          Tutup kasir
+          {t('Tutup kasir')}
         </button>
       }
     >
       <div className="flex flex-col gap-5">
         <div className="flex items-baseline justify-between gap-3 rounded-lg bg-subtle px-3.5 py-3">
-          <span className="text-[14px] text-ink-soft">Uang di laci seharusnya</span>
+          <span className="text-[14px] text-ink-soft">{t('Uang di laci seharusnya')}</span>
           <span className="num text-[18px] font-bold">{formatRupiah(drawer.expectedCash)}</span>
         </div>
         <div>
-          <label htmlFor="counted-cash" className={labelBase}>Uang yang dihitung di laci</label>
+          <label htmlFor="counted-cash" className={labelBase}>{t('Uang yang dihitung di laci')}</label>
           <RupiahInput id="counted-cash" value={counted} onChange={setCounted} autoFocus size="lg" />
           <p aria-live="polite" className={`num mt-2 text-[14px] font-semibold ${difference === null ? 'text-muted' : difference === 0 ? 'text-brand-700' : difference < 0 ? 'text-danger-700' : 'text-warn-700'}`}>
-            {difference === null ? 'Hitung uang tunai di laci, lalu ketik jumlahnya.' : difference === 0 ? 'Pas, tidak ada selisih.' : `Selisih: ${describeDifference(difference)}`}
+            {difference === null ? t('Hitung uang tunai di laci, lalu ketik jumlahnya.') : difference === 0 ? t('Pas, tidak ada selisih.') : t('Selisih: {0}', describeDifference(difference))}
           </p>
         </div>
         <div>
-          <label htmlFor="closing-note" className={labelBase}>Catatan <span className="font-normal text-muted">(opsional)</span></label>
-          <input id="closing-note" value={note} maxLength={CLOSING_NOTE_MAX} placeholder="mis. kembalian kurang Rp2.000" onChange={(e) => setNote(e.target.value)} className={inputBase} />
+          <label htmlFor="closing-note" className={labelBase}>{t('Catatan')} <span className="font-normal text-muted">{t('(opsional)')}</span></label>
+          <input id="closing-note" value={note} maxLength={CLOSING_NOTE_MAX} placeholder={t('mis. kembalian kurang Rp2.000')} onChange={(e) => setNote(e.target.value)} className={inputBase} />
         </div>
         {soldOutCount > 0 && (
           <Switch
             checked={shouldResetSoldOut}
             onChange={setShouldResetSoldOut}
-            label={`Sediakan lagi ${soldOutCount} menu yang habis`}
-            description="Tanda Habis dilepas supaya besok bisa langsung jualan."
+            label={t('Sediakan lagi {0} menu yang habis', soldOutCount)}
+            description={t('Tanda Habis dilepas supaya besok bisa langsung jualan.')}
           />
         )}
         {drawer.openOrderCount > 0 && (
           <p className="rounded-lg border border-warn-200 bg-warn-50 px-3.5 py-2.5 text-[13px] text-warn-700">
-            {drawer.openOrderCount} pesanan belum dibayar ({formatRupiah(drawer.openOrderAmount)}). Pesanan itu tetap tersimpan dan dihitung saat dibayar.
+            {drawer.openOrderCount} {t('pesanan belum dibayar (')}{formatRupiah(drawer.openOrderAmount)}{t('). Pesanan itu tetap tersimpan dan dihitung saat dibayar.')}
           </p>
         )}
       </div>

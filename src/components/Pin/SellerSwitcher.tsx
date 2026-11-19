@@ -6,8 +6,9 @@ import { useSessionStore } from '../../store/useSessionStore';
 import type { StoreMember } from '../../types';
 import { btnGhost } from '../ui/styles';
 import { PinPad } from './PinPad';
+import { t } from '../../i18n';
 
-const ROLE_LABEL = { owner: 'Pemilik', cashier: 'Kasir' } as const;
+const ROLE_LABEL = { owner: t('Pemilik'), cashier: t('Kasir::orang') } as const;
 export const initialsOf = (name: string): string => name.trim().slice(0, 2).toUpperCase() || '?';
 
 /** Pick a member, then enter that member's PIN. Used by the lock screen and the account sheet. */
@@ -24,7 +25,7 @@ export function SellerSwitcher({ onDone }: { onDone: () => void }) {
         <p className="text-[15px] font-semibold">{selected.displayName}</p>
         <p className="mb-2 text-[13px] text-muted">{ROLE_LABEL[selected.role]}</p>
         <PinPad
-          label={`PIN ${selected.displayName}`}
+          label={t('PIN {0}', selected.displayName)}
           verify={(pin) => verifyMemberPin(selected.id, pin)}
           onSuccess={() => {
             signInCashier({ memberId: selected.id, displayName: selected.displayName, role: selected.role });
@@ -32,7 +33,7 @@ export function SellerSwitcher({ onDone }: { onDone: () => void }) {
           }}
         />
         <button type="button" onClick={() => setSelected(null)} className={`${btnGhost} text-[14px]`}>
-          <ArrowLeft aria-hidden size={16} /> Pilih nama lain
+          <ArrowLeft aria-hidden size={16} /> {t('Pilih nama lain')}
         </button>
       </div>
     );
@@ -48,7 +49,7 @@ export function SellerSwitcher({ onDone }: { onDone: () => void }) {
               <span className="block truncate text-[15px] font-semibold">{member.displayName}</span>
               <span className="block text-[13px] text-muted">
                 {ROLE_LABEL[member.role]}
-                {member.id === activeId ? ' · sedang berjualan' : ''}
+                {member.id === activeId ? t(' · sedang berjualan') : ''}
               </span>
             </span>
             <ChevronRight aria-hidden size={18} className="text-faint" />

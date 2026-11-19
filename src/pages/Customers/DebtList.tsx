@@ -5,6 +5,7 @@ import type { CustomerStats } from '../../lib/customers';
 import { formatRupiah } from '../../lib/money';
 import type { Customer, Id } from '../../types';
 import { formatVisit } from './CustomerDetailSheet';
+import { t } from '../../i18n';
 
 interface DebtListProps {
   /** Customers with at least one unpaid order, already filtered by the search box. */
@@ -17,9 +18,9 @@ interface DebtListProps {
 export function DebtList({ debtors, hasQuery, onOpen }: DebtListProps) {
   if (debtors.length === 0) {
     return hasQuery ? (
-      <EmptyState icon={CircleCheck} title="Tidak ditemukan" description="Tidak ada pelanggan dengan nama atau nomor itu yang belum bayar." />
+      <EmptyState icon={CircleCheck} title={t('Tidak ditemukan')} description={t('Tidak ada pelanggan dengan nama atau nomor itu yang belum bayar.')} />
     ) : (
-      <EmptyState icon={CircleCheck} title="Tidak ada yang belum bayar" description="Pesanan yang disimpan atas nama pelanggan muncul di sini sampai dibayar." />
+      <EmptyState icon={CircleCheck} title={t('Tidak ada yang belum bayar')} description={t('Pesanan yang disimpan atas nama pelanggan muncul di sini sampai dibayar.')} />
     );
   }
 
@@ -30,8 +31,8 @@ export function DebtList({ debtors, hasQuery, onOpen }: DebtListProps) {
     <>
       <div className={`${card} mb-3 flex items-end justify-between gap-4 px-4 py-3.5`}>
         <div className="min-w-0">
-          <p className="text-[13px] font-semibold text-ink-soft">Total belum dibayar</p>
-          <p className="num text-[13px] text-muted">{debtors.length} pelanggan · {orderCount} pesanan</p>
+          <p className="text-[13px] font-semibold text-ink-soft">{t('Total belum dibayar')}</p>
+          <p className="num text-[13px] text-muted">{t('{0} pelanggan · {1} pesanan', debtors.length, orderCount)}</p>
         </div>
         <p className="num text-[24px] font-extrabold leading-none tracking-[-0.02em]">{formatRupiah(total)}</p>
       </div>
@@ -42,7 +43,7 @@ export function DebtList({ debtors, hasQuery, onOpen }: DebtListProps) {
               <span className="min-w-0">
                 <span className="block truncate text-[15px] font-semibold">{customer.name}</span>
                 <span className="num block truncate text-[13px] text-muted">
-                  {stats.openOrders} pesanan · sejak {formatVisit(stats.oldestOpenAt)}
+                  {stats.openOrders} {t('pesanan · sejak')} {formatVisit(stats.oldestOpenAt)}
                 </span>
               </span>
               <span className="num text-right text-[15px] font-semibold">{formatRupiah(stats.openAmount)}</span>

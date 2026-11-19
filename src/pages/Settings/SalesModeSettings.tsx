@@ -10,12 +10,13 @@ import type { Id, SalesMode } from '../../types';
 import { AddModeSheet } from './AddModeSheet';
 import { ConfigItemSheet } from './ConfigItemSheet';
 import { PRICE_RULE_HELP, PRICE_RULE_OPTIONS } from './priceRules';
+import { t } from '../../i18n';
 
 async function persist(mode: SalesMode): Promise<void> {
   try {
     await saveSalesMode(mode);
   } catch (error) {
-    toast.error(error instanceof Error ? error.message : 'Gagal menyimpan mode.');
+    toast.error(error instanceof Error ? error.message : t('Gagal menyimpan mode.'));
   }
 }
 
@@ -38,10 +39,10 @@ export function SalesModeSettings({ storeId, modes }: { storeId: Id; modes: Sale
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <p className="min-w-0 flex-1 text-[14px] text-muted">
-          {isFull ? `Sudah ${MAX_SALES_MODES} mode (batas maksimal).` : 'Urutan di sini sama dengan urutan di kasir.'}
+          {isFull ? t('Sudah {0} mode (batas maksimal).', MAX_SALES_MODES) : t('Urutan di sini sama dengan urutan di kasir.')}
         </p>
         <button type="button" disabled={isFull} onClick={() => setIsAdding(true)} className={`${btnSecondary} h-11 shrink-0 text-[14px]`}>
-          <Plus aria-hidden size={17} /> Tambah mode
+          <Plus aria-hidden size={17} /> {t('Tambah mode')}
         </button>
       </div>
       {modes.map((mode) => (
@@ -53,28 +54,28 @@ export function SalesModeSettings({ storeId, modes }: { storeId: Id; modes: Sale
                 disabled={mode.isDefault}
                 onChange={(isActive) => void persist({ ...mode, isActive })}
                 label={mode.name}
-                description={mode.isDefault ? 'Mode default saat kasir dibuka' : mode.isActive ? 'Tampil di kasir' : 'Disembunyikan'}
+                description={mode.isDefault ? t('Mode default saat kasir dibuka') : mode.isActive ? t('Tampil di kasir') : t('Disembunyikan')}
               />
             </div>
             {mode.isDefault ? (
-              <span className={badgeBrand}>Default</span>
+              <span className={badgeBrand}>{t('Default')}</span>
             ) : (
-              <button type="button" aria-label={`Jadikan ${mode.name} default`} onClick={() => void setDefault(mode)} className={`${btnGhost} text-[13px]`}>
-                <Star aria-hidden size={15} /> <span className="hidden sm:inline">Jadikan default</span>
+              <button type="button" aria-label={t('Jadikan {0} default', mode.name)} onClick={() => void setDefault(mode)} className={`${btnGhost} text-[13px]`}>
+                <Star aria-hidden size={15} /> <span className="hidden sm:inline">{t('Jadikan default')}</span>
               </button>
             )}
-            <button type="button" aria-label={`Kelola ${mode.name}`} onClick={() => setManagingId(mode.id)} className={`${btnIcon} border-transparent! bg-transparent!`}>
+            <button type="button" aria-label={t('Kelola {0}', mode.name)} onClick={() => setManagingId(mode.id)} className={`${btnIcon} border-transparent! bg-transparent!`}>
               <MoreHorizontal aria-hidden size={20} />
             </button>
           </div>
           {mode.isActive && (
             <div className="border-t border-line px-5 py-4">
-              <p className={labelBase}>Aturan harga</p>
-              <SegmentedControl label={`Aturan harga ${mode.name}`} options={PRICE_RULE_OPTIONS} value={mode.priceRule} onChange={(priceRule) => void persist({ ...mode, priceRule })} />
+              <p className={labelBase}>{t('Aturan harga')}</p>
+              <SegmentedControl label={t('Aturan harga {0}', mode.name)} options={PRICE_RULE_OPTIONS} value={mode.priceRule} onChange={(priceRule) => void persist({ ...mode, priceRule })} />
               <p className={helperText}>{PRICE_RULE_HELP[mode.priceRule]}</p>
               {mode.priceRule === 'markup' && (
                 <div className="mt-3 max-w-[180px]">
-                  <label htmlFor={`markup-${mode.id}`} className={labelBase}>Markup (%)</label>
+                  <label htmlFor={`markup-${mode.id}`} className={labelBase}>{t('Markup (%)')}</label>
                   <input
                     id={`markup-${mode.id}`}
                     type="number"
@@ -101,7 +102,7 @@ export function SalesModeSettings({ storeId, modes }: { storeId: Id; modes: Sale
           item={managing}
           index={managingIndex}
           count={modes.length}
-          deleteBlockedReason={managing.isDefault ? 'Mode default tidak bisa dihapus. Jadikan mode lain sebagai default dulu.' : null}
+          deleteBlockedReason={managing.isDefault ? t('Mode default tidak bisa dihapus. Jadikan mode lain sebagai default dulu.') : null}
           onClose={() => setManagingId(null)}
         />
       )}

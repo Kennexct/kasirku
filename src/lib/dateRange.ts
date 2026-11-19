@@ -1,4 +1,5 @@
 import type { BusinessDate } from '../types';
+import { DATE_LOCALE, t } from '../i18n';
 
 const DAY_MS = 86_400_000;
 
@@ -13,7 +14,7 @@ export type RangePreset = (typeof RANGE_PRESETS)[number];
 /** Parses YYYY-MM-DD as a UTC midnight timestamp (no timezone drift). */
 function toUtc(date: BusinessDate): number {
   const [y, m, d] = date.split('-').map(Number);
-  if (!y || !m || !d) throw new Error(`Tanggal tidak valid: ${date}`);
+  if (!y || !m || !d) throw new Error(t('Tanggal tidak valid: {0}', date));
   return Date.UTC(y, m - 1, d);
 }
 
@@ -48,8 +49,8 @@ export function presetRange(preset: Exclude<RangePreset, 'custom'>, today: Busin
 /** Returns an error message, or null when the range is usable. */
 export function validateRange(range: DateRange, maxDays: number): string | null {
   const span = daysBetween(range.from, range.to);
-  if (span < 0) return 'Tanggal awal harus sebelum tanggal akhir.';
-  if (span + 1 > maxDays) return `Rentang maksimal ${maxDays} hari.`;
+  if (span < 0) return t('Tanggal awal harus sebelum tanggal akhir.');
+  if (span + 1 > maxDays) return t('Rentang maksimal {0} hari.', maxDays);
   return null;
 }
 
@@ -59,8 +60,8 @@ export function datesInRange(range: DateRange): BusinessDate[] {
   return Array.from({ length: Math.max(0, span + 1) }, (_, i) => addDays(range.to, -i));
 }
 
-const longDate = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
-const shortDate = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const longDate = new Intl.DateTimeFormat(DATE_LOCALE, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const shortDate = new Intl.DateTimeFormat(DATE_LOCALE, { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
 export function formatBusinessDate(date: BusinessDate): string {
   return longDate.format(new Date(toUtc(date)));

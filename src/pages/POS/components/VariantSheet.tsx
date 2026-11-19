@@ -6,6 +6,7 @@ import { formatRupiah } from '../../../lib/money';
 import { unitPriceWithOptions } from '../../../lib/pricing';
 import { defaultSelection, toSelectedOptions, toggleOption, validateSelection, type VariantSelection } from '../../../lib/variants';
 import type { Product, SelectedOption, VariantGroup } from '../../../types';
+import { t } from '../../../i18n';
 
 interface VariantSheetProps {
   product: Product;
@@ -27,12 +28,12 @@ export function VariantSheet({ product, groups, modePrice, onClose, onConfirm }:
   return (
     <Sheet
       title={product.name}
-      subtitle={`Mulai ${formatRupiah(modePrice)}`}
+      subtitle={t('Mulai {0}', formatRupiah(modePrice))}
       isOpen
       onClose={onClose}
       footer={
         <button type="button" disabled={error !== null} onClick={() => onConfirm(options, unitPrice)} className={`${btnPrimary} w-full justify-between!`}>
-          <span>{error ?? 'Tambah ke pesanan'}</span>
+          <span>{error ?? t('Tambah ke pesanan')}</span>
           {error === null && <span className="num">{formatRupiah(unitPrice)}</span>}
         </button>
       }
@@ -43,9 +44,9 @@ export function VariantSheet({ product, groups, modePrice, onClose, onConfirm }:
             <legend className="mb-2.5 flex w-full items-center gap-2">
               <span className="text-[15px] font-semibold">{group.name}</span>
               <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${group.isRequired ? 'bg-ink text-white' : 'bg-subtle text-muted'}`}>
-                {group.isRequired ? 'Wajib' : 'Opsional'}
+                {group.isRequired ? t('Wajib') : t('Opsional')}
               </span>
-              {group.selectType === 'multi' && <span className="text-[13px] text-muted">maks {group.max}</span>}
+              {group.selectType === 'multi' && <span className="text-[13px] text-muted">{t('maks')} {group.max}</span>}
             </legend>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {group.options.map((option) => {

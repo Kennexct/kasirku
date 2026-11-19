@@ -3,6 +3,7 @@ import type { Store, StoreMember, SyncTable } from '../types';
 import { nowIso } from '../lib/id';
 import { buildSeedBundle, DEFAULT_SETUP, type SeedSetup } from './seedTemplate';
 import { saveAndQueue } from './sync';
+import { t } from '../i18n';
 
 export interface BootstrapResult {
   store: Store;
@@ -21,7 +22,7 @@ export async function findLocalStore(): Promise<BootstrapResult | null> {
     .equals(store.id)
     .filter((m) => m.role === 'owner' && !m.deletedAt)
     .first();
-  if (!owner) throw new Error('Data pemilik toko tidak ditemukan di perangkat ini.');
+  if (!owner) throw new Error(t('Data pemilik toko tidak ditemukan di perangkat ini.'));
   return { store, owner };
 }
 

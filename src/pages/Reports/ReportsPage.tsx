@@ -22,10 +22,11 @@ import { BreakdownTable } from './BreakdownTable';
 import { ExportSheet } from './ExportSheet';
 import { ProfitCard } from './ProfitCard';
 import { TopProducts } from './TopProducts';
+import { DATE_LOCALE, t } from '../../i18n';
 
 const pad = (n: number) => String(n).padStart(2, '0');
-const dayLabel = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-const dayDetail = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+const dayLabel = new Intl.DateTimeFormat(DATE_LOCALE, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const dayDetail = new Intl.DateTimeFormat(DATE_LOCALE, { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
 
 const MIN_HOUR_WINDOW = 8;
 const LAST_HOUR = 23;
@@ -91,12 +92,12 @@ export default function ReportsPage() {
   return (
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
-        title="Laporan"
+        title={t('Laporan')}
         helpTopic="laporan"
-        description={`${formatRange(dateRange.range)} · transaksi di perangkat ini`}
+        description={t('{0} · transaksi di perangkat ini', formatRange(dateRange.range))}
         actions={
-          <button type="button" aria-label="Ekspor laporan" disabled={!report} onClick={() => setIsExportOpen(true)} className={`${btnPrimary} h-11`}>
-            <Download aria-hidden size={18} /> <span className="hidden sm:inline">Ekspor</span>
+          <button type="button" aria-label={t('Ekspor laporan')} disabled={!report} onClick={() => setIsExportOpen(true)} className={`${btnPrimary} h-11`}>
+            <Download aria-hidden size={18} /> <span className="hidden sm:inline">{t('Ekspor')}</span>
           </button>
         }
       >
@@ -109,14 +110,14 @@ export default function ReportsPage() {
         {!report || !s ? (
           <LoadingScreen />
         ) : s.transactions === 0 && s.refunds === 0 && (expenses ?? []).length === 0 ? (
-          <EmptyState icon={BarChart3} title="Belum ada penjualan" description="Tidak ada transaksi pada periode ini." />
+          <EmptyState icon={BarChart3} title={t('Belum ada penjualan')} description={t('Tidak ada transaksi pada periode ini.')} />
         ) : (
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-3 gap-2 md:grid-cols-4 md:gap-3">
-              <StatTile label="Penjualan bersih" value={formatRupiah(s.netSales)} hint={`Kotor ${formatRupiah(s.grossSales)} − refund ${formatRupiah(s.refunds)}`} isPrimary />
-              <StatTile label="Transaksi" value={String(s.transactions)} hint={`${s.itemsSold} item terjual`} />
-              <StatTile label="Rata-rata" value={formatRupiah(s.averageTicket)} hint="per transaksi" />
-              <StatTile label="Diskon" value={formatRupiah(s.discounts)} hint={s.voidCount > 0 ? `${s.voidCount} void · ${formatRupiah(s.voidAmount)}` : 'Tanpa void'} />
+              <StatTile label={t('Penjualan bersih')} value={formatRupiah(s.netSales)} hint={t('Kotor {0} − refund {1}', formatRupiah(s.grossSales), formatRupiah(s.refunds))} isPrimary />
+              <StatTile label={t('Transaksi')} value={String(s.transactions)} hint={t('{0} item terjual', s.itemsSold)} />
+              <StatTile label={t('Rata-rata')} value={formatRupiah(s.averageTicket)} hint={t('per transaksi')} />
+              <StatTile label={t('Diskon')} value={formatRupiah(s.discounts)} hint={s.voidCount > 0 ? t('{0} void · {1}', s.voidCount, formatRupiah(s.voidAmount)) : t('Tanpa void')} />
             </div>
 
             {profit && <ProfitCard profit={profit} />}
@@ -124,27 +125,27 @@ export default function ReportsPage() {
             <div className="grid gap-4 xl:grid-cols-2">
               {hours.length > 0 && (
                 <BarChartCard
-                  title="Penjualan per jam"
-                  subtitle={peak ? `Paling ramai ${peak.detail} · ${formatRupiah(peak.value)}` : 'Penjualan kotor'}
+                  title={t('Penjualan per jam')}
+                  subtitle={peak ? t('Paling ramai {0} · {1}', peak.detail, formatRupiah(peak.value)) : t('Penjualan kotor')}
                   data={hours}
-                  summary={`Penjualan per jam. ${hours.filter((h) => h.count > 0).map((h) => `${h.detail}: ${formatRupiah(h.value)}`).join('; ')}`}
+                  summary={t('Penjualan per jam. {0}', hours.filter((h) => h.count > 0).map((h) => `${h.detail}: ${formatRupiah(h.value)}`).join('; '))}
                 />
               )}
               {isMultiDay && (
                 <BarChartCard
-                  title="Penjualan bersih per hari"
-                  subtitle="Sudah dikurangi refund pada hari refund"
+                  title={t('Penjualan bersih per hari')}
+                  subtitle={t('Sudah dikurangi refund pada hari refund')}
                   data={dayData(report.byDay)}
-                  summary={`Penjualan bersih per hari. ${report.byDay.map((d) => `${d.date}: ${formatRupiah(d.net)}`).join('; ')}`}
+                  summary={t('Penjualan bersih per hari. {0}', report.byDay.map((d) => `${d.date}: ${formatRupiah(d.net)}`).join('; '))}
                 />
               )}
             </div>
 
             <div className="grid gap-4 xl:grid-cols-2">
-              <BreakdownTable title="Per metode pembayaran" description="Cocokkan QRIS & transfer dengan mutasi bank" rows={report.byPaymentMethod} />
+              <BreakdownTable title={t('Per metode pembayaran')} description={t('Cocokkan QRIS & transfer dengan mutasi bank')} rows={report.byPaymentMethod} />
               <TopProducts products={report.products} />
-              <BreakdownTable title="Per mode penjualan" rows={report.bySalesMode} />
-              <BreakdownTable title="Per kasir" rows={report.byCashier} />
+              <BreakdownTable title={t('Per mode penjualan')} rows={report.bySalesMode} />
+              <BreakdownTable title={t('Per kasir')} rows={report.byCashier} />
             </div>
           </div>
         )}

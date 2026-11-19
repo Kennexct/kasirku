@@ -1,4 +1,5 @@
 import { BACKUP_APP_ID, BACKUP_FORMAT_VERSION } from '../constants';
+import { t } from '../i18n';
 
 /**
  * Backup file format (ADR-008). This module only reads and checks a file's text — it never touches the database,
@@ -34,13 +35,13 @@ export function parseBackup(text: string, currentSchemaVersion: number, knownTab
   try {
     raw = JSON.parse(text);
   } catch {
-    throw new BackupError('Berkas rusak atau bukan berkas cadangan KasirKu.');
+    throw new BackupError(t('Berkas rusak atau bukan berkas cadangan KasirKu.'));
   }
   if (!isRecord(raw) || raw.app !== BACKUP_APP_ID || !isRecord(raw.tables)) {
-    throw new BackupError('Ini bukan berkas cadangan KasirKu.');
+    throw new BackupError(t('Ini bukan berkas cadangan KasirKu.'));
   }
   if (typeof raw.formatVersion !== 'number' || raw.formatVersion > BACKUP_FORMAT_VERSION || typeof raw.schemaVersion !== 'number' || raw.schemaVersion > currentSchemaVersion) {
-    throw new BackupError('Cadangan ini dibuat dengan versi aplikasi yang lebih baru. Perbarui aplikasi, lalu coba lagi.');
+    throw new BackupError(t('Cadangan ini dibuat dengan versi aplikasi yang lebih baru. Perbarui aplikasi, lalu coba lagi.'));
   }
 
   const tables: BackupFile['tables'] = {};
@@ -48,22 +49,22 @@ export function parseBackup(text: string, currentSchemaVersion: number, knownTab
     const rows = raw.tables[name] ?? [];
     const keyField = KEY_FIELD[name] ?? 'id';
     if (!Array.isArray(rows) || !rows.every((row) => isRecord(row) && typeof row[keyField] === 'string' && row[keyField] !== '')) {
-      throw new BackupError(`Berkas cadangan rusak (data "${name}" tidak terbaca).`);
+      throw new BackupError(t('Berkas cadangan rusak (data "{0}" tidak terbaca).', name));
     }
     tables[name] = name === 'meta' ? rows.filter((row) => isPortableMetaKey(String(row.key))) : rows;
   }
 
   const stores = tables.stores ?? [];
-  if (stores.length !== 1) throw new BackupError('Berkas cadangan rusak (data toko tidak lengkap).');
+  if (stores.length !== 1) throw new BackupError(t('Berkas cadangan rusak (data toko tidak lengkap).'));
   const owner = (tables.storeMembers ?? []).some((m) => m.role === 'owner' && !m.deletedAt);
-  if (!owner) throw new BackupError('Berkas cadangan rusak (data pemilik tidak ada).');
+  if (!owner) throw new BackupError(t('Berkas cadangan rusak (data pemilik tidak ada).'));
 
   return {
     app: BACKUP_APP_ID,
     formatVersion: raw.formatVersion,
     schemaVersion: raw.schemaVersion,
     exportedAt: typeof raw.exportedAt === 'string' ? raw.exportedAt : '',
-    storeName: typeof stores[0]?.name === 'string' ? stores[0].name : 'Toko',
+    storeName: typeof stores[0]?.name === 'string' ? stores[0].name : t('Toko'),
     counts: Object.fromEntries(Object.entries(tables).map(([name, rows]) => [name, rows.length])),
     tables,
   };

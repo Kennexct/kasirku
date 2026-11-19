@@ -2,6 +2,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { card } from '../../components/ui/styles';
 import { formatRupiah } from '../../lib/money';
 import { niceTicks } from '../../lib/niceTicks';
+import { DATE_LOCALE, t } from '../../i18n';
 
 export interface BarDatum {
   label: string;
@@ -24,7 +25,7 @@ interface BarChartCardProps {
 const BRAND = '#0b7a5a';
 const GRID = '#e2e7e4';
 const MUTED = '#5e6a65';
-const compact = new Intl.NumberFormat('id-ID', { notation: 'compact', maximumFractionDigits: 1 });
+const compact = new Intl.NumberFormat(DATE_LOCALE, { notation: 'compact', maximumFractionDigits: 1 });
 
 function ChartTooltip({ active, payload }: Pick<TooltipContentProps, 'active' | 'payload'>) {
   const datum = payload?.[0]?.payload as BarDatum | undefined;
@@ -33,7 +34,7 @@ function ChartTooltip({ active, payload }: Pick<TooltipContentProps, 'active' | 
     <div className="rounded-lg border border-line bg-surface px-3 py-2 text-[13px] shadow-pop">
       <p className="font-semibold text-ink">{datum.detail}</p>
       <p className="num text-ink-soft">{formatRupiah(datum.value)}</p>
-      <p className="num text-muted">{datum.count} transaksi</p>
+      <p className="num text-muted">{t('{0} transaksi', datum.count)}</p>
     </div>
   );
 }

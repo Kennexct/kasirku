@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Sheet } from '../../../components/ui/Sheet';
 import { btnPrimary, helperText, inputBase, labelBase, option } from '../../../components/ui/styles';
+import { t } from '../../../i18n';
 
-const QUICK_LABELS = ['Meja 1', 'Meja 2', 'Meja 3', 'Meja 4', 'Meja 5', 'Bungkus'] as const;
+const QUICK_LABELS = [t('Meja 1'), t('Meja 2'), t('Meja 3'), t('Meja 4'), t('Meja 5'), t('Bungkus')] as const;
 
 interface SaveOrderSheetProps {
   initialLabel: string;
@@ -18,28 +19,28 @@ export function SaveOrderSheet({ initialLabel, isSubmitting, onSave, onClose }: 
 
   return (
     <Sheet
-      title="Simpan pesanan"
-      subtitle="Bayar nanti — pesanan masuk ke daftar Pesanan"
+      title={t('Simpan pesanan')}
+      subtitle={t('Bayar nanti — pesanan masuk ke daftar Pesanan')}
       isOpen
       onClose={onClose}
       footer={
         <button type="button" disabled={trimmed.length === 0 || isSubmitting} onClick={() => onSave(trimmed)} className={`${btnPrimary} w-full`}>
-          {isSubmitting ? 'Menyimpan…' : 'Simpan pesanan'}
+          {isSubmitting ? t('Menyimpan…') : t('Simpan pesanan')}
         </button>
       }
     >
-      <label htmlFor="order-label" className={labelBase}>Label pesanan</label>
+      <label htmlFor="order-label" className={labelBase}>{t('Label pesanan')}</label>
       <input
         id="order-label"
         autoFocus
         value={label}
         maxLength={40}
-        placeholder="Contoh: Meja 5 / Mas jaket merah"
+        placeholder={t('Contoh: Meja 5 / Mas jaket merah')}
         onChange={(event) => setLabel(event.target.value)}
         onKeyDown={(event) => event.key === 'Enter' && trimmed && onSave(trimmed)}
         className={inputBase}
       />
-      <p className={helperText}>Gunakan nomor meja atau ciri pelanggan agar mudah ditemukan.</p>
+      <p className={helperText}>{t('Gunakan nomor meja atau ciri pelanggan agar mudah ditemukan.')}</p>
       <div className="mt-4 grid grid-cols-3 gap-2">
         {QUICK_LABELS.map((quick) => (
           <button key={quick} type="button" onClick={() => setLabel(quick)} className={option(label === quick)}>
