@@ -1,0 +1,4 @@
+# accounts-billing — QA
+- Unit: server/server.test.ts (11) — trial creation, normalisation, resend limit, wrong/expired/single-use codes, 5-attempt lock, Google linking, refresh rotation + sign-out, checkout → notification extends from trial end, once-only, post-expiry extension from payment date, forged signature 403, amount mismatch 400, pending/challenge ignored, deny → failed, late notification via status API, cross-account 404, auth + validation. src/lib/accessPass.test.ts (4) — active/warn, grace only when unconfirmed, clock rollback, signature/tamper.
+- Total 160 unit tests pass.
+- Browser: e2e/v14.py on tablet + phone against wrangler pages dev — landing CTA → sign-in, wrong code, sign-in, journey, sale, trial status, Snap round-trip, wrong-amount notification refused, signed notification → paid + history, expired device read-only with reports still open, sign-out keeps local data. All 13 earlier flows pass at /app.

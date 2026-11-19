@@ -1,0 +1,117 @@
+import type { JWK } from 'jose';
+import { accessState, monotonicNow, verifyPass, type AccessState, type PassClaims } from '../lib/accessPass';
+
+const K = { pass: 'kk.pass', refresh: 'kk.refresh', lastSeen: 'kk.lastSeen' } as const;
+
+const publicJwk: JWK | null = (() => {
+  const raw = import.meta.env.VITE_PASS_PUBLIC_JWK as string | undefined;
+  try {
+    return raw ? (JSON.parse(raw) as JWK) : null;
+  } catch {
+    return null;
+  }
+})();
+
+/** ADR-013: billing is on only when the app was built with the server's public key and not switched off. */
+export const BILLING_ENABLED = publicJwk !== null && import.meta.env.VITE_BILLING !== 'off';
+export const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) || null;
+
+const read = (k: string) => {
+  try {
+    return localStorage.getItem(k);
+  } catch {
+    return null;
+  }
+};
+const write = (k: string, v: string | null) => {
+  try {
+    if (v === null) localStorage.removeItem(k);
+    else localStorage.setItem(k, v);
+  } catch {
+    /* private mode: session-only */
+  }
+};
+
+export function deviceNow(): number {
+  const now = monotonicNow(Date.now(), Number(read(K.lastSeen)) || 0);
+  write(K.lastSeen, String(now));
+  return now;
+}
+
+export class ApiError extends Error {
+  constructor(public code: string, public status: number) {
+    super(code);
+  }
+}
+
+async function api<T>(method: 'GET' | 'POST', path: string, body?: unknown, auth?: boolean): Promise<T> {
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  if (auth) headers.Authorization = `Bearer ${read(K.refresh) ?? ''}`;
+  let res: Response;
+  try {
+    res = await fetch(path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  } catch {
+    throw new ApiError('offline', 0);
+  }
+  const json = (await res.json().catch(() => ({}))) as T & { error?: string };
+  if (!res.ok) throw new ApiError(json.error ?? 'server_error', res.status);
+  return json;
+}
+
+interface SessionBody {
+  pass: string;
+  refreshToken: string;
+}
+
+async function keep(s: SessionBody): Promise<PassClaims> {
+  const claims = publicJwk ? await verifyPass(s.pass, publicJwk) : null;
+  if (!claims) throw new ApiError('bad_pass', 500);
+  write(K.pass, s.pass);
+  write(K.refresh, s.refreshToken);
+  return claims;
+}
+
+export async function loadStoredPass(): Promise<PassClaims | null> {
+  const p = read(K.pass);
+  return p && publicJwk ? verifyPass(p, publicJwk) : null;
+}
+
+export const hasRefreshToken = () => read(K.refresh) !== null;
+export const stateOf = (c: PassClaims): AccessState => accessState(c, deviceNow());
+
+export const requestCode = (email: string) => api<{ ok: true }>('POST', '/api/auth/code', { email });
+export const verifyCode = async (email: string, code: string) => keep(await api<SessionBody>('POST', '/api/auth/verify', { email, code }));
+export const googleSignIn = async (idToken: string) => keep(await api<SessionBody>('POST', '/api/auth/google', { idToken }));
+
+/** New pass with the server's current entitlement. Throws ApiError('signed_out', 401) when the session is gone. */
+export async function refreshPass(): Promise<PassClaims> {
+  const refreshToken = read(K.refresh);
+  if (!refreshToken) throw new ApiError('signed_out', 401);
+  return keep(await api<SessionBody>('POST', '/api/auth/refresh', { refreshToken }));
+}
+
+export async function signOut(): Promise<void> {
+  const refreshToken = read(K.refresh);
+  write(K.pass, null);
+  write(K.refresh, null);
+  if (refreshToken) await api('POST', '/api/auth/signout', { refreshToken }).catch(() => undefined);
+}
+
+export interface PaymentView {
+  orderId: string;
+  plan: 'monthly' | 'yearly';
+  amount: number;
+  status: 'pending' | 'paid' | 'failed' | 'expired';
+  createdAt: number;
+  paidAt: number | null;
+  method: string | null;
+}
+export interface BillingOverview {
+  account: { email: string; plan: 'trial' | 'paid'; until: number; trialEndsAt: number; paidUntil: number | null };
+  prices: Record<'monthly' | 'yearly', { amount: number; days: number }>;
+  payments: PaymentView[];
+}
+export const billingOverview = () => api<BillingOverview>('GET', '/api/billing', undefined, true);
+export const startCheckout = (plan: 'monthly' | 'yearly') => api<{ orderId: string; redirectUrl: string }>('POST', '/api/billing/checkout', { plan }, true);
+export const paymentStatus = (orderId: string) => api<PaymentView>('GET', `/api/billing/status/${encodeURIComponent(orderId)}`, undefined, true);

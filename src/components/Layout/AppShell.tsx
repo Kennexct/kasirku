@@ -1,4 +1,5 @@
 import { Lock, LockOpen, MoreHorizontal } from 'lucide-react';
+import { SubscriptionBanner } from '../Access/SubscriptionBanner';
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { ROUTES } from '../../constants';
@@ -124,6 +125,7 @@ export function AppShell() {
       </nav>
 
       <main className="relative flex min-w-0 flex-1 flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
+        <SubscriptionBanner />
         <Outlet />
       </main>
 

@@ -1,4 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
+import { APP_BASE } from '../../constants';
 import { Download, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -66,7 +67,7 @@ export function BackupSettings() {
     try {
       await restoreBackup(candidate);
       clearDeviceSession();
-      window.location.assign('/');
+      window.location.assign(`${APP_BASE}/`);
     } catch (error) {
       toast.error(t('Pemulihan gagal, data di perangkat ini tidak berubah. {0}', errorMessage(error)));
       setIsBusy(false);

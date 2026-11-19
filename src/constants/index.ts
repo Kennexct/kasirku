@@ -79,6 +79,9 @@ export const DEFAULT_PAYMENT_METHODS = [
 /** Quick cash buttons shown on the payment screen. */
 export const QUICK_CASH_AMOUNTS = [10_000, 20_000, 50_000, 100_000] as const;
 
+/** ADR-013: the POS lives under /app; the landing page is at /. */
+export const APP_BASE = '/app';
+
 export const ROUTES = {
   login: '/login',
   pos: '/',

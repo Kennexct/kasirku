@@ -1,4 +1,5 @@
 import { ORDER_STATUS_LABEL } from '../constants';
+import { assertCanSell } from '../store/useAccessStore';
 import { localDb } from '../db/localDb';
 import { formatReceiptNo, getBusinessDate } from '../lib/businessDate';
 import { nowIso, uuidv7 } from '../lib/id';
@@ -97,6 +98,7 @@ async function buildOrder(cart: CartSnapshot, ctx: OrderContext): Promise<Order>
 
 /** M8: save an unpaid order ("bayar nanti"). A label is required so it can be found later. */
 export async function saveOpenOrder(cart: CartSnapshot, ctx: OrderContext): Promise<Order> {
+  assertCanSell();
   if (cart.label.trim().length === 0) throw new Error(t('Isi label pesanan (contoh: Meja 5).'));
   const order = await buildOrder(cart, ctx);
   await saveAndQueue('orders', order);
@@ -116,6 +118,7 @@ export function validatePayment(payment: PaymentInput, grandTotal: number): stri
 
 /** M1/M5: complete a sale with a single payment method (split payment is planned for v1.1). */
 export async function completeOrder(cart: CartSnapshot, ctx: OrderContext, payment: PaymentInput): Promise<Order> {
+  assertCanSell();
   const draft = await buildOrder(cart, ctx);
   const error = validatePayment(payment, draft.totals.grandTotal);
   if (error) throw new Error(error);

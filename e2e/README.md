@@ -18,3 +18,8 @@ python3    e2e/reports.py http://localhost:4173 ./shots              # sales + r
 Both print `ERRORS: none` when no page errors, console errors or failed requests occurred. Screenshots land in `./shots`.
 Since v0.10 a fresh browser profile opens the first-time journey; every older flow presses "Lewati, pakai contoh toko" first.
 Since v0.11 every Indonesian flow sets `locale='id-ID'` on the browser context; a default headless browser reports English and would open the app in English.
+
+## v0.14: the app lives under /app
+Old flows: build without `VITE_PASS_PUBLIC_JWK` (billing off), `npx vite preview --port 4173`, then pass `http://localhost:4173/app` as BASE.
+`manage.py` takes the fixtures folder as a third argument: `python3 e2e/manage.py http://localhost:4173/app OUT e2e/fixtures`.
+`v14.py` runs against `wrangler pages dev` — see docs/runbooks/deploy-cloudflare.md.

@@ -6,7 +6,7 @@ import { OwnerGate } from './components/Layout/OwnerGate';
 import { LockScreen } from './components/Pin/LockScreen';
 import { OwnerPinHost } from './components/Pin/OwnerPinHost';
 import { LoadingScreen } from './components/ui/LoadingScreen';
-import { ROUTES } from './constants';
+import { APP_BASE, ROUTES } from './constants';
 import { useBootstrap } from './hooks/useBootstrap';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { CashPage } from './pages/Cash/CashPage';
@@ -20,15 +20,31 @@ import { POSPage } from './pages/POS/POSPage';
 import { ProductsPage } from './pages/Products/ProductsPage';
 import { SettingsPage } from './pages/Settings/SettingsPage';
 import { useSessionStore } from './store/useSessionStore';
+import { useAccessRefresh } from './hooks/useAccessRefresh';
+import { SignInPage } from './pages/Auth/SignInPage';
 import { t } from './i18n';
 
 // ADR-001: charts + export code load only when Reports is opened.
 const ReportsPage = lazy(() => import('./pages/Reports/ReportsPage'));
 
+const toasterFor = () => <Toaster position="top-center" />;
+
 export default function App() {
   useOnlineStatus();
   const boot = useBootstrap();
   const hasSeller = useSessionStore((s) => s.cashier !== null);
+  const accessStatus = useAccessRefresh();
+
+  // ADR-013: an account comes first — before the store, the journey and the PIN screen.
+  if (accessStatus === 'checking') return <LoadingScreen message={t('Memeriksa akun…')} />;
+  if (accessStatus === 'signedOut') {
+    return (
+      <>
+        <SignInPage />
+        {toasterFor()}
+      </>
+    );
+  }
 
   if (boot.status === 'loading') return <LoadingScreen message={t('Menyiapkan kasir…')} />;
   if (boot.status === 'error') {
@@ -72,7 +88,7 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={APP_BASE}>
       <Routes>
         <Route element={<AppShell />}>
           <Route path={ROUTES.pos} element={<POSPage />} />

@@ -1,10 +1,35 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'node:path';
+import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { VitePWA } from 'vite-plugin-pwa';
 
+/** Dev/preview: deep links under /app/ serve the app shell (Cloudflare does this with public/_redirects). */
+const appFallback = (): Plugin => {
+  const rewrite = (req: { url?: string }) => {
+    if (req.url && /^\/app(\/[^.]*)?(\?.*)?$/.test(req.url)) req.url = '/app/index.html';
+  };
+  return {
+    name: 'kasirku-app-fallback',
+    configureServer(server) {
+      server.middlewares.use((req, _res, next) => (rewrite(req), next()));
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use((req, _res, next) => (rewrite(req), next()));
+    },
+  };
+};
+
 export default defineConfig({
+  appType: 'mpa',
+  build: {
+    rollupOptions: {
+      input: { landing: resolve(__dirname, 'index.html'), app: resolve(__dirname, 'app/index.html') },
+    },
+  },
   plugins: [
+    appFallback(),
     react(),
     tailwindcss(),
     VitePWA({
@@ -15,7 +40,9 @@ export default defineConfig({
         short_name: 'KasirKu',
         description: 'Kasir cepat untuk UMKM dan pedagang kaki lima',
         lang: 'id',
-        start_url: '/',
+        start_url: '/app/',
+        scope: '/app/',
+        id: '/app/',
         display: 'standalone',
         orientation: 'any',
         background_color: '#f7f9f8',
@@ -27,7 +54,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        navigateFallback: '/index.html',
+        navigateFallback: '/app/index.html',
+        navigateFallbackAllowlist: [/^\/app(\/|$)/],
+        navigateFallbackDenylist: [/^\/api\//],
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
         runtimeCaching: [
           {
@@ -45,6 +74,6 @@ export default defineConfig({
   ],
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'server/**/*.test.ts'],
   },
 });

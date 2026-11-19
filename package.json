@@ -1,7 +1,7 @@
 {
   "name": "kasirku",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.14.0",
   "type": "module",
   "description": "Offline-first web POS for Indonesian UMKM and street food sellers",
   "engines": {
@@ -9,13 +9,15 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && tsc -p tsconfig.server.json && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "i18n:check": "node scripts/i18n-keys.mjs",
-    "i18n:scan": "node scripts/i18n-scan.mjs"
+    "i18n:scan": "node scripts/i18n-scan.mjs",
+    "landing": "python3 scripts/landing/build.py static",
+    "pages:dev": "wrangler pages dev dist --compatibility-date=2026-11-01"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",

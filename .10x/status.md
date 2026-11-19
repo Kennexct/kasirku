@@ -67,3 +67,6 @@
 
 ## v0.14 accounts-billing — Design Complete (2026-11-19)
 Spec `specs/2026-11-19-accounts-trial-billing-design.md`, ADR-013. Stack: Cloudflare Pages + Functions, Neon, Resend, R2 (later), GitHub.
+
+## v0.14 accounts-billing — Delivery docs complete (2026-11-19)
+Built and verified (see reviews/2026-11-19-v14-review.md). Waiting on the user for: Neon project, Resend domain, Midtrans sandbox keys, Cloudflare Pages project, final prices, custom domain.
