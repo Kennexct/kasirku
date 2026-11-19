@@ -1,7 +1,7 @@
 # Status
 
-**Phase:** Implementation — v0.9 next (cost price & profit, expenses, close of day, backup file). v0.8 delivered.
-**Branch:** `feat/v0.8-feedback` (stacked: reports-export → staff-pin → customers → v0.8-feedback)
+**Phase:** Implementation — v0.9 (design + planning complete: ADR-007, ADR-008)
+**Branch:** `feat/v0.9-profit-closing-backup` (stacked: reports-export → staff-pin → customers → v0.8-feedback → v0.9)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
 | Feature | Phase | Notes |
@@ -15,6 +15,15 @@
 | v0.9 cost & profit · expenses · close of day · backup | Next | roadmap spec |
 | v0.10 first-time journey · help centre | Planned | roadmap spec |
 | v0.11 English | Planned | roadmap spec |
+
+## v0.9 tasks
+- [ ] T1 Types, Dexie v4, sync tables, migration
+- [ ] T2 Cost price on product + cost snapshot on sold item; `lib/profit.ts` + tests
+- [ ] T3 Expenses service; `lib/cashDrawer.ts`; day closing service + tests
+- [ ] T4 Kas screen (today, expenses, closing history)
+- [ ] T5 Profit card in Reports + export summary rows
+- [ ] T6 Backup file + restore + Settings tab + tests
+- [ ] T7 e2e `v09.py` + regressions, review, runbook
 
 ## reports-export tasks
 - [x] T1 Refund businessDate + migrations

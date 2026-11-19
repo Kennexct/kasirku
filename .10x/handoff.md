@@ -1,7 +1,6 @@
 # Handoff
 
-**To:** Architect → SDE
+**To:** SDE
 
-v0.8 is delivered (`reviews/2026-11-19-v08-review.md`, `decisions/sde/v08-feedback.md`).
-
-Next: v0.9 per `specs/2026-11-19-feedback-round-roadmap.md` — cost price → profit in reports, expenses, close of day (opening cash, expected vs counted, resets sold-out flags), backup/restore file. Write the ADR (data shapes for expenses and day closings, backup file format and restore rules) before code. Then v0.10 → v0.11.
+Build v0.9 in task order T1–T7 (`status.md`). Binding: `specs/2026-11-19-v09-profit-closing-backup-design.md`, ADR-007, ADR-008, `decisions/architect/v09-profit-closing-backup.md`.
+Tricky parts: profit must reconcile to the report headline; drawer maths shared by screen and closing record; restore must be all-or-nothing.
