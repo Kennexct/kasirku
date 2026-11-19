@@ -15,3 +15,4 @@
 - v0.10 first-time journey, help centre — ADR-009 → `v10-onboarding-help.md`
 - v0.11 English — ADR-010 (source-string dictionary, reload on change)
 - v0.12 flexible price, sell by weight — ADR-011 → `v12-flex-price-weight.md`
+- v0.13 variants + add-on rename — ADR-012 → `v13-variants-addons.md`
