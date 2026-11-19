@@ -62,3 +62,5 @@
 | `onboarding` (user request) | First-launch journey: language, store name + business template, payment/QRIS setup, short explanation, "Langkah awal" checklist. Absorbs recommended "setup wizard" | medium |
 | `help-center` (user request) | Help button → in-app, offline help topics + contextual "?" on complex screens + replay intro | medium (≈ 12–15 short articles × 2 languages) |
 | recommended additions | 1 close-of-day + expenses, 2 cost price → profit, 3 backup file, 5 sold-out toggle, 6 customer debt view | each small–medium; user to choose |
+
+- Landing page v1 published (Design artifact UZ6XxLt43pE2gACongRVHs); source copy in landing/index.dc.html. Pro price Rp49.000 is a placeholder.
