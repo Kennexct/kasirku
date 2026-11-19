@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PageHeader } from '../../components/Layout/PageHeader';
+import { NARROW_COLUMN, PageHeader } from '../../components/Layout/PageHeader';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
 import { Tabs } from '../../components/ui/Tabs';
 import { useAppData } from '../../hooks/useAppData';
@@ -32,11 +32,11 @@ export function SettingsPage() {
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      <PageHeader title={t('Pengaturan')} description={t('Profil toko, struk, pembayaran, mode penjualan, staf, dan cadangan.')} helpTopic={TABS.find((t) => t.value === tab)?.help}>
+      <PageHeader title={t('Pengaturan')} description={t('Profil toko, struk, pembayaran, mode penjualan, staf, dan cadangan.')} helpTopic={TABS.find((t) => t.value === tab)?.help} isNarrow>
         <Tabs label={t('Bagian pengaturan')} items={TABS} value={tab} onChange={setTab} />
       </PageHeader>
       <div className="min-h-0 flex-1 overflow-y-auto p-4 md:px-8 md:py-6">
-        <div className="max-w-2xl">
+        <div className={NARROW_COLUMN}>
           {tab === 'store' && (
             <>
               <SettingsSection title={t('Bahasa')} description={t('Bahasa aplikasi di perangkat ini. Nama produk dan data toko tidak diterjemahkan. Aplikasi dimuat ulang saat bahasa diganti.')}>

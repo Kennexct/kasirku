@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Delivery Complete — v0.12 (flexible price, sell by weight)
+**Phase:** Delivery Complete — v0.12.1 (v0.12 + Settings/Help centred layout fix)
 **Branch:** `feat/v0.12-flex-price-weight` (stacked: … → v0.8-feedback → v0.9 → v0.10 → v0.11 → v0.12)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 

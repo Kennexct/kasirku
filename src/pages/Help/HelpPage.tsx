@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ChecklistCard } from '../../components/Checklist/ChecklistCard';
 import { HelpTopicView } from '../../components/Help/HelpTopicView';
 import { IntroCards } from '../../components/Help/IntroCards';
-import { PageHeader } from '../../components/Layout/PageHeader';
+import { NARROW_COLUMN, PageHeader } from '../../components/Layout/PageHeader';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SearchInput } from '../../components/ui/SearchInput';
 import { Sheet } from '../../components/ui/Sheet';
@@ -31,6 +31,7 @@ export function HelpPage() {
     <section className="flex min-h-0 flex-1 flex-col">
       <PageHeader
         title={t('Bantuan')}
+        isNarrow
         description={t('Cara memakai KasirKu. Bisa dibuka tanpa internet.')}
         actions={
           <button type="button" onClick={() => setIsIntroOpen(true)} className={`${btnSecondary} h-11 text-[14px]`}>
@@ -40,7 +41,7 @@ export function HelpPage() {
         }
       />
       <div className="min-h-0 flex-1 overflow-y-auto p-4 md:px-8 md:py-6">
-        <div className="mx-auto flex max-w-3xl flex-col gap-4">
+        <div className={`${NARROW_COLUMN} flex flex-col gap-4`}>
           {checklist && !checklist.isComplete && <ChecklistCard checklist={checklist} />}
           <SearchInput value={query} onChange={setQuery} placeholder={t('Cari bantuan, mis. refund, QRIS, tutup kasir…')} label={t('Cari topik bantuan')} />
           {topics.length === 0 ? (

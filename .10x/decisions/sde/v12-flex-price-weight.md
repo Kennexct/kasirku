@@ -20,3 +20,6 @@ Tech debt
 - No audit event for a price change; `listPrice` on the sale is the record.
 - Turning the setting off does not convert products back to pieces.
 - No scale integration, no tare, no custom units, no partial-weight refund.
+
+## v0.12.1 — layout fix (user feedback, 19 Nov 2026)
+Settings looked pushed to the left on wide screens (content capped at `max-w-2xl` and left-aligned, empty space on the right). `PageHeader` gained `isNarrow` and exports `NARROW_COLUMN` (`mx-auto w-full max-w-3xl`); Settings and Help now put the title, tabs and content in the same centred column. Other pages (lists, reports, Kas) keep the full width. No behaviour change.

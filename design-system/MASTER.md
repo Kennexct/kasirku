@@ -80,3 +80,8 @@ Components must use semantic tokens only — no raw `slate-*`, `orange-*` or hex
 ## Anti-patterns (reject in review)
 
 Pastel random tile colors · gradient buttons · pill-shaped everything · emoji icons · gray text below `muted` · raw palette classes in JSX · shadows on every card · centered-everything layouts · more than one accent color.
+
+## Page width
+
+- List and data pages (Kasir, Riwayat, Laporan, Produk, Pelanggan, Kas) use the full width.
+- Form-like pages (Pengaturan, Bantuan) use one centred column for header, tabs and content: `<PageHeader isNarrow>` + `NARROW_COLUMN` (`max-w-3xl`). Never cap content width while leaving it left-aligned.
