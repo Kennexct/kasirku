@@ -14,3 +14,4 @@
 - v0.9 profit, expenses, close of day, backup — ADR-007, ADR-008 → `v09-profit-closing-backup.md`
 - v0.10 first-time journey, help centre — ADR-009 → `v10-onboarding-help.md`
 - v0.11 English — ADR-010 (source-string dictionary, reload on change)
+- v0.12 flexible price, sell by weight — ADR-011 → `v12-flex-price-weight.md`
