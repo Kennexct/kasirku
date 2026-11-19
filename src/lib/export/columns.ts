@@ -84,7 +84,7 @@ export const ITEM_COLUMNS: ReadonlyArray<ExportColumn<ItemRow>> = [
   { header: t('No. Struk'), width: 22, kind: 'text', value: (r) => r.order.receiptNo },
   { header: t('Status'), width: 16, kind: 'text', value: (r) => ORDER_STATUS_LABEL[r.order.status] },
   { header: t('Produk'), width: 22, kind: 'text', value: (r) => r.item.nameSnapshot },
-  { header: t('Varian'), width: 22, kind: 'text', value: (r) => r.item.options.map((o) => o.name).join(', ') },
+  { header: t('Add-on'), width: 22, kind: 'text', value: (r) => r.item.options.map((o) => o.name).join(', ') },
   { header: t('Catatan'), width: 18, kind: 'text', value: (r) => r.item.note },
   { header: t('Qty'), width: 8, kind: 'int', value: (r) => roundQuantity(r.item.qty) },
   { header: t('Harga Satuan'), width: 13, kind: 'money', value: (r) => r.item.unitPrice },
@@ -92,6 +92,7 @@ export const ITEM_COLUMNS: ReadonlyArray<ExportColumn<ItemRow>> = [
   // Appended so existing columns keep their positions (ADR-011).
   { header: t('Satuan'), width: 8, kind: 'text', value: (r) => UNIT_INFO[r.item.unit ?? 'pcs'].symbol || 'pcs' },
   { header: t('Harga Normal'), width: 13, kind: 'money', value: (r) => r.item.listPrice ?? r.item.unitPrice },
+  { header: t('Varian'), width: 16, kind: 'text', value: (r) => r.item.variantName ?? '' },
 ];
 
 export const REFUND_COLUMNS: ReadonlyArray<ExportColumn<RefundRow>> = [

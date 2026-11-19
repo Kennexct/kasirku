@@ -33,7 +33,7 @@ export function TopProducts({ products }: { products: ProductRow[] }) {
       ) : (
         <ol className="flex flex-col gap-3">
           {ranked.map((p, index) => (
-            <li key={p.productId} className="grid grid-cols-[20px_1fr_auto] items-center gap-x-3">
+            <li key={p.key} className="grid grid-cols-[20px_1fr_auto] items-center gap-x-3">
               <span className="num text-[13px] font-semibold text-muted">{index + 1}</span>
               <span className="min-w-0">
                 <span className="block truncate text-[14px] font-medium">{p.name}</span>

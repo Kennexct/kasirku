@@ -17,6 +17,11 @@ describe('starter templates', () => {
       expect(product.basePrice).toBeGreaterThan(0);
     }
     for (const group of bundle.variantGroups) expect(group.options.length).toBeGreaterThanOrEqual(group.min);
+    for (const product of bundle.products) {
+      const names = (product.variants ?? []).map((v) => v.name.toLowerCase());
+      expect(new Set(names).size).toBe(names.length);
+      if (names.length > 0) expect(product.basePrice).toBe(Math.min(...(product.variants ?? []).map((v) => v.price)));
+    }
     expect(bundle.salesModes.filter((m) => m.isDefault)).toHaveLength(1);
   });
 
@@ -32,5 +37,19 @@ describe('starter templates', () => {
     const bundle = buildSeedBundle({ ...DEFAULT_SETUP, template: 'kosong' });
     expect([bundle.products.length, bundle.categories.length, bundle.variantGroups.length]).toEqual([0, 0, 0]);
     expect(bundle.paymentMethods.length).toBeGreaterThan(0);
+  });
+});
+
+describe('coffee template (ADR-012)', () => {
+  it('models product → variant → add-on', () => {
+    const bundle = buildSeedBundle({ ...DEFAULT_SETUP, template: 'kopi' });
+    const kopi = bundle.products.find((p) => p.name === 'Kopi');
+    expect(kopi?.variants?.map((v) => v.name)).toEqual(['Americano', 'Latte', 'Cappuccino', 'Espresso', 'Kopi Susu Gula Aren']);
+    const addOns = bundle.variantGroups.filter((g) => kopi?.variantGroupIds.includes(g.id)).map((g) => [g.name, g.options.map((o) => o.name)]);
+    expect(addOns).toEqual([
+      ['Es', ['Es normal', 'Sedikit es', 'Tanpa es', 'Panas']],
+      ['Gula', ['Gula normal', 'Sedikit gula', 'Tanpa gula']],
+      ['Ukuran', ['Tall', 'Grande', 'Venti']],
+    ]);
   });
 });

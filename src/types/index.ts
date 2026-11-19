@@ -112,11 +112,28 @@ export interface Product extends SyncMeta {
   /** "Habis": shown but not sellable at the cashier until switched back (ADR-006). */
   isSoldOut?: boolean;
   sortOrder: number;
+  /** Add-on groups (ADR-012: stored as "variant groups"; the interface calls them add-ons). */
   variantGroupIds: Id[];
   /** salesModeId -> price override (e.g. Takeaway cup cost). */
   modePrices: Record<Id, Rupiah>;
+  /** Real variants (Kopi → Latte, Americano…), each with its own full price. Absent/empty = no variants (ADR-012). */
+  variants?: ProductVariant[];
 }
 
+/** One variant of a product, sold as its own item: "Kopi – Latte" (ADR-012). */
+export interface ProductVariant {
+  id: Id;
+  name: string;
+  /** Full price for the default (Dine In) mode. */
+  price: Rupiah;
+  /** salesModeId -> price for "per product" modes such as Takeaway. */
+  modePrices?: Record<Id, Rupiah>;
+  costPrice?: Rupiah;
+  isSoldOut?: boolean;
+  sortOrder: number;
+}
+
+/** Option of an add-on group (ADR-012: the type keeps its historical name). */
 export interface VariantOption {
   id: Id;
   name: string;
@@ -124,6 +141,7 @@ export interface VariantOption {
   sortOrder: number;
 }
 
+/** An add-on group: Es, Gula, Ukuran… (ADR-012: the type keeps its historical name). */
 export interface VariantGroup extends SyncMeta {
   name: string;
   isRequired: boolean;
@@ -192,6 +210,9 @@ export interface OrderItem {
   unitCost?: Rupiah;
   /** Normal unit price when sold, kept only for flexible-price products; differs from `unitPrice` when the seller changed it (ADR-011). */
   listPrice?: Rupiah;
+  /** Set when a product variant was sold; `nameSnapshot` is then "Product – Variant" (ADR-012). */
+  variantId?: Id;
+  variantName?: string;
   /** Absent = pieces. For a measured unit, `qty` is a decimal weight/length/volume (ADR-011). */
   unit?: SaleUnit;
   qty: number;

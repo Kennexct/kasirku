@@ -53,7 +53,7 @@ export function VariantGroupForm({ group, storeId, onClose }: VariantGroupFormPr
       toast.success(t('{0} disimpan', draft.name.trim()));
       onClose();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('Gagal menyimpan varian.'));
+      toast.error(error instanceof Error ? error.message : t('Gagal menyimpan add-on.'));
     } finally {
       setIsSaving(false);
     }
@@ -61,19 +61,19 @@ export function VariantGroupForm({ group, storeId, onClose }: VariantGroupFormPr
 
   return (
     <Sheet
-      title={group ? t('Ubah grup varian') : t('Grup varian baru')}
+      title={group ? t('Ubah grup add-on') : t('Grup add-on baru')}
       isOpen
       onClose={onClose}
       footer={
         <button type="button" disabled={isSaving} onClick={() => void handleSave()} className={`${btnPrimary} w-full`}>
-          {t('Simpan varian')}
+          {t('Simpan add-on')}
         </button>
       }
     >
       <div className="flex flex-col gap-5">
         <div>
           <label htmlFor="group-name" className={labelBase}>{t('Nama grup')}</label>
-          <input id="group-name" value={draft.name} onChange={(e) => update({ name: e.target.value })} placeholder={t('Contoh: Level Pedas, Ukuran, Topping')} className={inputBase} />
+          <input id="group-name" value={draft.name} onChange={(e) => update({ name: e.target.value })} placeholder={t('Contoh: Es, Gula, Ukuran, Topping')} className={inputBase} />
         </div>
 
         <div>

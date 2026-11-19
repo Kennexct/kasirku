@@ -114,7 +114,7 @@ npx supabase db push           # applies supabase/migrations
 
 CI (`.github/workflows/ci.yml`): `npm ci` → `typecheck` → `test` → `build`. Migrations are applied to staging on merge, to prod by manual approval.
 
-## 7. Current status (v0.12 — + flexible price, sell by weight)
+## 7. Current status (v0.13 — + variants, add-ons)
 
 Design rules, tokens and component inventory: [`design-system/MASTER.md`](design-system/MASTER.md). Browser flow checks: [`e2e/`](e2e/README.md).
 
@@ -147,11 +147,12 @@ Design rules, tokens and component inventory: [`design-system/MASTER.md`](design
 | English (v0.11) | Done: Indonesian + English for every screen, receipt, WhatsApp text, export and help topic; per-device language with reload on change; typed source-string dictionary (ADR-010) | `src/i18n/`, `content/help.en.ts`, `scripts/i18n-*.mjs` |
 | Flexible price (v0.12) | Done: per-product switch; the seller types the price at the register; the normal price is stored next to the charged price and shown in history and the Item export (ADR-011) | `pages/POS/components/SaleEntrySheet.tsx`, `lib/quantity.ts` |
 | Sell by weight / measure (v0.12) | Done: store setting; products sold per kg, ons, gram, litre or metre; weight or money amount typed at the register; decimal quantity, whole-Rupiah line totals; receipts, refunds, profit and exports aware of units | `lib/quantity.ts`, `lib/pricing.ts`, `pages/Products/ProductForm.tsx`, `pages/Settings/StoreSettings.tsx` |
+| Variants & add-ons (v0.13) | Done: product → variant (own full price, takeaway price, cost, sold-out) → add-ons (ice, sugar, size…; previously called "Varian"); cashier sheet variant-then-add-on; reports per variant (ADR-012) | `lib/productVariants.ts`, `pages/POS/components/OptionSheet.tsx`, `pages/Products/ProductVariantsEditor.tsx` |
 | M15 parts 2–3 (owner login, sync) | Not started — needs a Supabase project | — |
 
 First run opens a three-step journey; the chosen template (`services/seedTemplate.ts`) seeds a small editable menu so the seller can sell immediately.
 
-Tests: 140 unit/integration tests (incl. a 20k-order performance guard) (`npm test`) cover pricing, variants, receipt numbering, business date, WhatsApp receipt text, and the order service against an in-memory IndexedDB (paid, open → resume → paid, cancel + audit, validation, StrictMode double-seed guard) and void/refund rules (same-day void, refund window, partial → full, permission, reason).
+Tests: 145 unit/integration tests (incl. a 20k-order performance guard) (`npm test`) cover pricing, variants, receipt numbering, business date, WhatsApp receipt text, and the order service against an in-memory IndexedDB (paid, open → resume → paid, cancel + audit, validation, StrictMode double-seed guard) and void/refund rules (same-day void, refund window, partial → full, permission, reason).
 
 ## 8. Build order (maps to PRD release plan)
 

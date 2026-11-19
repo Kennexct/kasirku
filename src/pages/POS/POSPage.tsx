@@ -19,8 +19,9 @@ import { writeAudit } from '../../services/audit';
 import { completeOrder, saveOpenOrder, type PaymentInput } from '../../services/orders';
 import { requestOwnerApproval } from '../../store/usePinPromptStore';
 import { useCartStore } from '../../store/useCartStore';
+import { hasVariants, isProductSoldOut, lineName, priceTarget, variantPrice } from '../../lib/productVariants';
 import { countUnits, isMeasured } from '../../lib/quantity';
-import type { AppliedDiscount, Id, Order, OrderItem, Product, SalesMode, SaleUnit, SelectedOption } from '../../types';
+import type { AppliedDiscount, Id, Order, OrderItem, Product, ProductVariant, SalesMode, SaleUnit, SelectedOption } from '../../types';
 import { CartPanel } from './components/CartPanel';
 import { CustomerPicker } from './components/CustomerPicker';
 import { DiscountSheet } from './components/DiscountSheet';
@@ -29,7 +30,7 @@ import { ProductGrid } from './components/ProductGrid';
 import { SaleEntrySheet } from './components/SaleEntrySheet';
 import { SaveOrderSheet } from './components/SaveOrderSheet';
 import { SoldOutSheet } from './components/SoldOutSheet';
-import { VariantSheet } from './components/VariantSheet';
+import { OptionSheet } from './components/OptionSheet';
 import { t } from '../../i18n';
 
 /** What the entry sheet needs: a product being added, or a cart line being changed. */
@@ -40,6 +41,8 @@ interface EntryRequest {
   isPriceEditable: boolean;
   unitCost: number | undefined;
   options: SelectedOption[];
+  variantId?: Id;
+  variantName?: string;
   normalPrice: number;
   editing?: OrderItem;
 }
@@ -59,7 +62,7 @@ export function POSPage() {
   const [isFromCart, setIsFromCart] = useState(false);
   const customer = useCustomer(cart.customerId);
   const customerName = customer && !customer.deletedAt ? customer.name : null;
-  const [variantProduct, setVariantProduct] = useState<Product | null>(null);
+  const [optionProduct, setOptionProduct] = useState<Product | null>(null);
   const [entry, setEntry] = useState<EntryRequest | null>(null);
   const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
   const [categoryId, setCategoryId] = useState<Id>(ALL_CATEGORIES);
@@ -72,6 +75,14 @@ export function POSPage() {
 
   const productsById = useMemo(() => new Map(catalog?.products.map((p) => [p.id, p]) ?? []), [catalog]);
 
+  /** Normal unit price of a cart line for a sales mode: product or variant price plus add-ons (ADR-012). */
+  const normalPriceFor = (item: OrderItem, salesMode: SalesMode): number => {
+    const product = productsById.get(item.productId);
+    if (!product) return item.listPrice ?? item.unitPrice;
+    const variant = product.variants?.find((v) => v.id === item.variantId);
+    return unitPriceWithOptions(variantPrice(product, variant, salesMode), item.options);
+  };
+
   /**
    * The cart's mode can vanish (hidden or deleted in Settings). Fall back to the default and, for a cart that is
    * not a saved order, re-price it — a saved order keeps the prices the customer was told.
@@ -81,10 +92,7 @@ export function POSPage() {
     if (!mode || salesModeId === mode.id) return;
     setSalesMode(mode.id);
     if (salesModeId === null || openOrderId) return;
-    repriceItems((item) => {
-      const product = productsById.get(item.productId);
-      return product ? unitPriceWithOptions(resolveModePrice(product, mode), item.options) : item.unitPrice;
-    });
+    repriceItems((item) => normalPriceFor(item, mode));
   }, [mode, salesModeId, setSalesMode, repriceItems, openOrderId, productsById]);
 
   const visibleProducts = useMemo(() => {
@@ -98,7 +106,7 @@ export function POSPage() {
   }, [catalog, categoryId, search]);
   const checklist = useChecklist(store?.id ?? null);
   const sellableProducts = useMemo(() => catalog?.products.filter((p) => p.isActive) ?? [], [catalog]);
-  const soldOutCount = sellableProducts.filter((p) => p.isSoldOut).length;
+  const soldOutCount = sellableProducts.filter(isProductSoldOut).length;
   const qtyByProduct = useMemo(() => {
     const map = new Map<Id, number>();
     cart.items.forEach((item) => map.set(item.productId, (map.get(item.productId) ?? 0) + countUnits([item])));
@@ -116,24 +124,31 @@ export function POSPage() {
     product.variantGroupIds.flatMap((id) => catalog.variantGroups.filter((g) => g.id === id));
 
   const handleSelectProduct = (product: Product) => {
-    if (product.isSoldOut) {
+    if (isProductSoldOut(product)) {
       setPanel('soldOut');
       return;
     }
-    if (groupsFor(product).length > 0) {
-      setVariantProduct(product);
+    if (hasVariants(product) || groupsFor(product).length > 0) {
+      setOptionProduct(product);
       return;
     }
-    addOrAsk(product, [], resolveModePrice(product, mode));
+    addOrAsk(product, undefined, [], resolveModePrice(product, mode));
   };
 
   /** Measured and flexible-price products go through the entry sheet; everything else is added at once (ADR-011). */
-  const addOrAsk = (product: Product, options: SelectedOption[], normalPrice: number) => {
+  const addOrAsk = (product: Product, variant: ProductVariant | undefined, options: SelectedOption[], normalPrice: number) => {
+    const line = {
+      productId: product.id,
+      name: lineName(product, variant),
+      unitCost: priceTarget(product, variant).costPrice,
+      options,
+      ...(variant ? { variantId: variant.id, variantName: variant.name } : {}),
+    };
     if (needsEntry(product)) {
-      setEntry({ productId: product.id, name: product.name, unit: product.unit, isPriceEditable: product.isPriceEditable === true, unitCost: product.costPrice, options, normalPrice });
+      setEntry({ ...line, unit: product.unit, isPriceEditable: product.isPriceEditable === true, normalPrice });
       return;
     }
-    cart.addItem({ productId: product.id, name: product.name, unitPrice: normalPrice, unitCost: product.costPrice, options });
+    cart.addItem({ ...line, unitPrice: normalPrice });
   };
 
   const handleEditItem = (item: OrderItem) =>
@@ -144,16 +159,14 @@ export function POSPage() {
       isPriceEditable: item.listPrice !== undefined,
       unitCost: item.unitCost,
       options: item.options,
+      ...(item.variantId ? { variantId: item.variantId, variantName: item.variantName } : {}),
       normalPrice: item.listPrice ?? item.unitPrice,
       editing: item,
     });
 
   const handleModeChange = (next: SalesMode) => {
     cart.setSalesMode(next.id);
-    cart.repriceItems((item) => {
-      const product = productsById.get(item.productId);
-      return product ? unitPriceWithOptions(resolveModePrice(product, next), item.options) : item.unitPrice;
-    });
+    cart.repriceItems((item) => normalPriceFor(item, next));
   };
 
   const snapshot = () => {
@@ -321,6 +334,7 @@ export function POSPage() {
                 unitPrice,
                 unitCost: entry.unitCost,
                 options: entry.options,
+                ...(entry.variantId ? { variantId: entry.variantId, variantName: entry.variantName } : {}),
                 qty,
                 unit: entry.unit,
                 listPrice: entry.isPriceEditable ? entry.normalPrice : undefined,
@@ -330,15 +344,15 @@ export function POSPage() {
           }}
         />
       )}
-      {variantProduct && (
-        <VariantSheet
-          product={variantProduct}
-          groups={groupsFor(variantProduct)}
-          modePrice={resolveModePrice(variantProduct, mode)}
-          onClose={() => setVariantProduct(null)}
-          onConfirm={(options, unitPrice) => {
-            setVariantProduct(null);
-            addOrAsk(variantProduct, options, unitPrice);
+      {optionProduct && (
+        <OptionSheet
+          product={optionProduct}
+          groups={groupsFor(optionProduct)}
+          mode={mode}
+          onClose={() => setOptionProduct(null)}
+          onConfirm={({ variant, options, unitPrice }) => {
+            setOptionProduct(null);
+            addOrAsk(optionProduct, variant, options, unitPrice);
           }}
         />
       )}

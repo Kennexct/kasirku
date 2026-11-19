@@ -5,7 +5,8 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { SearchInput } from '../../../components/ui/SearchInput';
 import { Sheet } from '../../../components/ui/Sheet';
 import { Switch } from '../../../components/ui/Switch';
-import { setProductSoldOut } from '../../../services/catalog';
+import { activeVariants, hasVariants, isProductSoldOut } from '../../../lib/productVariants';
+import { setProductSoldOut, setVariantSoldOut } from '../../../services/catalog';
 import type { Product } from '../../../types';
 import { t } from '../../../i18n';
 
@@ -18,15 +19,23 @@ interface SoldOutSheetProps {
 /** Any seller marks what has run out; the tile stays visible but cannot be sold until switched back. */
 export function SoldOutSheet({ products, onClose }: SoldOutSheetProps) {
   const [query, setQuery] = useState('');
-  const soldOutCount = products.filter((p) => p.isSoldOut).length;
+  const soldOutCount = products.filter(isProductSoldOut).length;
 
   /** Items that were sold out when the sheet opened go first; the order then stays put so rows do not jump under the finger. */
-  const [pinnedIds] = useState(() => new Set(products.filter((p) => p.isSoldOut).map((p) => p.id)));
+  const [pinnedIds] = useState(() => new Set(products.filter((p) => p.isSoldOut || (p.variants ?? []).some((v) => v.isSoldOut)).map((p) => p.id)));
   const rows = useMemo(() => {
     const text = query.trim().toLowerCase();
     const matches = products.filter((p) => text === '' || p.name.toLowerCase().includes(text));
     return [...matches.filter((p) => pinnedIds.has(p.id)), ...matches.filter((p) => !pinnedIds.has(p.id))];
   }, [products, query, pinnedIds]);
+
+  const toggleVariant = async (product: Product, variantId: string, isSoldOut: boolean) => {
+    try {
+      await setVariantSoldOut(product.id, variantId, isSoldOut);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('Gagal menyimpan.'));
+    }
+  };
 
   const toggle = async (product: Product, isSoldOut: boolean) => {
     try {
@@ -48,12 +57,28 @@ export function SoldOutSheet({ products, onClose }: SoldOutSheetProps) {
           <ul className="divide-y divide-line">
             {rows.map((product) => (
               <li key={product.id} className="py-1">
-                <Switch
-                  checked={product.isSoldOut === true}
-                  onChange={(isSoldOut) => void toggle(product, isSoldOut)}
-                  label={product.name}
-                  description={product.isSoldOut ? t('Habis, tidak bisa dijual') : undefined}
-                />
+                {hasVariants(product) ? (
+                  <>
+                    <p className="pt-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-muted">{product.name}</p>
+                    {activeVariants(product).map((variant) => (
+                      <div key={variant.id} className="pl-3">
+                        <Switch
+                          checked={variant.isSoldOut === true}
+                          onChange={(isSoldOut) => void toggleVariant(product, variant.id, isSoldOut)}
+                          label={variant.name}
+                          description={variant.isSoldOut ? t('Habis, tidak bisa dijual') : undefined}
+                        />
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <Switch
+                    checked={product.isSoldOut === true}
+                    onChange={(isSoldOut) => void toggle(product, isSoldOut)}
+                    label={product.name}
+                    description={product.isSoldOut ? t('Habis, tidak bisa dijual') : undefined}
+                  />
+                )}
               </li>
             ))}
           </ul>

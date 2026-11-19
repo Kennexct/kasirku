@@ -13,6 +13,7 @@ import { createCategory, newMeta, saveProduct } from '../../services/catalog';
 import type { Id, Product } from '../../types';
 import { t } from '../../i18n';
 import { isMeasured, perUnit, SALE_UNITS, UNIT_INFO } from '../../lib/quantity';
+import { newVariant, ProductVariantsEditor } from './ProductVariantsEditor';
 
 interface ProductFormProps {
   product: Product | null;
@@ -34,7 +35,7 @@ const newProduct = (storeId: Id, sortOrder: number): Product => ({
   modePrices: {},
 });
 
-/** M2 + M3: product with category, base price, per-mode prices, variant groups and photo. */
+/** M2 + M3: product with category, price or variants (ADR-012), per-mode prices, add-ons and photo. */
 export function ProductForm({ product, catalog, storeId, onClose, isWeightSaleEnabled }: ProductFormProps) {
   const [draft, setDraft] = useState<Product>(() => product ?? newProduct(storeId, catalog.products.length));
   const [newCategory, setNewCategory] = useState<string | null>(null);
@@ -91,6 +92,7 @@ export function ProductForm({ product, catalog, storeId, onClose, isWeightSaleEn
   const unit = draft.unit ?? 'pcs';
   /** Shown when the store setting is on — or when this product already uses a unit, so it can be switched back. */
   const showsUnit = isWeightSaleEnabled || isMeasured(draft.unit);
+  const usesVariants = (draft.variants?.length ?? 0) > 0;
   const priceModes = catalog.salesModes.filter((m) => m.priceRule === 'mode_price');
   const markupModes = catalog.salesModes.filter((m) => m.priceRule === 'markup');
 
@@ -167,6 +169,17 @@ export function ProductForm({ product, catalog, storeId, onClose, isWeightSaleEn
                 {isMeasured(unit) && <p className={helperText}>{t('Semua harga di bawah ini adalah harga per {0}. Berat diketik di kasir saat menjual.', UNIT_INFO[unit].symbol)}</p>}
               </div>
             )}
+            <div className="mb-4 border-b border-line pb-3">
+              <Switch
+                checked={usesVariants}
+                onChange={(isOn) => update({ variants: isOn ? [newVariant(0), newVariant(1)] : [] })}
+                label={t('Punya varian')}
+                description={t('Misalnya Kopi: Latte, Americano, Espresso. Setiap varian punya harga sendiri.')}
+              />
+            </div>
+            {usesVariants ? (
+              <ProductVariantsEditor variants={draft.variants ?? []} priceModes={priceModes} unitSuffix={perUnit(unit)} onChange={(variants) => update({ variants })} />
+            ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="base-price" className={labelBase}>{t('Harga dasar (Dine In)')} <span className="num font-normal text-muted">{perUnit(unit)}</span></label>
@@ -195,6 +208,7 @@ export function ProductForm({ product, catalog, storeId, onClose, isWeightSaleEn
                 </p>
               </div>
             </div>
+            )}
             {markupModes.length > 0 && (
               <p className={helperText}>{markupModes.map((m) => t('{0}: otomatis +{1}% dari harga dasar', m.name, m.markupPct)).join(' · ')}</p>
             )}
@@ -209,9 +223,9 @@ export function ProductForm({ product, catalog, storeId, onClose, isWeightSaleEn
           </fieldset>
 
           <fieldset>
-            <legend className={labelBase}>{t('Varian')}</legend>
+            <legend className={labelBase}>{t('Add-on')}</legend>
             {catalog.variantGroups.length === 0 ? (
-              <p className="text-[14px] text-muted">{t('Belum ada grup varian. Buat di tab Varian.')}</p>
+              <p className="text-[14px] text-muted">{t('Belum ada grup add-on. Buat di tab Add-on (mis. Es, Gula, Ukuran).')}</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {catalog.variantGroups.map((g) => {

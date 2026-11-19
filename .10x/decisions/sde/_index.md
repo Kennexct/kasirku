@@ -14,3 +14,4 @@
 - v0.10 first-time journey, help centre → `v10-onboarding-help.md`
 - v0.11 English → `v11-english.md`
 - v0.12 flexible price, sell by weight → `v12-flex-price-weight.md`
+- v0.13 variants + add-on rename → `v13-variants-addons.md`

@@ -55,7 +55,7 @@ def run(p, name, viewport, is_mobile):
     page.get_by_role('button', name='Mulai jualan').click()
 
     # 2. Cashier opens with the chosen menu and the Langkah awal banner; first sale ticks a step.
-    page.get_by_role('button', name=re.compile('Kopi Susu Gula Aren')).first.wait_for()
+    page.get_by_role('button', name=re.compile('Kentang Goreng')).first.wait_for()
     banner_start = page.get_by_role('link', name=re.compile('Langkah awal')).inner_text()
     shot(page, f'{name}-x4-pos')
     page.get_by_role('button', name=re.compile('Roti Bakar')).first.click()
@@ -94,7 +94,7 @@ def run(p, name, viewport, is_mobile):
     page.get_by_role('button', name='Sembunyikan langkah awal').click()
     page.get_by_role('link', name=re.compile('Langkah awal')).wait_for(state='hidden')
     page.reload()
-    page.get_by_role('button', name=re.compile('Kopi Susu Gula Aren')).first.wait_for()
+    page.get_by_role('button', name=re.compile('Kentang Goreng')).first.wait_for()
     banner_gone = page.get_by_role('link', name=re.compile('Langkah awal')).count() == 0
 
     db = page.evaluate(READ_DB)

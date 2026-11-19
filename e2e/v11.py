@@ -15,7 +15,7 @@ BASE, OUT = sys.argv[1], sys.argv[2]
 errors = []
 # Common Indonesian interface words. Product names from the starter menu are merchant data and are not checked.
 INDONESIAN = set('yang dan belum sudah untuk dengan tidak dari atau ini itu pesanan pelanggan kasir bayar simpan hapus tambah ubah tutup buka laporan riwayat pengaturan produk harga jumlah hari semua cari pilih struk diskon catatan nama toko laci uang tunai habis lainnya lanjut kembali batal penjualan pengeluaran pembayaran cadangan bantuan langkah kemarin bulan transaksi rata kotor bersih masuk keluar modal awal metode mode lunas'.split())
-MERCHANT_WORDS = set('kopi susu gula aren teh tarik cokelat roti bakar kentang goreng hitam mode'.split())
+MERCHANT_WORDS = set('kopi susu gula aren teh tarik cokelat roti bakar kentang goreng hitam mode lemon tea matcha latte espresso cappuccino americano'.split())
 leftovers = {}
 
 
@@ -53,7 +53,8 @@ def run(p, name, viewport, is_mobile):
     page.get_by_role('button', name='Start selling').click()
 
     # Sale with a variant, cash.
-    page.get_by_role('button', name=re.compile('Americano')).first.click()
+    page.get_by_role('button', name=re.compile('^Kopi')).first.click()
+    page.get_by_role('radio', name=re.compile('^Americano')).click()
     scan(page, name, 'variant-sheet')
     page.get_by_role('button', name='Add to order').click()
     page.get_by_role('button', name=re.compile('Roti Bakar')).first.click()
@@ -105,7 +106,7 @@ def run(p, name, viewport, is_mobile):
             summary_labels = [row[0] for row in workbook[sheet_names[0]].iter_rows(values_only=True) if row[0]][:8]
             page.keyboard.press('Escape')
         if screen == 'products':
-            page.get_by_role('button', name=re.compile('^Americano')).first.click()
+            page.get_by_role('button', name=re.compile('^Kopi')).first.click()
             scan(page, name, 'product-form')
             page.keyboard.press('Escape')
         if screen == 'customers':

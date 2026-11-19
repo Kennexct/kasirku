@@ -46,7 +46,8 @@ export interface BreakdownRow {
 
 export interface HourRow { hour: number; transactions: number; gross: number }
 export interface DayRow { date: BusinessDate; transactions: number; gross: number; refunds: number; net: number }
-export interface ProductRow { productId: Id; name: string; qty: number; revenue: number; unit?: SaleUnit }
+/** One row per product, or per product variant (ADR-012): `key` is `productId` or `productId:variantId`. */
+export interface ProductRow { key: string; productId: Id; variantId?: Id; name: string; qty: number; revenue: number; unit?: SaleUnit }
 
 export interface Report {
   range: DateRange;
@@ -154,8 +155,17 @@ function products(counted: readonly Order[]): ProductRow[] {
   const rows = new Map<Id, ProductRow>();
   for (const order of counted) {
     for (const item of order.items) {
-      const row: ProductRow = rows.get(item.productId) ?? { productId: item.productId, name: item.nameSnapshot, qty: 0, revenue: 0, ...(item.unit ? { unit: item.unit } : {}) };
-      rows.set(item.productId, { ...row, qty: roundQuantity(row.qty + item.qty), revenue: row.revenue + lineTotal(item) });
+      const key = item.variantId ? `${item.productId}:${item.variantId}` : item.productId;
+      const row: ProductRow = rows.get(key) ?? {
+        key,
+        productId: item.productId,
+        ...(item.variantId ? { variantId: item.variantId } : {}),
+        name: item.nameSnapshot,
+        qty: 0,
+        revenue: 0,
+        ...(item.unit ? { unit: item.unit } : {}),
+      };
+      rows.set(key, { ...row, qty: roundQuantity(row.qty + item.qty), revenue: row.revenue + lineTotal(item) });
     }
   }
   return Array.from(rows.values()).sort((a, b) => b.revenue - a.revenue || b.qty - a.qty);

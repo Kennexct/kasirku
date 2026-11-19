@@ -6,6 +6,7 @@ import { isUsingFallbackPrice, resolveModePrice } from '../../../lib/pricing';
 import type { Id, Product, SalesMode } from '../../../types';
 import { t } from '../../../i18n';
 import { perUnit } from '../../../lib/quantity';
+import { fromPrice, hasVariants, isProductSoldOut } from '../../../lib/productVariants';
 
 interface ProductGridProps {
   products: Product[];
@@ -25,8 +26,8 @@ export function ProductGrid({ products, salesMode, qtyByProduct, onSelect }: Pro
       {products.map((product) => {
         const qty = qtyByProduct.get(product.id) ?? 0;
         const isSelected = qty > 0;
-        const hasVariants = product.variantGroupIds.length > 0;
-        const isSoldOut = product.isSoldOut === true;
+        const hasChoices = hasVariants(product) || product.variantGroupIds.length > 0;
+        const isSoldOut = isProductSoldOut(product);
         return (
           <li key={product.id}>
             <button
@@ -42,10 +43,11 @@ export function ProductGrid({ products, salesMode, qtyByProduct, onSelect }: Pro
                 <span className={`line-clamp-2 text-[13px] font-semibold leading-snug md:text-[14px] ${isSoldOut ? 'text-muted' : 'text-ink'}`}>{product.name}</span>
                 <span className="mt-auto flex items-center gap-1.5">
                   <span className={`num text-[13px] font-semibold md:text-[14px] ${isSoldOut ? 'text-faint' : 'text-ink-soft'}`}>
-                    {formatRupiah(resolveModePrice(product, salesMode))}{perUnit(product.unit)}
+                    {hasVariants(product) ? t('Mulai {0}', formatRupiah(fromPrice(product, salesMode))) : formatRupiah(resolveModePrice(product, salesMode))}
+                    {perUnit(product.unit)}
                   </span>
-                  {hasVariants && <Layers aria-label={t('Ada varian')} size={14} className="text-faint" />}
-                  {isUsingFallbackPrice(product, salesMode) && (
+                  {hasChoices && <Layers aria-label={t('Ada pilihan')} size={14} className="text-faint" />}
+                  {!hasVariants(product) && isUsingFallbackPrice(product, salesMode) && (
                     <span title={t('Harga mode ini belum diatur — memakai harga dasar')} className="h-[18px] rounded bg-warn-50 px-1 text-[10px] font-semibold leading-[18px] text-warn-700">
                       {t('Dasar')}
                     </span>

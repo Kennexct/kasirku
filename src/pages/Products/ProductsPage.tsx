@@ -39,14 +39,14 @@ export function ProductsPage() {
       <PageHeader
         title={t('Produk')}
         helpTopic="produk"
-        description={t('Menu, harga per mode penjualan, dan varian.')}
+        description={t('Menu, harga per mode penjualan, varian, dan add-on.')}
         actions={
           <button
             type="button"
             onClick={() => (tab === 'products' ? setEditingProduct({ item: null }) : setEditingGroup({ item: null }))}
             className={`${btnPrimary} h-11`}
           >
-            <Plus aria-hidden size={18} /> {tab === 'products' ? t('Produk') : t('Grup varian')}
+            <Plus aria-hidden size={18} /> {tab === 'products' ? t('Produk') : t('Grup add-on')}
           </button>
         }
       >
@@ -56,7 +56,7 @@ export function ProductsPage() {
           onChange={setTab}
           items={[
             { value: 'products', label: t('Produk'), count: catalog.products.length },
-            { value: 'variants', label: t('Varian'), count: catalog.variantGroups.length },
+            { value: 'variants', label: t('Add-on'), count: catalog.variantGroups.length },
           ]}
         />
       </PageHeader>
@@ -70,7 +70,7 @@ export function ProductsPage() {
             <div className={`${card} overflow-hidden`}>
               <div className="hidden grid-cols-[1fr_160px_120px_120px_96px_24px] items-center gap-4 border-b border-line bg-subtle px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.05em] text-muted lg:grid">
                 <span>{t('Produk')}</span>
-                <span>{t('Varian')}</span>
+                <span>{t('Varian & add-on')}</span>
                 <span className="text-right">{'Dine In'}</span>
                 <span className="text-right">{takeawayMode?.name ?? 'Takeaway'}</span>
                 <span>{t('Status')}</span>
@@ -91,14 +91,15 @@ export function ProductsPage() {
                           <span className="block truncate text-[13px] text-muted">
                             {(p.categoryId && categoryName.get(p.categoryId)) || t('Tanpa kategori')}
                             <span className="lg:hidden">
-                              {p.variantGroupIds.length > 0 && t(' · {0} varian', p.variantGroupIds.length)}
+                              {(p.variants?.length ?? 0) > 0 && t(' · {0} varian', p.variants?.length ?? 0)}
+                              {p.variantGroupIds.length > 0 && t(' · {0} add-on', p.variantGroupIds.length)}
                               {p.isActive && p.isSoldOut && t(' · Habis')}
                             </span>
                           </span>
                         </span>
                       </span>
                       <span className="hidden truncate text-[13px] text-ink-soft lg:block">
-                        {p.variantGroupIds.map((id) => groupName.get(id)).filter(Boolean).join(', ') || '—'}
+                        {[(p.variants ?? []).map((v) => v.name).join(', '), p.variantGroupIds.map((id) => groupName.get(id)).filter(Boolean).join(', ')].filter(Boolean).join(' · ') || '—'}
                       </span>
                       <span className="num text-right text-[15px] font-semibold">{formatRupiah(p.basePrice)}{perUnit(p.unit)}</span>
                       <span className="num hidden text-right text-[14px] text-ink-soft lg:block">

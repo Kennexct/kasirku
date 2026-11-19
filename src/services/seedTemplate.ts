@@ -34,7 +34,9 @@ export const STORE_NAME_MAX = 60;
 
 type GroupDef = { name: string; isRequired: boolean; max: number; options: ReadonlyArray<readonly [name: string, priceDelta: number]> };
 /** name, category key, base price, takeaway price (null = same as base), variant group keys */
-type ProductDef = readonly [name: string, category: string, basePrice: number, takeawayPrice: number | null, groups: readonly string[]];
+/** name, price, takeaway price (null = same) */
+type VariantDef = readonly [name: string, price: number, takeawayPrice: number | null];
+type ProductDef = readonly [name: string, category: string, basePrice: number, takeawayPrice: number | null, groups: readonly string[], variants?: readonly VariantDef[]];
 
 interface TemplateDef {
   label: string;
@@ -71,18 +73,26 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     label: t('Kopi & minuman'),
     description: t('Kedai kopi, es, camilan'),
     categories: { kopi: t('Kopi'), nonkopi: t('Non-kopi'), camilan: t('Camilan') },
+    // ADR-012: drinks have variants (each its own price); ice, sugar and size are add-ons.
     groups: {
-      sajian: single(t('Sajian'), [[t('Es'), 0], [t('Panas'), 0]]),
-      ukuran: single(t('Ukuran'), [[t('Reguler'), 0], [t('Besar'), 4_000]]),
-      gula: single(t('Gula'), [[t('Normal'), 0], [t('Sedikit'), 0], [t('Tanpa gula'), 0]]),
+      es: single(t('Es'), [[t('Es normal'), 0], [t('Sedikit es'), 0], [t('Tanpa es'), 0], [t('Panas'), 0]]),
+      gula: single(t('Gula'), [[t('Gula normal'), 0], [t('Sedikit gula'), 0], [t('Tanpa gula'), 0]]),
+      ukuran: single(t('Ukuran'), [['Tall', 0], ['Grande', 4_000], ['Venti', 7_000]]),
     },
     products: [
-      ['Kopi Susu Gula Aren', 'kopi', 18_000, 19_000, ['ukuran', 'gula']],
-      ['Americano', 'kopi', 15_000, 16_000, ['sajian', 'ukuran']],
-      ['Cappuccino', 'kopi', 20_000, 21_000, ['sajian', 'gula']],
-      ['Kopi Hitam', 'kopi', 10_000, 11_000, ['sajian', 'gula']],
-      ['Teh Tarik', 'nonkopi', 12_000, 13_000, ['sajian', 'gula']],
-      ['Cokelat', 'nonkopi', 18_000, 19_000, ['sajian', 'ukuran']],
+      ['Kopi', 'kopi', 15_000, null, ['es', 'gula', 'ukuran'], [
+        ['Americano', 18_000, 19_000],
+        ['Latte', 25_000, 26_000],
+        ['Cappuccino', 25_000, 26_000],
+        ['Espresso', 15_000, 16_000],
+        ['Kopi Susu Gula Aren', 20_000, 21_000],
+      ]],
+      ['Teh', 'nonkopi', 15_000, null, ['es', 'gula', 'ukuran'], [
+        ['Teh Tarik', 15_000, 16_000],
+        ['Lemon Tea', 15_000, 16_000],
+        ['Matcha Latte', 25_000, 26_000],
+      ]],
+      ['Cokelat', 'nonkopi', 22_000, 23_000, ['es', 'gula', 'ukuran']],
       ['Roti Bakar', 'camilan', 15_000, null, []],
       ['Kentang Goreng', 'camilan', 15_000, null, []],
     ],
@@ -169,11 +179,22 @@ export function buildSeedBundle(setup: SeedSetup = DEFAULT_SETUP): SeedBundle {
     }),
   );
 
-  const products = template.products.map(([name, category, basePrice, takeawayPrice, groupKeys], sortOrder): Product => ({
+  const products = template.products.map(([name, category, basePrice, takeawayPrice, groupKeys, variantDefs], sortOrder): Product => ({
     ...meta(),
+    ...(variantDefs
+      ? {
+          variants: variantDefs.map(([variantName, price, variantTakeaway], variantOrder) => ({
+            id: uuidv7(),
+            name: variantName,
+            price,
+            ...(variantTakeaway === null ? {} : { modePrices: { [takeaway.id]: variantTakeaway } }),
+            sortOrder: variantOrder,
+          })),
+        }
+      : {}),
     categoryId: categories.get(category)?.id ?? null,
     name,
-    basePrice,
+    basePrice: variantDefs ? Math.min(...variantDefs.map(([, price]) => price)) : basePrice,
     isActive: true,
     sortOrder,
     variantGroupIds: groupKeys.flatMap((key) => groups.get(key)?.id ?? []),

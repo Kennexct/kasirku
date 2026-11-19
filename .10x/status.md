@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Implementation — v0.13 variants + add-on rename (design approved: ADR-012)
+**Phase:** Delivery Complete — v0.13 (variants, add-on rename)
 **Branch:** `feat/v0.12-flex-price-weight` (stacked: … → v0.8-feedback → v0.9 → v0.10 → v0.11 → v0.12)
 **Previous:** Delivery Complete (`reports-export`) — ready to merge after 2 manual device checks
 
@@ -14,7 +14,7 @@
 | v0.8 custom methods/modes · sold-out · unpaid customers | **Delivered (v0.8)** on `feat/v0.8-feedback` | 85 unit · 7 e2e · ADR-006 · review PASS |
 | v0.9 cost & profit · expenses · close of day · backup | **Delivered (v0.9)** on `feat/v0.9-profit-closing-backup` | 112 unit · 8 e2e · ADR-007, ADR-008 · review PASS |
 | v0.10 first-time journey · help centre | **Delivered (v0.10)** on `feat/v0.10-onboarding-help` | 123 unit · 9 e2e · ADR-009 · review PASS |
-| v0.13 variants · add-on rename | In progress | ADR-012 |
+| v0.13 variants · add-on rename | **Delivered (v0.13)** on `feat/v0.13-variants-addons` | 145 unit · 12 e2e · ADR-012 · review PASS |
 | v0.12 flexible price · sell by weight | **Delivered (v0.12)** on `feat/v0.12-flex-price-weight` | 140 unit · 11 e2e · ADR-011 · review PASS |
 | v0.11 English | **Delivered (v0.11)** on `feat/v0.11-english` | 129 unit · 10 e2e · ADR-010 · review PASS |
 

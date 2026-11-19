@@ -2,7 +2,7 @@ import { CLOSING_NOTE_MAX } from '../constants';
 import { localDb } from '../db/localDb';
 import { buildDrawer, type DrawerInput } from '../lib/cashDrawer';
 import { nowIso } from '../lib/id';
-import type { BusinessDate, DayClosing, Id } from '../types';
+import type { BusinessDate, DayClosing, Id, Product } from '../types';
 import { writeAudit } from './audit';
 import { newMeta } from './catalog';
 import { saveAndQueue } from './sync';
@@ -56,9 +56,13 @@ export async function loadDrawerInput(storeId: Id, date: BusinessDate): Promise<
 
 /** Switch every "Habis" item back to available (ADR-006). Returns how many were reset. */
 export async function resetSoldOut(storeId: Id): Promise<number> {
-  const soldOut = await localDb.products.where('storeId').equals(storeId).filter((p) => p.isSoldOut === true && !p.deletedAt).toArray();
+  const anyVariantSoldOut = (p: Product) => (p.variants ?? []).some((v) => v.isSoldOut === true);
+  const soldOut = await localDb.products.where('storeId').equals(storeId).filter((p) => (p.isSoldOut === true || anyVariantSoldOut(p)) && !p.deletedAt).toArray();
   const now = nowIso();
-  for (const product of soldOut) await saveAndQueue('products', { ...product, isSoldOut: false, updatedAt: now });
+  for (const product of soldOut) {
+    const variants = product.variants?.map((v) => ({ ...v, isSoldOut: false }));
+    await saveAndQueue('products', { ...product, isSoldOut: false, ...(variants ? { variants } : {}), updatedAt: now });
+  }
   return soldOut.length;
 }
 

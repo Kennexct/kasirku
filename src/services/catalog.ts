@@ -4,6 +4,7 @@ import type { Category, Id, PaymentMethod, Product, SalesMode, SyncMeta, Variant
 import { saveAndQueue } from './sync';
 import { t } from '../i18n';
 import { SALE_UNITS } from '../lib/quantity';
+import { hasVariants, validateVariants } from '../lib/productVariants';
 
 const NAME_MAX = 80;
 
@@ -24,6 +25,13 @@ function requirePrice(value: number, label: string): void {
 }
 
 export async function saveProduct(product: Product): Promise<void> {
+  const variantError = validateVariants(product.variants ?? []);
+  if (variantError) throw new Error(variantError);
+  // ADR-012: the product's base price mirrors its cheapest variant so lists and older code paths stay sensible.
+  if (hasVariants(product)) {
+    const variants = (product.variants ?? []).map((v, sortOrder) => ({ ...v, name: v.name.trim(), sortOrder }));
+    product = { ...product, variants, basePrice: Math.min(...variants.map((v) => v.price)) };
+  }
   requireName(product.name, t('Nama produk'));
   requirePrice(product.basePrice, t('Harga dasar'));
   if (product.costPrice !== undefined) requirePrice(product.costPrice, t('Harga modal'));
@@ -33,6 +41,15 @@ export async function saveProduct(product: Product): Promise<void> {
 }
 
 /** "Habis" switch (ADR-006): any seller can flip it from the cashier; it changes nothing else about the product. */
+/** "Habis" for one variant (ADR-012). The product stays sellable while another variant is available. */
+export async function setVariantSoldOut(productId: Id, variantId: Id, isSoldOut: boolean): Promise<void> {
+  const product = await localDb.products.get(productId);
+  const variant = product?.variants?.find((v) => v.id === variantId);
+  if (!product || product.deletedAt || !variant) throw new Error(t('Produk tidak ditemukan.'));
+  const variants = (product.variants ?? []).map((v) => (v.id === variantId ? { ...v, isSoldOut } : v));
+  await saveAndQueue('products', { ...product, variants, updatedAt: nowIso() });
+}
+
 export async function setProductSoldOut(productId: Id, isSoldOut: boolean): Promise<void> {
   const product = await localDb.products.get(productId);
   if (!product || product.deletedAt) throw new Error(t('Produk tidak ditemukan.'));
@@ -40,7 +57,7 @@ export async function setProductSoldOut(productId: Id, isSoldOut: boolean): Prom
 }
 
 export async function saveVariantGroup(group: VariantGroup): Promise<void> {
-  requireName(group.name, t('Nama grup varian'));
+  requireName(group.name, t('Nama grup add-on'));
   if (group.options.length === 0) throw new Error(t('Tambahkan minimal satu pilihan.'));
   group.options.forEach((option) => requireName(option.name, t('Nama pilihan')));
   if (group.max < 1) throw new Error(t('Maksimal pilihan minimal 1.'));

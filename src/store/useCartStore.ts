@@ -16,6 +16,9 @@ interface AddItemInput {
   unit?: SaleUnit;
   /** Normal price, for flexible-price products only. */
   listPrice?: number;
+  /** Product variant (ADR-012); `name` is then "Product – Variant". */
+  variantId?: Id;
+  variantName?: string;
 }
 
 interface CartState {
@@ -66,13 +69,13 @@ export const useCartStore = create<CartState>()(
       ...EMPTY_CART,
       items: [],
 
-      addItem: ({ productId, name, unitPrice, unitCost, options, qty = 1, unit, listPrice }) =>
+      addItem: ({ productId, name, unitPrice, unitCost, options, qty = 1, unit, listPrice, variantId, variantName }) =>
         set((state) => {
           // Each weighing, and each flexible-price entry, is its own line.
           const isOwnLine = isMeasured(unit) || listPrice !== undefined;
           const existing = isOwnLine
             ? undefined
-            : state.items.find((item) => item.productId === productId && sameOptions(item.options, options) && item.note === '' && item.listPrice === undefined);
+            : state.items.find((item) => item.productId === productId && item.variantId === variantId && sameOptions(item.options, options) && item.note === '' && item.listPrice === undefined);
           if (existing) {
             return {
               items: state.items.map((item) => (item.id === existing.id ? { ...item, qty: item.qty + 1 } : item)),
@@ -86,6 +89,7 @@ export const useCartStore = create<CartState>()(
             ...(unitCost !== undefined ? { unitCost } : {}),
             ...(listPrice !== undefined ? { listPrice } : {}),
             ...(isMeasured(unit) ? { unit } : {}),
+            ...(variantId ? { variantId, variantName } : {}),
             qty,
             options,
             discount: null,
